@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27009.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.CodeGen", "Uno.CodeGen\Uno.CodeGen.csproj", "{7A05DD54-F3F1-4A48-97A5-1A5F45D9F315}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.CodeGen.Tests", "Uno.CodeGen.Tests\Uno.CodeGen.Tests.csproj", "{AB977C38-BF77-42E2-A10C-335C261E0E03}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7A05DD54-F3F1-4A48-97A5-1A5F45D9F315} = {7A05DD54-F3F1-4A48-97A5-1A5F45D9F315}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.Immutables", "Uno.Immutables\Uno.Immutables.csproj", "{6D6DD983-D919-4CE0-88FC-26FBF34FC763}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.Equality", "Uno.Equality\Uno.Equality.csproj", "{0F785D54-1A9B-4B3A-AEB2-B40FE8C81577}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{0C1D81C9-BE02-4D97-999D-D2079A5F8CDA}"
+	ProjectSection(SolutionItems) = preProject
+		..\doc\Equality Generation.md = ..\doc\Equality Generation.md
+		..\doc\Immutable Generation.md = ..\doc\Immutable Generation.md
+		..\readme.md = ..\readme.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7A05DD54-F3F1-4A48-97A5-1A5F45D9F315}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A05DD54-F3F1-4A48-97A5-1A5F45D9F315}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A05DD54-F3F1-4A48-97A5-1A5F45D9F315}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A05DD54-F3F1-4A48-97A5-1A5F45D9F315}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB977C38-BF77-42E2-A10C-335C261E0E03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB977C38-BF77-42E2-A10C-335C261E0E03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB977C38-BF77-42E2-A10C-335C261E0E03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB977C38-BF77-42E2-A10C-335C261E0E03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D6DD983-D919-4CE0-88FC-26FBF34FC763}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D6DD983-D919-4CE0-88FC-26FBF34FC763}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D6DD983-D919-4CE0-88FC-26FBF34FC763}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D6DD983-D919-4CE0-88FC-26FBF34FC763}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F785D54-1A9B-4B3A-AEB2-B40FE8C81577}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F785D54-1A9B-4B3A-AEB2-B40FE8C81577}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F785D54-1A9B-4B3A-AEB2-B40FE8C81577}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F785D54-1A9B-4B3A-AEB2-B40FE8C81577}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9F663DEC-A145-475E-A087-347FF527750D}
+	EndGlobalSection
+EndGlobal

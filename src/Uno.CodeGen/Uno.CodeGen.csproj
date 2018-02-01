@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net46</TargetFramework>
+		<IsTool>true</IsTool>
+		<NoWarn>1701;1702;1705;NU1701</NoWarn>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<RootNamespace>Uno</RootNamespace>
+		<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
+		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
+		<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
+		<Description>This package provides tooling for code generation.</Description>
+		<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />
+		<PackageReference Include="Uno.RoslynHelpers" Version="1.0.0-dev.6" PrivateAssets="all" />
+		<PackageReference Include="Uno.SourceGeneration" Version="1.20.0-dev.6" PrivateAssets="all" />
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.20.0-dev.6" PrivateAssets="none" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="build/**/*.*">
+			<Pack>true</Pack>
+			<PackagePath>build</PackagePath>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
+		<ProjectReference Include="..\Uno.Immutables\Uno.Immutables.csproj" />
+	</ItemGroup>
+
+</Project>

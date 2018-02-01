@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net45' or ('$(ProjectTypeGuids)'=='' and ('$(TargetFrameworkVersion)'=='v4.5' or '$(TargetFrameworkVersion)'=='v4.5.1'))">
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_GEOCOORDINATE_WATCHER;HAS_GEOCOORDINATE;HAS_COMPILED_REGEX;USE_FAST_REPLAYONE</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_SEMAPHORE</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_FILE_IO</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_THREADS</UnoDefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(TargetFramework)' == 'uap10.0' or '$(ProjectTypeGuids)'=='{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}'">
+    <UnoDefineConstants>$(UnoDefineConstants);WINDOWS_UAP;WINDOWS_UWP</UnoDefineConstants>
+
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_WINDOWS_UI;HAS_TOP_APPBAR;HAS_BOTTOM_APPBAR</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_VIEWSIZE_PREFERENCE</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_GEOPOSITION</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);USE_SINGLE_ITEM_COLLECTIONCHANGED</UnoDefineConstants>
+
+    <UnoDefineConstants>$(UnoDefineConstants);NETFX_CORE</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);METRO</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);WINRT</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_WINRT_FILEIO;HAS_QUERYOPTIONS;HAS_CRIPPLEDREFLECTION;HAS_TYPEINFO;USE_FAST_REPLAYONE</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_ISTORAGEFILE</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_NATIVE_SYSTEMINFO</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_ISTORAGEFILE_ADVANCED</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_GEOLOCATOR</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_SEMAPHORE</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_HTTPCLIENT</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_DATACONTEXTCHANGED</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_HARDWARE_BUTTONS</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_TYPEINFO_EXTENSIONS</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_CAMERA_CAPTURE_UI</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_FILE_IO</UnoDefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS10' or '$(ProjectTypeGuids)'=='{FEACFBD2-3405-455C-9665-78FE426C6842};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}'">
+    <UnoDefineConstants>$(UnoDefineConstants);XAMARIN;XAMARIN_IOS</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_COMPILED_REGEX;HAS_CRIPPLEDREFLECTION;USE_FAST_REPLAYONE</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_QUERY_OPTIONS</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_BROKEN_SEMAPHORE_SLIM</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_SEMAPHORE</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_NO_CONCURRENT_DICT</UnoDefineConstants>
+    <!-- Performance is worse than Sync Dic-->
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_FILE_IO</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_THREADS</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);NO_DNSENDPOINT</UnoDefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid60' or '$(ProjectTypeGuids)'=='{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}'">
+    <UnoDefineConstants>$(UnoDefineConstants);XAMARIN;XAMARIN_ANDROID</UnoDefineConstants>
+
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_COMPILED_REGEX;HAS_CRIPPLEDREFLECTION;USE_FAST_REPLAYONE</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_BROKEN_SEMAPHORE_SLIM</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_SEMAPHORE</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_NO_WINDOWS_DISPATCHER</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_HTTPCLIENT</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_NO_CONCURRENT_DICT</UnoDefineConstants>
+    <!-- Performance is worse than Sync Dic-->
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_FILE_IO</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_THREADS</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);NO_DNSENDPOINT</UnoDefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid70'">
+    <UnoDefineConstants>$(UnoDefineConstants);XAMARIN;XAMARIN_ANDROID</UnoDefineConstants>
+
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_COMPILED_REGEX;HAS_CRIPPLEDREFLECTION;USE_FAST_REPLAYONE</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_BROKEN_SEMAPHORE_SLIM</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_SEMAPHORE</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_NO_WINDOWS_DISPATCHER</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_HTTPCLIENT</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_NO_CONCURRENT_DICT</UnoDefineConstants>
+    <!-- Performance is worst than Sync Dic-->
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_FILE_IO</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);HAS_THREADS</UnoDefineConstants>
+    <UnoDefineConstants>$(UnoDefineConstants);NO_DNSENDPOINT</UnoDefineConstants>
+  </PropertyGroup>
+  <Target Name="_UnoDefineConstantsDefines" BeforeTargets="BeforeCompile;XamlPreCompile;CoreCompile">
+    <!-- Merge the AppTasksDefineConstants with the existing constants -->
+    <CreateProperty Value="$(DefineConstants);$(UnoDefineConstants)">
+      <Output TaskParameter="Value" PropertyName="DefineConstants" />
+    </CreateProperty>
+  </Target>
+</Project>
