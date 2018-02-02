@@ -2,10 +2,12 @@
 
 ## Quick Start
 
-1. Add a reference _Uno_ package `Uno.ImmutableGenerator` in your project.
-1. Create a new _POCO_ class with the `GeneratedEquality` attribute
+1. Add a reference to the `Uno.CodeGen` _Nuget_ package in your project.
+   [![NuGet](https://img.shields.io/nuget/v/Uno.CodeGen.svg)](https://www.nuget.org/packages/Uno.CodeGen/)
+1. Create a new [POCO](https://en.wikipedia.org/wiki/Plain_old_CLR_object)
+   class with the `[GeneratedEquality]` attribute
    ``` csharp
-   [GeneratedEquality] // Uno.Equality.GeneratedEquality
+   [GeneratedEquality] // Uno.Equality.GeneratedEqualityAttribute
    public partial class MyEntity
    {
        [EqualityKey]
@@ -20,9 +22,7 @@
        public string C { get; } 
    }
    ```
-   
-   * Note: The `[GeneratedEquality]` attribute is implicit when you are
-     using the `[Immutable]` attribute to generate an immutable class.
+
 1. Compile (the generation process occurres at compile time).
 1. It will generate the following public methods for you:
    ``` csharp
@@ -123,7 +123,8 @@ of it).
    server, having the same unique key... instances will be _key equals_
    but not _equals_).
    * **To activate KeyEquality**, you need to have at least one field
-     or property maked as _Equality Key_.
+     or property maked as _Equality Key_, or to derive from a type
+	 implementing it.
    * When activated, this feature will generate:
      * The class will implements the `IKeyEquatable<T>` interface
      * The `.GetKeyHashCode()` & `.KeyEquals()` methods
@@ -229,3 +230,19 @@ The generation logic for fields/properties in the class, using a first-match rul
   quick computed value than a completely unique value. Colision should be avoided,
   but never as a result of a big computation. That's why only the length is used
   by default for collections.
+* For best results, your class should be immutable. For this, you can use the
+  [GeneratedImmutable] attribute. There is an optional parameter on this attribute
+  to automatically generate equality.
+
+  Example: `[GeneratedImmutable(GenerateEquality = true)]`
+
+  # FAQ
+
+  ## I'm getting the error `warning CS0282: There is no defined ordering between fields
+  ## in multiple declarations of partial struct '<mystruct>'. To specify an ordering, all
+  ## instance fields must be in the same declaration.`
+  You have this error because the generator is using partial declarations for a `struct`.
+  If the layout is not important for your structs (mostly used for native interop), you
+  can mute this warning in your project.
+
+  You can also consider replacing the `struct` by a `class`.

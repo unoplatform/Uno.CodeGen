@@ -2,8 +2,10 @@
 
 ## Quick Start
 
-1. Add a reference _Uno_ package `Uno.ImmutableGenerator` in your project.
-1. Create a new _POCO_ class with the `Immutable` attribute
+1. Add a reference to the `Uno.CodeGen` _Nuget_ package in your project.
+   [![NuGet](https://img.shields.io/nuget/v/Uno.CodeGen.svg)](https://www.nuget.org/packages/Uno.CodeGen/)
+1. Create a new [POCO](https://en.wikipedia.org/wiki/Plain_old_CLR_object)
+   class with the `[GeneratedImmutable]` attribute
    ``` csharp
    [GeneratedImmutable] // Uno.GeneratedImmutableAttribute
    public partial class MyEntity
@@ -191,3 +193,65 @@ Important:
   A complex property is when it's a defined type, not a CLR primitive.
 * Indexers are not supported.
 * _Events Properties_ are not supported.
+
+# FAQ
+
+## I need to use it with _Newtownsoft's JSON.NET_. How can I acheive that?
+You simply need to deserialze the builder instead of the class itself.
+The implicit casting will automatically convert it to the right type.
+
+Example:
+``` csharp
+  MyEntity e = JsonConvert.DeserializeObject<MyEntity.Builder>(json);
+```
+
+## It's generating a lot of unused method. It's a waste.
+For most application the compiled code won't be significant. Assets
+in projects are usually a lot bigger than that.
+
+If you are using an _AOT_ linking tool, those unused methods will
+be removed for final binary.
+
+We think the cost of this unused code is cheaper than the potential
+bugs when writing and maintaining this code manually.
+
+## What is the usage of the `[Immutable]` and `[ImmutableBuilder]` attributes?
+* **ImmutableAttribute**:
+  The `[Immutable]` is used by other parts of _Uno_
+  (some are not published as opened source) to identify an entity has been
+  immutable.
+* **ImmutableBuilderAttribute**:
+  The `[ImmutableBuilder]` is used to designate the builder able to
+  create the target immutable type. The builder is expected to implement
+  the `IImmutableBuilder<TImmutable>` interface.
+
+If you want, you can manually create immutable classes and use those
+attributes in your code: the code generators will use it as if it was
+generated.
+
+## Are immutable entities thread-safe?
+Yes! That's the major aspect of immutable entities. Once an instance
+of an immutable class is created, it's impossible to change it.
+(ok, it's possible by using reflection, but why would you do that?)
+
+But the builders are not thread safe. That means updating the same
+property of the same instance concurrently (from many threads) will
+produce unexpected result.
+
+## Can we reuse builders?
+Yes. You can continue to update the builder even after calling
+.ToImmutable()`. The created instance won't be updated.
+
+## What is the usage of the [Pure] attribute on some methods?
+This attribute is used to indicate a _pure method_. It means a method
+having no side effect.
+
+Since calling a _pure method_ without using the result is a waste
+of resources, some IDE tools like [ReSharper(TM)](https://www.jetbrains.com/resharper/)
+will give you a visual warning when you're not using the result.
+
+## Can I create a nested immutable types?
+Not supported yet. Open an issue if you need this.
+
+## Can I use this for value types? (`struct`)
+No. The type must be a reference type (`class`).
