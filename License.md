@@ -1,8 +1,8 @@
-# Uno.SourceGeneration
+# Uno.CodeGen
 
 Copyright (c) nventive
 
-All rights reserved. 
+All rights reserved.
 
 # Apache 2.0 License
 

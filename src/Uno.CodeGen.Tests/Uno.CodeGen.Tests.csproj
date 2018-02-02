@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net46</TargetFramework>
+	  <IsPackable>false</IsPackable>
+	  <NoWarn>1701;1702;1705;NU1701</NoWarn>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<SourceGenerator Include="..\Uno.CodeGen\bin\$(Configuration)\net46\Uno.CodeGen.dll" />
+	</ItemGroup>
+	<Import Project="..\Uno.CodeGen\build\Uno.CodeGen.props" />
+
+	<ItemGroup>
+		<PackageReference Include="FluentAssertions" Version="4.19.4" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
+		<PackageReference Include="MSTest.TestAdapter" Version="1.2.0" />
+		<PackageReference Include="MSTest.TestFramework" Version="1.2.0" />
+		<PackageReference Include="Uno.Core" Version="1.20.0-dev.4" />
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.20.0-dev.6" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
+	  <ProjectReference Include="..\Uno.CodeGen\Uno.CodeGen.csproj" />
+	  <ProjectReference Include="..\Uno.Immutables\Uno.Immutables.csproj" />
+	</ItemGroup>
+
+</Project>

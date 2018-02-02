@@ -1,0 +1,24 @@
+<Project ToolsVersion="15.0">
+  <PropertyGroup>
+    <!--
+      This file is used to control the platforms compiled by visual studio, and 
+      allow for a faster build when testing for a single platform.
+      
+      e.g. when compiling for unit tests, set the TargetPlatforms to net46.
+      
+			Instructions:
+			1) Copy this file and remove the ".sample" extension
+			2) Adjust the TargetFrameworks properties below
+			3) Make sure to do a Rebuild, so that nuget restores the proper packages for the new target
+
+			Original frameworks: Xamarin.iOS10;MonoAndroid71;uap10.0;net46
+		-->
+    <TargetFrameworks>net46;Xamarin.iOS10</TargetFrameworks>
+
+    <!-- 
+    This property allows the override of the nuget local cache.
+    Set it to the version you want to override, used in another app.
+    -->
+    <!--<UmbrellaNugetOverrideVersion>2.23.2-dev.667</UmbrellaNugetOverrideVersion>-->
+  </PropertyGroup>
+</Project>
