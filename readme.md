@@ -1,6 +1,6 @@
 # Uno CodeGen
 
-`Uno.CodeGen` is a set of tools to generate C# code in Visual Studio projects.
+`Uno.CodeGen` is a set of tools to generate C# code in msbuild based projects.
 
 ## Build status
 
@@ -14,4 +14,4 @@
 | Generator | Triggering Attribute | Usage |    |
 | --------- | -------------------- | ----- | -- |
 | `EqualityGenerator` | `[GenerateEquality]` | Generate code for efficient `.Equals()` members generation. | [Documentation](doc/Equality%20Generation.md) |
-| `ImmutableGenerator` | `[GenerateImmutable] | Generate truly immutable entities. | [Documentation](doc/Immutable%20Generation.md) |
+| `ImmutableGenerator` | `[GenerateImmutable]` | Generate code to build truly immutable entities. | [Documentation](doc/Immutable%20Generation.md) |
