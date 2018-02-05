@@ -16,6 +16,7 @@
 // ******************************************************************
 using System;
 using System.Collections.Generic;
+using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Uno.CodeGen.Tests
@@ -24,8 +25,24 @@ namespace Uno.CodeGen.Tests
 	public class Given_GeneratedEquality
 	{
 		[TestMethod]
-		public void TestX()
+		public void EqualityWithCustomComparer()
 		{
+			var e1 = GeneratedImmutableEntityForEquality.Default.WithId("a");
+			var e2 = GeneratedImmutableEntityForEquality.Default.WithId("A");
+			var e3 = e1.WithId("A");
+			var e4 = e2.WithId("A");
+
+			e1.Should().BeEquivalentTo(e2);
+			e1.Should().BeEquivalentTo(e3);
+			e1.Should().BeEquivalentTo(e4);
+			e3.Should().BeSameAs(e1);
+			e4.Should().BeSameAs(e2);
+			e2.Should().NotBeSameAs(e1);
+
+			typeof(GeneratedImmutableEntityForEquality).Should()
+				.HaveImplictConversionOperator<GeneratedImmutableEntityForEquality.Builder, GeneratedImmutableEntityForEquality>();
+			typeof(GeneratedImmutableEntityForEquality).Should()
+				.HaveImplictConversionOperator<GeneratedImmutableEntityForEquality, GeneratedImmutableEntityForEquality.Builder>();
 		}
 	}
 
@@ -74,4 +91,14 @@ namespace Uno.CodeGen.Tests
 		[EqualityKey]
 		internal string A { get; }
 	}
+
+
+	[GeneratedImmutable(GenerateEquality = true)]
+	public partial class GeneratedImmutableEntityForEquality
+	{
+		public string Id { get; }
+
+		private static IEqualityComparer<string> Id_CustomComparer => StringComparer.OrdinalIgnoreCase;
+	}
+
 }

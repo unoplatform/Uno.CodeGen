@@ -15,6 +15,7 @@
 //
 // ******************************************************************
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -30,7 +31,7 @@ namespace Uno.CodeGen.Tests
 			var entity = new MyImmutableEntity.Builder().ToImmutable();
 
 			entity.Should().NotBeNull();
-			entity.MyField1.ShouldBeEquivalentTo(4);
+			entity.MyField1.Should().Be(4);
 		}
 
 		[TestMethod]
@@ -42,7 +43,7 @@ namespace Uno.CodeGen.Tests
 			};
 
 			entity.Should().NotBeNull();
-			entity.MyField1.ShouldBeEquivalentTo(42);
+			entity.MyField1.Should().Be(42);
 		}
 
 		[TestMethod]
@@ -57,7 +58,7 @@ namespace Uno.CodeGen.Tests
 			var r2 = builder.ToImmutable();
 
 			r1.Should().NotBeNull();
-			r1.MyField1.ShouldBeEquivalentTo(42);
+			r1.MyField1.Should().Be(42);
 			r1.Should().BeSameAs(r2);
 		}
 
@@ -87,15 +88,15 @@ namespace Uno.CodeGen.Tests
 			MyImmutableEntity newInstance = original
 				.WithMyField1(43);
 
-			original.MyField1.ShouldBeEquivalentTo(42);
-			newInstance.MyField1.ShouldBeEquivalentTo(43);
+			original.MyField1.Should().Be(42);
+			newInstance.MyField1.Should().Be(43);
 		}
 
 		[TestMethod]
 		public void Immutable_When_CreatingHierarchyOfBuilders()
 		{
 			A original = A.Default.WithEntity(x => x.WithMyField2(223));
-			original.Entity.MyField2.ShouldBeEquivalentTo(223);
+			original.Entity.MyField2.Should().Be(223);
 		}
 	}
 

@@ -208,7 +208,7 @@ namespace Uno
 							? "base.KeyEquals(other)"
 							: null;
 
-						GenerateEqualLogic(typeSymbol, builder, keyEqualityMembers, baseCall);
+						GenerateEqualLogic(typeSymbol, builder, equalityMembers, baseCall);
 					}
 
 					builder.AppendLineInvariant("#endregion");
