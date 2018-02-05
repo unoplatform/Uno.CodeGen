@@ -226,13 +226,13 @@ The generation logic for fields/properties in the class, using a first-match rul
 * **Never rely on _Hash Code_ for persistence**: the computed result could
   be different when the application will be restarted. Hash codes should
   never _survive_ to the killing of the process.
-* Remember: **Computing _Hash Codes_ should be quick**. It is better to have a
+* Remember: **Computing _hash codes_ should be quick**. It is better to have a
   quick computed value than a completely unique value. Colision should be avoided,
   but never as a result of a big computation. That's why only the length is used
   by default for collections.
 * For best results, your class should be immutable. For this, you can use the
   [GeneratedImmutable] attribute. There is an optional parameter on this attribute
-  to automatically generate equality.
+  to automatically generate equality members.
 
   Example: `[GeneratedImmutable(GenerateEquality = true)]`
 

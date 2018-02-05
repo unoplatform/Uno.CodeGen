@@ -33,7 +33,8 @@
 1. The class needs to be partial - because generated code will augment it.
 1. Restrictions:
    * **No default constructor allowed**
-     (this won't work with _Newtownsoft's JSON.NET_ - that's intentional!)
+     (this won't work with [Newtownsoft's JSON.NET](https://www.newtonsoft.com/json)
+	 - that's intentional: You need to deserialize the builder instead)
    * **No property setters allowed** (even `private` ones):
      properties should be _read only_, even for the class itself.
    * **No fields allowed** (except static fields, but that would be weird).
@@ -196,7 +197,7 @@ Important:
 
 # FAQ
 
-## I need to use it with _Newtownsoft's JSON.NET_. How can I acheive that?
+## What if I need to use it with [Newtownsoft's JSON.NET](https://www.newtonsoft.com/json)?
 You simply need to deserialze the builder instead of the class itself.
 The implicit casting will automatically convert it to the right type.
 
@@ -209,8 +210,10 @@ Example:
 For most application the compiled code won't be significant. Assets
 in projects are usually a lot bigger than that.
 
-If you are using an _AOT_ linking tool, those unused methods will
-be removed for final binary.
+If you are using a linker tool
+([Mono Linker](http://www.mono-project.com/docs/tools+libraries/tools/linker/) /
+[DotNetCore Linker](https://github.com/dotnet/core/blob/master/samples/linker-instructions.md)),
+those unused methods will be removed from compiled result.
 
 We think the cost of this unused code is cheaper than the potential
 bugs when writing and maintaining this code manually.
@@ -221,8 +224,8 @@ bugs when writing and maintaining this code manually.
   (some are not published as opened source) to identify an entity has been
   immutable.
 * **ImmutableBuilderAttribute**:
-  The `[ImmutableBuilder]` is used to designate the builder able to
-  create the target immutable type. The builder is expected to implement
+  The `[ImmutableBuilder]` is used to indicate which class to use to build
+  the target immutable type. The builder is expected to implement
   the `IImmutableBuilder<TImmutable>` interface.
 
 If you want, you can manually create immutable classes and use those
@@ -240,7 +243,7 @@ produce unexpected result.
 
 ## Can we reuse builders?
 Yes. You can continue to update the builder even after calling
-.ToImmutable()`. The created instance won't be updated.
+`.ToImmutable()`. The created instance won't be updated.
 
 ## What is the usage of the [Pure] attribute on some methods?
 This attribute is used to indicate a _pure method_. It means a method

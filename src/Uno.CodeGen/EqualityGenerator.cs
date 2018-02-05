@@ -125,11 +125,11 @@ namespace Uno
 
 				if (baseTypeInfo.isBaseType && !baseTypeInfo.baseOverridesEquals)
 				{
-					builder.AppendLineInvariant($"#warning {nameof(EqualityGenerator)}: base type {typeSymbol.BaseType} does not override .Equals() method. It could lead to erronous results.");
+					builder.AppendLineInvariant($"#warning {nameof(EqualityGenerator)}: base type {typeSymbol.BaseType} does not override .Equals() method. It could lead to erroneous results.");
 				}
 				if (baseTypeInfo.isBaseType && !baseTypeInfo.baseOverridesGetHashCode)
 				{
-					builder.AppendLineInvariant($"#warning {nameof(EqualityGenerator)}: base type {typeSymbol.BaseType} does not override .GetHashCode() method. It could lead to erronous results.");
+					builder.AppendLineInvariant($"#warning {nameof(EqualityGenerator)}: base type {typeSymbol.BaseType} does not override .GetHashCode() method. It could lead to erroneous results.");
 				}
 
 				var classOrStruct = typeSymbol.IsReferenceType ? "class" : "struct";
