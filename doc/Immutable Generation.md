@@ -258,3 +258,11 @@ Not supported yet. Open an issue if you need this.
 
 ## Can I use this for value types? (`struct`)
 No. The type must be a reference type (`class`).
+
+## What is happening with attributes on my properties?
+All attributes are copied, except those defined in `Uno.Immutables` and
+`Uno.Equality`. If you need to remove other attributes, you just need
+to use the `[ImmutableAttributeCopyIgnore(<regex>)]` attribute.
+
+For a better fine control, you can put it on assembly level, on a type or
+even on a property itself.
