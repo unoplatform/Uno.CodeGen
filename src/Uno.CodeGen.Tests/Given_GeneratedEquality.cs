@@ -63,6 +63,12 @@ namespace Uno.CodeGen.Tests
 	}
 
 	[GeneratedEquality]
+	internal partial class DerivedEqualityClass : MyEqualityClass<int>
+	{
+
+	}
+
+	[GeneratedEquality]
 	internal partial struct MyEqualityStruct
 	{
 		[EqualityKey]
