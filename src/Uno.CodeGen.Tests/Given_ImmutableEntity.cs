@@ -17,6 +17,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -98,6 +100,15 @@ namespace Uno.CodeGen.Tests
 			A original = A.Default.WithEntity(x => x.WithMyField2(223));
 			original.Entity.MyField2.Should().Be(223);
 		}
+
+		[TestMethod]
+		public void Immutable_When_Using_Attributes_Then_They_Are_Copied_On_Builder()
+		{
+			var tBuilder = typeof(MySuperGenericImmutable<string, string, string, string, string, string>.Builder);
+			var idProperty = tBuilder.GetProperty("Id");
+			var attributes = idProperty.GetCustomAttributes(false);
+			attributes.Should().HaveCount(3);
+		}
 	}
 
 	[GeneratedImmutable]
@@ -148,13 +159,24 @@ namespace Uno.CodeGen.Tests
 	{
 	}
 
+	[ImmutableAttributeCopyIgnore("RequiredAttribute")]
 	[GeneratedImmutable(GenerateEquality = true)]
 	public partial class MySuperGenericImmutable<T1, T2, T3, T4, T5, T6>
 	{
+		[Required, System.ComponentModel.DataAnnotations.DataType(DataType.Text)]
+		[System.ComponentModel.DataAnnotations.Key]
+		[System.ComponentModel.DataAnnotations.RegularExpression("regex-pattern", ErrorMessage = "error-msg")]
+		public string Id { get; }
+
+		[Required(AllowEmptyStrings = true, ErrorMessage = "Entity1 is required!")]
 		public T1 Entity1 { get; }
+		[EqualityIgnore]
 		public T2 Entity2 { get; }
+		[EqualityIgnore]
 		public T3 Entity3 { get; }
+		[EqualityIgnore]
 		public T4 Entity4 { get; }
+		[EqualityIgnore]
 		public T5 Entity5 { get; }
 		[EqualityHash]
 		public T6 Entity6 { get; }

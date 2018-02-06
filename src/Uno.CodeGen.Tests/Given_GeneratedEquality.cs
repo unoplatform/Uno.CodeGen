@@ -16,6 +16,7 @@
 // ******************************************************************
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -90,6 +91,8 @@ namespace Uno.CodeGen.Tests
 	{
 		[EqualityKey]
 		internal string A { get; }
+		[Key]
+		internal string B { get; }
 	}
 
 

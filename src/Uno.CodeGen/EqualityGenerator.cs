@@ -46,6 +46,7 @@ namespace Uno
 		private INamedTypeSymbol _ignoreForEqualityAttributeSymbol;
 		private INamedTypeSymbol _equalityHashCodeAttributeSymbol;
 		private INamedTypeSymbol _equalityKeyCodeAttributeSymbol;
+		private INamedTypeSymbol _dataAnnonationsKeyAttributeSymbol;
 		private SourceGeneratorContext _context;
 
 		private static readonly int[] PrimeNumbers =
@@ -91,6 +92,7 @@ namespace Uno
 			_ignoreForEqualityAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityIgnoreAttribute");
 			_equalityHashCodeAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityHashAttribute");
 			_equalityKeyCodeAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityKeyAttribute");
+			_dataAnnonationsKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("System.ComponentModel.DataAnnotations.KeyAttribute");
 
 			foreach (var type in EnumerateEqualityTypesToGenerate())
 			{
@@ -621,7 +623,9 @@ namespace Uno
 
 				equalityMembers.Add(symbol);
 
-				if (symbolAttributes.Any(a => a.AttributeClass.Equals(_equalityKeyCodeAttributeSymbol)))
+				if (symbolAttributes.Any(a =>
+					a.AttributeClass.Equals(_equalityKeyCodeAttributeSymbol)
+					|| a.AttributeClass.Equals(_dataAnnonationsKeyAttributeSymbol)))
 				{
 					// [EqualityKey] on the member: this member is used for both key & hash
 					hashMembers.Add(symbol);
