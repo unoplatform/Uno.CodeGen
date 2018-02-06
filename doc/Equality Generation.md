@@ -23,7 +23,7 @@
    }
    ```
 
-1. Compile (the generation process occurres at compile time).
+1. Compile (the generation process occurs at compile time).
 1. It will generate the following public methods for you:
    ``` csharp
    partial class MyEntity : IEquatable<MyEntity>, IKeyEquatable<MyEntity>
@@ -100,7 +100,7 @@ two entities are the same.
 Suppose you have 2 versions of the same entity, an original version and
 an updated version after a change. The two won't be equals because they
 are representing different values, but they should be _key equals_ because
-they have the same key (reprensenting the same thing, just different versions
+they have the same key (representing the same thing, just different versions
 of it).
 
 
@@ -114,7 +114,7 @@ of it).
    * **Only read-only fields/properties should be used**
      A warning will be generated when using mutable fields.
    * **Nested classes not supported**, the class must be directly in its
-     namespace for the generation to happend.
+     namespace for the generation to happen.
 1. **KeyEquality**:
    The _Key Equality_ is a feature to compare entities for the equality
    of their key(s). The main usage of this equality is to compare if
@@ -123,7 +123,7 @@ of it).
    server, having the same unique key... instances will be _key equals_
    but not _equals_).
    * **To activate KeyEquality**, you need to have at least one field
-     or property maked as _Equality Key_, or to derive from a type
+     or property marked as _Equality Key_, or to derive from a type
 	 implementing it.
    * When activated, this feature will generate:
      * The class will implements the `IKeyEquatable<T>` interface

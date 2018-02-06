@@ -19,19 +19,22 @@ using System;
 namespace Uno
 {
 	/// <summary>
-	/// Define which attributes to ignore when copying to builder
+	/// Defines which attributes to ignore when copying to builder
 	/// </summary>
 	/// <remarks>
-	/// Can be put on an assembly, a type or a property directly.
+	/// Can be put on an assembly, a type or a property.
 	/// </remarks>
 	[System.AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
 	public sealed class ImmutableAttributeCopyIgnoreAttribute : Attribute
 	{
-		public string Regex { get; }
+		/// <summary>
+		/// Regex use to match the name (fullname) of the attribute type(s) to ignore.
+		/// </summary>
+		public string AttributeToIgnoreRegex { get; }
 
-		public ImmutableAttributeCopyIgnoreAttribute(string regex)
+		public ImmutableAttributeCopyIgnoreAttribute(string attributeToIgnoreRegex)
 		{
-			Regex = regex;
+			AttributeToIgnoreRegex = attributeToIgnoreRegex;
 		}
 	}
 }

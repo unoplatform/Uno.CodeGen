@@ -41,7 +41,7 @@
    * **Static members are ok**, as they can only manipulate immutable stuff.
      Same apply for extensions.
    * **Nested classes not supported**, the class must be directly in its
-     namespace for the generator to happend.
+     namespace for the generator to happen.
 1. Property Initializers will become default values in the builder.
    ex:
    ``` csharp
@@ -65,12 +65,12 @@
      /// </summary>
      public string FullName => LastName + ", " + FirstName;
      ```
-   * Generated builder are implicitely convertible to/from the entity
+   * Generated builder are implicitly convertible to/from the entity
    * Collections must be IReadOnlyCollection, IReadonlyDictionary or an
      immutable type from System.Collection.Immutable namespace:
      ImmutableList, ImmutableDictionary, ImmutableArray, ImmutableSet...
      **The type of the collection must be immutable too**.
-1. A static `.Default` readonly property will containt a default instance with
+1. A static `.Default` readonly property will contain a default instance with
    properties to their default initial values.
 
    It can be used as starting point to create a new instance, example:
@@ -198,7 +198,7 @@ Important:
 # FAQ
 
 ## What if I need to use it with [Newtownsoft's JSON.NET](https://www.newtonsoft.com/json)?
-You simply need to deserialze the builder instead of the class itself.
+You simply need to deserialize the builder instead of the class itself.
 The implicit casting will automatically convert it to the right type.
 
 Example:
@@ -260,9 +260,9 @@ Not supported yet. Open an issue if you need this.
 No. The type must be a reference type (`class`).
 
 ## What is happening with attributes on my properties?
-All attributes are copied, except those defined in `Uno.Immutables` and
+All attributes are replicated, except those defined in `Uno.Immutables` and
 `Uno.Equality`. If you need to remove other attributes, you just need
 to use the `[ImmutableAttributeCopyIgnore(<regex>)]` attribute.
 
-For a better fine control, you can put it on assembly level, on a type or
+For a finer control, you can put it at assembly level, on a type or
 even on a property itself.
