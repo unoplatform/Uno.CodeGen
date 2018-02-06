@@ -220,6 +220,9 @@ The generation logic for fields/properties in the class, using a first-match rul
 > * Some field/property names could implicitly become _key equality member_
 > * Members with `[EqualityKey]` (explicit or implicit) will also be considered
 >   as `[EqualityHash]`.
+> * Using the [Key] attribute from
+>   [Data Annotations](https://www.nuget.org/packages/System.ComponentModel.Annotations)
+>   will produce the same behavior.
 
 ## Important Considerations
 
