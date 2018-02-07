@@ -16,9 +16,7 @@
 // ******************************************************************
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -29,7 +27,7 @@ using Uno.SourceGeneration;
 
 namespace Uno
 {
-	[SourceGeneratorDependency("Uno.ImmutableGenerator")]
+	[GenerateAfter("Uno.ImmutableGenerator")]
 	public class EqualityGenerator : SourceGenerator
 	{
 		private INamedTypeSymbol _objectSymbol;
