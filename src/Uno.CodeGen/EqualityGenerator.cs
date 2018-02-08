@@ -47,6 +47,8 @@ namespace Uno
 		private INamedTypeSymbol _dataAnnonationsKeyAttributeSymbol;
 		private SourceGeneratorContext _context;
 
+		private bool _generateKeyEqualityCode;
+
 		private static readonly int[] PrimeNumbers =
 		{
 			223469, // 19901st prime number
@@ -92,6 +94,9 @@ namespace Uno
 			_equalityKeyCodeAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityKeyAttribute");
 			_dataAnnonationsKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("System.ComponentModel.DataAnnotations.KeyAttribute");
 
+			_generateKeyEqualityCode = _iKeyEquatableSymbol != null;
+
+
 			foreach (var type in EnumerateEqualityTypesToGenerate())
 			{
 				GenerateEquality(type);
@@ -130,6 +135,12 @@ namespace Uno
 				if (baseTypeInfo.isBaseType && !baseTypeInfo.baseOverridesGetHashCode)
 				{
 					builder.AppendLineInvariant($"#warning {nameof(EqualityGenerator)}: base type {typeSymbol.BaseType} does not override .GetHashCode() method. It could lead to erroneous results.");
+				}
+
+				if (generateKeyEquals && !_generateKeyEqualityCode)
+				{
+					builder.AppendLineInvariant($"#warning {nameof(EqualityGenerator)}: To use the `KeyEquality` features, you need to add a reference to `Uno.Core` package. https://www.nuget.org/packages/Uno.Core/");
+					generateKeyEquals = false;
 				}
 
 				var classOrStruct = typeSymbol.IsReferenceType ? "class" : "struct";
@@ -205,7 +216,7 @@ namespace Uno
 						builder.AppendLineInvariant("if (other.GetHashCode() != GetHashCode()) return false;");
 
 						var baseCall = baseTypeInfo.baseOverridesEquals
-							? "base.KeyEquals(other)"
+							? "base.Equals(other)"
 							: null;
 
 						GenerateEqualLogic(typeSymbol, builder, equalityMembers, baseCall);
@@ -257,7 +268,6 @@ namespace Uno
 
 					if (generateKeyEquals)
 					{
-						builder.AppendLine();
 						builder.AppendLineInvariant("#region \"Key Equality\" Section -- THIS IS WHERE KEY EQUALS IS DONE + KEY HASH CODE IS COMPUTED");
 
 						builder.AppendLineInvariant("/// <inheritdoc />");
