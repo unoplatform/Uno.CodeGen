@@ -23,22 +23,23 @@ namespace Uno.Helpers
 {
 	public static class NamedTypeSymbolExtensions
 	{
-		public static (string symbolName, string symbolNameWithGenerics, string symbolForXml, string symbolNameDefinition, string symbolFilename) GetSymbolNames(this INamedTypeSymbol typeSymbol)
+		public static (string symbolName, string genericArguments, string symbolNameWithGenerics, string symbolForXml, string symbolNameDefinition, string symbolFilename)
+			GetSymbolNames(this INamedTypeSymbol typeSymbol)
 		{
 			var symbolName = typeSymbol.Name;
 			if (typeSymbol.TypeArguments.Length == 0) // not a generic type
 			{
-				return (symbolName, symbolName, symbolName, symbolName, symbolName);
+				return (symbolName, "", symbolName, symbolName, symbolName, symbolName);
 			}
 
 			var argumentNames = typeSymbol.GetTypeArgumentNames();
-			var arguments = string.Join(", ", argumentNames);
+			var genericArguments = string.Join(", ", argumentNames);
 
 			// symbolNameWithGenerics: MyType<T1, T2>
-			var symbolNameWithGenerics = $"{symbolName}<{arguments}>";
+			var symbolNameWithGenerics = $"{symbolName}<{genericArguments}>";
 
 			// symbolNameWithGenerics: MyType&lt;T1, T2&gt;
-			var symbolForXml = $"{symbolName}&lt;{arguments}&gt;";
+			var symbolForXml = $"{symbolName}&lt;{genericArguments}&gt;";
 
 			// symbolNameDefinition: MyType<,>
 			var symbolNameDefinition = $"{symbolName}<{string.Join(",", typeSymbol.TypeArguments.Select(ta => ""))}>";
@@ -46,7 +47,7 @@ namespace Uno.Helpers
 			// symbolNameWithGenerics: MyType_T1_T2
 			var symbolFilename = $"{symbolName}_{string.Join("_", argumentNames)}";
 
-			return (symbolName, symbolNameWithGenerics, symbolForXml, symbolNameDefinition, symbolFilename);
+			return (symbolName, $"<{genericArguments}>", symbolNameWithGenerics, symbolForXml, symbolNameDefinition, symbolFilename);
 		}
 
 		public static string[] GetTypeArgumentNames(this ITypeSymbol typeSymbol)

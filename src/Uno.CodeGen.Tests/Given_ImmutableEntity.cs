@@ -102,12 +102,50 @@ namespace Uno.CodeGen.Tests
 		}
 
 		[TestMethod]
+		public void Immutable_When_CreatingHierarchyOfBuilders_Then_NullRefException_Is_Prevented()
+		{
+			var list = ImmutableList<string>.Empty;
+
+			MyGenericImmutable<A> nullObject = null;
+
+			var newObj = nullObject.WithEntity(a => a.WithEntity(b => b.WithList(list)));
+
+			newObj.Entity.Entity.List.Should().BeSameAs(list);
+		}
+
+		[TestMethod]
 		public void Immutable_When_Using_Attributes_Then_They_Are_Copied_On_Builder()
 		{
 			var tBuilder = typeof(MySuperGenericImmutable<string, string, string, string, string, string>.Builder);
 			var idProperty = tBuilder.GetProperty("Id");
 			var attributes = idProperty.GetCustomAttributes(false);
 			attributes.Should().HaveCount(3);
+		}
+
+		[TestMethod]
+		public void Immutable_When_Using_Options()
+		{
+			var list = ImmutableList<string>.Empty;
+
+			var original = MyImmutableEntity.None;
+			var modifiedBuilder = original.WithList(list);
+			Option<MyImmutableEntity> modifiedOption = modifiedBuilder;
+			MyImmutableEntity modified = modifiedOption;
+
+			original.MatchNone().Should().BeTrue();
+			modifiedOption.MatchSome().Should().BeTrue();
+			modified.MyField1.Should().Be(MyImmutableEntity.Default.MyField1);
+			modified.MyField2.Should().Be(MyImmutableEntity.Default.MyField2);
+			modified.Date.Should().Be(MyImmutableEntity.Default.Date);
+			modified.List.Should().BeSameAs(list);
+		}
+
+		[TestMethod]
+		public void Immutable_When_Using_OptionNone()
+		{
+			MyImmutableEntity.Builder builder = MyImmutableEntity.None;
+			Option<MyImmutableEntity> option = builder;
+			option.MatchNone().Should().BeTrue();
 		}
 	}
 
