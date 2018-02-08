@@ -107,7 +107,7 @@ namespace Uno
 		{
 			var builder = new IndentedStringBuilder();
 
-			var (symbolName, symbolNameWithGenerics, symbolNameForXml, symbolNameDefinition, resultFileName) = typeSymbol.GetSymbolNames();
+			var (symbolName, genericArguments, symbolNameWithGenerics, symbolNameForXml, symbolNameDefinition, resultFileName) = typeSymbol.GetSymbolNames();
 			var (equalityMembers, hashMembers, keyEqualityMembers) = GetEqualityMembers(typeSymbol);
 			var baseTypeInfo = GetBaseTypeInfo(typeSymbol);
 			var generateKeyEquals = baseTypeInfo.baseImplementsKeyEquals || baseTypeInfo.baseImplementsKeyEqualsT || keyEqualityMembers.Any();

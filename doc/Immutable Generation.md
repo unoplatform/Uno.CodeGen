@@ -143,6 +143,35 @@ var v2 = v1
 MyEntity v2bis = v1.WithB("b2");
 ```
 
+You can also use a lambda to project a property value. This is very
+useful for object hierarchy:
+
+``` csharp
+public partial class MyEntity
+{
+    public MySubEntity A { get; } = null;
+}
+
+public partial class MySubEntity
+{
+    public string X { get; } = null;
+}
+
+var original = MyEntity.Default;
+var modified = original.WithA(a=>a.WithX("!!!");
+// Create a first immutable instance
+var v1 = new MyEntity.Builder { A="a", B="b" };
+
+// Create a new immutable instance
+var v2 = v1
+    .WithB("b2")
+    .ToImmutable();
+
+// Same as previous but with the usage of implicit conversion
+MyEntity v2bis = v1.WithB("b2");
+```
+
+
 ## Aggregates (graph of objects/classes)
 
 Let's say we write this...
@@ -194,6 +223,44 @@ Important:
   A complex property is when it's a defined type, not a CLR primitive.
 * Indexers are not supported.
 * _Events Properties_ are not supported.
+
+# Relation with `Uno.Core` package & `Option<T>`
+The generator will automatically detect the presence of the package `Uno.Core`
+to generate helper methods for working with `Option<T>`.
+
+When `Uno.Core` is detected, the following code will be generated additionally:
+* A new static `T.None`
+* An automatic conversion from `Option<T>` to `T.Builder`.
+* An automatic conversion from `T.Builder` to `Option<T>`
+  (producing `Option.None` when the instance is `default(T)`)
+* Extensions methods for _.WithXXX()_ on `Option<T>`.
+
+The generated code will produce the following effect:
+  ``` csharp
+  using Uno;
+
+  // Without `Option` generated code:
+  Option<MyEntity> original = Option.Some(MyEntity.Default);
+  Option<MyEntity> modified = new MyEntity.Builder(original.SomeOrDefault()
+      .WithA("new-a")
+      .ToImmutable();
+  
+  // With generated code:
+  Option<MyEntity> original = Option.Some(MyEntity.Default);
+  Option<MyEntity> modified = original.WithA("new-a");
+  
+  // You can also do that:
+  Option<MyEntity> x = MyEntity.None.WithA("new-a");
+  // **************************************************************
+  // IMPORTANT: Calling .WithXXX() methods on a `None` will convert
+  // it to `Default`. So MyEntity.None.WithA() produce the exact
+  // same result as MyEntity.Default.WithA().
+  // **************************************************************
+  ```
+  
+> For more information on the `Uno.Core` package:
+> * On Github: <https://github.com/nventive/Uno.Core>
+> * On Nuget: <https://www.nuget.org/packages/Uno.Core/>
 
 # FAQ
 
