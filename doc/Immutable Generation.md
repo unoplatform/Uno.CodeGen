@@ -158,17 +158,7 @@ public partial class MySubEntity
 }
 
 var original = MyEntity.Default;
-var modified = original.WithA(a=>a.WithX("!!!");
-// Create a first immutable instance
-var v1 = new MyEntity.Builder { A="a", B="b" };
-
-// Create a new immutable instance
-var v2 = v1
-    .WithB("b2")
-    .ToImmutable();
-
-// Same as previous but with the usage of implicit conversion
-MyEntity v2bis = v1.WithB("b2");
+var modified = original.WithA(a => a.WithX("!!!"); // won't generate null-ref exception!
 ```
 
 
