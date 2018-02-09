@@ -18,9 +18,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+[assembly: Uno.ImmutableGenerationOptions(TreatArrayAsImmutable = true)]
 
 namespace Uno.CodeGen.Tests
 {
@@ -105,18 +106,17 @@ namespace Uno.CodeGen.Tests
 		public void Immutable_When_CreatingHierarchyOfBuilders_Then_NullRefException_Is_Prevented()
 		{
 			var list = ImmutableList<string>.Empty;
+			A a = null;
 
-			MyGenericImmutable<A> nullObject = null;
+			var newObj = a.WithEntity(b => b.WithList(list));
 
-			var newObj = nullObject.WithEntity(a => a.WithEntity(b => b.WithList(list)));
-
-			newObj.Entity.Entity.List.Should().BeSameAs(list);
+			newObj.Entity.List.Should().BeSameAs(list);
 		}
 
 		[TestMethod]
 		public void Immutable_When_Using_Attributes_Then_They_Are_Copied_On_Builder()
 		{
-			var tBuilder = typeof(MySuperGenericImmutable<string, string, string, string, string, string>.Builder);
+			var tBuilder = typeof(MySuperGenericImmutable<MyImmutableEntity, MyImmutableEntity, MyImmutableEntity[], string, string, string>.Builder);
 			var idProperty = tBuilder.GetProperty("Id");
 			var attributes = idProperty.GetCustomAttributes(false);
 			attributes.Should().HaveCount(3);
@@ -152,6 +152,8 @@ namespace Uno.CodeGen.Tests
 	[GeneratedImmutable]
 	public partial class A
 	{
+		public Type T { get; }
+
 		public MyImmutableEntity Entity { get; } = MyImmutableEntity.Default;
 
 		public bool IsSomething { get; } = true;
@@ -174,6 +176,12 @@ namespace Uno.CodeGen.Tests
 
 		public int MyField2 { get; } = 75;
 
+		public int? MyField3 { get; }
+
+		public string[] MyField4 { get; }
+
+		public IReadOnlyList<string[]> MyField5 { get; }
+
 		public int Sum => MyField1 + MyField2; // won't generate any builder code
 
 		public DateTimeOffset Date { get; } = DateTimeOffset.Now;
@@ -182,7 +190,7 @@ namespace Uno.CodeGen.Tests
 	}
 
 	[GeneratedImmutable]
-	public partial class MyGenericImmutable<T>
+	public abstract partial class MyGenericImmutable<T>
 	{
 		public T Entity { get; }
 	}
@@ -199,7 +207,10 @@ namespace Uno.CodeGen.Tests
 
 	[ImmutableAttributeCopyIgnore("RequiredAttribute")]
 	[GeneratedImmutable(GenerateEquality = true)]
-	public partial class MySuperGenericImmutable<T1, T2, T3, T4, T5, T6>
+	public abstract partial class MySuperGenericImmutable<T1, T2, T3, T4, T5, T6>
+		where T1: MyImmutableEntity
+		where T2: T1
+		where T3: IReadOnlyCollection<T1>
 	{
 		[Required, System.ComponentModel.DataAnnotations.DataType(DataType.Text)]
 		[System.ComponentModel.DataAnnotations.Key]
@@ -221,5 +232,10 @@ namespace Uno.CodeGen.Tests
 		public (T1, T2, T3, T4, T5, T6) Values { get; }
 
 		private static int GetHash_Entity6(T6 value) => 50;
+	}
+
+	public partial class MySuperGenericConcrete<T> : MySuperGenericImmutable<MyImmutableEntity, MyImmutableEntity, MyImmutableEntity[], T, T, T>
+		where T: IReadOnlyCollection<string>
+	{
 	}
 }

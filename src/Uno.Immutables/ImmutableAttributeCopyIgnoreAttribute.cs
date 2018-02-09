@@ -24,7 +24,7 @@ namespace Uno
 	/// <remarks>
 	/// Can be put on an assembly, a type or a property.
 	/// </remarks>
-	[System.AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
+	[System.AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
 	public sealed class ImmutableAttributeCopyIgnoreAttribute : Attribute
 	{
 		/// <summary>

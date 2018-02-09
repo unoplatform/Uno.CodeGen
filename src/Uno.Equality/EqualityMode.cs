@@ -14,26 +14,11 @@
 // limitations under the License.
 //
 // ******************************************************************
-using System;
-
 namespace Uno
 {
-	/// <summary>
-	/// Define a field/property to use for generating the <see cref="object.GetHashCode"/> method.
-	/// </summary>
-	/// <remarks>
-	/// Use in conjonction with <see cref="GeneratedEqualityAttribute"/>.
-	/// * If this attribute is not used, you must manually define a <see cref="object.GetHashCode"/> attribute
-	/// * You can put this attribute to more than one member of your class. They will all be used for HashCode calculation.
-	/// </remarks>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
-	public class EqualityHashAttribute : Attribute
+	public enum EqualityMode
 	{
-		public EqualityMode Mode { get; }
-
-		public EqualityHashAttribute(EqualityMode mode = EqualityMode.UseEquality)
-		{
-			Mode = mode;
-		}
+		UseKeyEquality,
+		UseEquality
 	}
 }
