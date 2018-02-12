@@ -323,3 +323,16 @@ to use the `[ImmutableAttributeCopyIgnore(<regex>)]` attribute.
 
 For a finer control, you can put it at assembly level, on a type or
 even on a property itself.
+
+## What about arrays? They are not immutables
+Exactly, arrays are not immutable. But they have one big advantages over other
+declarations: they are _great looking_. Declaring a property as `A[]` is
+more concise than declaring `IReadonlyCollection<T>`.
+
+You should not use arrays for immutable types, but if you really prefer the
+concise declaration of arrays, you can allow arrays to be treated as immutables
+by setting this attribute on your assembly:
+
+``` csharp
+[assembly: Uno.ImmutableGenerationOptions(TreatArrayAsImmutable = true)]
+```

@@ -25,9 +25,11 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 using Uno.Helpers;
 using Uno.RoslynHelpers;
 using Uno.SourceGeneration;
+using TypeSymbolExtensions = Uno.Helpers.TypeSymbolExtensions;
 
 namespace Uno
 {
@@ -39,7 +41,10 @@ namespace Uno
 		private INamedTypeSymbol _generatedImmutableAttributeSymbol;
 		private INamedTypeSymbol _immutableBuilderAttributeSymbol;
 		private INamedTypeSymbol _immutableAttributeCopyIgnoreAttributeSymbol;
+		private INamedTypeSymbol _immutableGenerationOptionsAttributeSymbol;
+
 		private bool _generateOptionCode = true;
+		private (bool generateOptionCode, bool treatArrayAsImmutable) _generationOptions;
 
 		private Regex[] _copyIgnoreAttributeRegexes;
 
@@ -51,8 +56,7 @@ namespace Uno
 			_generatedImmutableAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.GeneratedImmutableAttribute");
 			_immutableBuilderAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableBuilderAttribute");
 			_immutableAttributeCopyIgnoreAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableAttributeCopyIgnoreAttribute");
-
-			_generateOptionCode = context.Compilation.GetTypeByMetadataName("Uno.Option") != null;
+			_immutableGenerationOptionsAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableGenerationOptionsAttribute");
 
 			var generationData = EnumerateImmutableGeneratedEntities()
 				.OrderBy(x => x.symbol.Name)
@@ -64,6 +68,10 @@ namespace Uno
 				ExtractCopyIgnoreAttributes(context.Compilation.Assembly)
 					.Concat(new[] {new Regex(@"^Uno\.Immutable"), new Regex(@"^Uno\.Equality")})
 					.ToArray();
+
+			_generationOptions = ExtractGenerationOptions(context.Compilation.Assembly);
+
+			_generateOptionCode = _generationOptions.generateOptionCode && context.Compilation.GetTypeByMetadataName("Uno.Option") != null;
 
 			foreach ((var type, var moduleAttribute) in generationData)
 			{
@@ -80,6 +88,34 @@ namespace Uno
 			return symbol.GetAttributes()
 				.Where(a => a.AttributeClass.Equals(_immutableAttributeCopyIgnoreAttributeSymbol))
 				.Select(a => new Regex(a.ConstructorArguments[0].Value.ToString()));
+		}
+
+		private (bool generateOptionCode, bool treatArrayAsImmutable) ExtractGenerationOptions(IAssemblySymbol assembly)
+		{
+			var generateOptionCode = true;
+			var treatArrayAsImmutable = false;
+
+			var attribute = assembly
+				.GetAttributes()
+				.FirstOrDefault(a => a.AttributeClass.Equals(_immutableGenerationOptionsAttributeSymbol));
+
+			if (attribute != null)
+			{
+				foreach (var argument in attribute.NamedArguments)
+				{
+					switch (argument.Key)
+					{
+						case nameof(ImmutableGenerationOptionsAttribute.GenerateOptionCode):
+							generateOptionCode = (bool)argument.Value.Value;
+							break;
+						case nameof(ImmutableGenerationOptionsAttribute.TreatArrayAsImmutable):
+							treatArrayAsImmutable = (bool) argument.Value.Value;
+							break;
+					}
+				}
+			}
+
+			return (generateOptionCode, treatArrayAsImmutable);
 		}
 
 		private bool GetShouldGenerateEquality(AttributeData attribute)
@@ -118,7 +154,7 @@ namespace Uno
 				var names = baseType.GetSymbolNames();
 
 				var isSameNamespace = baseType.ContainingNamespace.Equals(type.ContainingNamespace);
-				var baseTypeName = isSameNamespace ? names.symbolNameWithGenerics : baseType.ToDisplayString();
+				var baseTypeName = isSameNamespace ? names.SymbolNameWithGenerics : baseType.ToDisplayString();
 				var builderBaseType = baseTypeName + ".Builder";
 
 				return (true, baseTypeName, builderBaseType, isImmutablePresent);
@@ -133,9 +169,13 @@ namespace Uno
 		{
 			var defaultMemberName = "Default";
 
+			var generateOption = _generateOptionCode && !typeSymbol.IsAbstract;
+
 			var classCopyIgnoreRegexes = ExtractCopyIgnoreAttributes(typeSymbol).ToArray();
 
 			(IPropertySymbol property, bool isNew)[] properties;
+
+			var typeProperties = typeSymbol.GetProperties().ToArray();
 
 			if (baseTypeInfo.isBaseType)
 			{
@@ -144,16 +184,14 @@ namespace Uno
 					.Select(x => x.Name)
 					.ToArray();
 
-				properties = typeSymbol
-					.GetProperties()
+				properties = typeProperties
 					.Where(x => x.IsReadOnly && IsAutoProperty(x))
 					.Select(x => (x, baseProperties.Contains(x.Name))) // remove properties already present in base class
 					.ToArray();
 			}
 			else
 			{
-				properties = typeSymbol
-					.GetProperties()
+				properties = typeProperties
 					.Where(x => x.IsReadOnly && IsAutoProperty(x))
 					.Select(x => (x, false))
 					.ToArray();
@@ -161,26 +199,10 @@ namespace Uno
 
 			var builder = new IndentedStringBuilder();
 
-			var (symbolName, genericArguments, symbolNameWithGenerics, symbolNameForXml, symbolNameDefinition, resultFileName) =
-				typeSymbol.GetSymbolNames();
+			var symbolNames = typeSymbol.GetSymbolNames();
+			var (symbolName, genericArguments, symbolNameWithGenerics, symbolNameForXml, symbolNameDefinition, resultFileName) = symbolNames;
 
-			if (!IsFromPartialDeclaration(typeSymbol))
-			{
-				builder.AppendLineInvariant(
-					$"#warning {nameof(ImmutableGenerator)}: you should add the partial modifier to the class {symbolNameWithGenerics}.");
-			}
-
-			if (typeSymbol.IsValueType)
-			{
-				builder.AppendLineInvariant(
-					$"#error {nameof(ImmutableGenerator)}: Type {symbolNameWithGenerics} **MUST** be a class, not a struct.");
-			}
-
-			if (baseTypeInfo.isBaseType && baseTypeInfo.baseType == null)
-			{
-				builder.AppendLineInvariant(
-					$"#error {nameof(ImmutableGenerator)}: Type {symbolNameWithGenerics} **MUST** derive from an immutable class.");
-			}
+			ValidateType(builder, typeSymbol, baseTypeInfo, symbolNames, typeProperties);
 
 			var newModifier = baseTypeInfo.isBaseType ? "new " : "";
 
@@ -195,9 +217,17 @@ namespace Uno
 
 			using (builder.BlockInvariant($"namespace {typeSymbol.ContainingNamespace}"))
 			{
-				var builderTypeNameAndBaseClass = baseTypeInfo.isBaseType
+				string builderTypeNameAndBaseClass;
+				if (typeSymbol.IsAbstract)
+				{
+					builderTypeNameAndBaseClass = baseTypeInfo.isBaseType ? $"Builder : {baseTypeInfo.builderBaseType}" : $"Builder";
+				}
+				else
+				{
+					builderTypeNameAndBaseClass = baseTypeInfo.isBaseType
 					? $"Builder : {baseTypeInfo.builderBaseType}, Uno.IImmutableBuilder<{symbolNameWithGenerics}>"
 					: $"Builder : global::Uno.IImmutableBuilder<{symbolNameWithGenerics}>";
+				}
 
 				if (baseTypeInfo.isImmutablePresent)
 				{
@@ -215,16 +245,19 @@ namespace Uno
 
 				builder.AppendLineInvariant($"[global::Uno.ImmutableBuilder(typeof({symbolNameDefinition}.Builder))] // Other generators can use this to find the builder.");
 
-				using (builder.BlockInvariant(
-					$"{typeSymbol.GetAccessibilityAsCSharpCodeString()} partial class {symbolNameWithGenerics}"))
-				{
-					builder.AppendLineInvariant($"/// <summary>");
-					builder.AppendLineInvariant($"/// {defaultMemberName} instance with only property initializers set.");
-					builder.AppendLineInvariant($"/// </summary>");
-					builder.AppendLineInvariant(
-						$"public static readonly {newModifier}{symbolNameWithGenerics} {defaultMemberName} = new {symbolNameWithGenerics}();");
+				var abstractClause = typeSymbol.IsAbstract ? "abstract " : "";
 
-					builder.AppendLine();
+				using (builder.BlockInvariant($"{typeSymbol.GetAccessibilityAsCSharpCodeString()} {abstractClause}partial class {symbolNameWithGenerics}"))
+				{
+					if(!typeSymbol.IsAbstract)
+					{
+						builder.AppendLineInvariant($"/// <summary>");
+						builder.AppendLineInvariant($"/// {defaultMemberName} instance with only property initializer set.");
+						builder.AppendLineInvariant($"/// </summary>");
+						builder.AppendLineInvariant($"public static readonly {newModifier}{symbolNameWithGenerics} {defaultMemberName} = new {symbolNameWithGenerics}();");
+
+						builder.AppendLine();
+					}
 
 					var prop1Name = properties.Select(p => p.property.Name).FirstOrDefault() ?? symbolName + "Property";
 					builder.AppendLineInvariant($"/// <summary>");
@@ -235,18 +268,14 @@ namespace Uno
 					builder.AppendLineInvariant($"/// use the .WithXXX() methods to do it in a fluent way. You can continue to");
 					builder.AppendLineInvariant($"/// change it even after calling the `.ToImmutable()` method: it will simply");
 					builder.AppendLineInvariant($"/// generate a new version from the current state.");
-					builder.AppendLineInvariant(
-						$"/// **THE BUILDER IS NOT THREAD-SAFE** (it shouldn't be accessed concurrently from many threads)");
+					builder.AppendLineInvariant($"/// **THE BUILDER IS NOT THREAD-SAFE** (it shouldn't be accessed concurrently from many threads)");
 					builder.AppendLineInvariant($"/// </remarks>");
 					builder.AppendLineInvariant("/// <example>");
 					builder.AppendLineInvariant($"/// // The following code will create a builder using a .With{prop1Name}() method:");
-					builder.AppendLineInvariant(
-						$"/// {symbolNameForXml}.Builder b = my{symbolName}Instance.With{prop1Name}([{prop1Name} value]);");
+					builder.AppendLineInvariant($"/// {symbolNameForXml}.Builder b = my{symbolName}Instance.With{prop1Name}([{prop1Name} value]);");
 					builder.AppendLineInvariant("///");
-					builder.AppendLineInvariant(
-						$"/// // The following code will use implicit cast to create a new {symbolNameForXml} immutable instance:");
-					builder.AppendLineInvariant("{0}",
-						$"/// {symbolNameForXml} my{symbolName}Instance = new {symbolNameForXml}.Builder {{ {prop1Name} = [{prop1Name} value], ... }};");
+					builder.AppendLineInvariant($"/// // The following code will use implicit cast to create a new {symbolNameForXml} immutable instance:");
+					builder.AppendLineInvariant("{0}", $"/// {symbolNameForXml} my{symbolName}Instance = new {symbolNameForXml}.Builder {{ {prop1Name} = [{prop1Name} value], ... }};");
 					builder.AppendLineInvariant("/// </example>");
 					using (builder.BlockInvariant(
 						$"{typeSymbol.GetAccessibilityAsCSharpCodeString()} {newModifier}partial class {builderTypeNameAndBaseClass}"))
@@ -261,25 +290,33 @@ namespace Uno
 							builder.AppendLineInvariant("{0}", $"internal readonly {symbolNameWithGenerics} _original;");
 							builder.AppendLine();
 							builder.AppendLineInvariant("// Cached version of generated entity (flushed when the builder is updated)");
-							builder.AppendLineInvariant(
-								$"protected {symbolNameWithGenerics} _cachedResult = default({symbolNameWithGenerics});");
+							builder.AppendLineInvariant($"protected {symbolNameWithGenerics} _cachedResult = default({symbolNameWithGenerics});");
 							builder.AppendLine();
 
-							using (builder.BlockInvariant($"public Builder({symbolNameWithGenerics} original)"))
+							if (typeSymbol.IsAbstract)
 							{
-								builder.AppendLineInvariant($"_original = original ?? {symbolNameWithGenerics}.Default;");
+								using (builder.BlockInvariant($"public Builder({symbolNameWithGenerics} original)"))
+								{
+									builder.AppendLineInvariant($"_original = original ?? throw new ArgumentNullException(nameof(original));");
+								}
 							}
-
-							builder.AppendLine();
-							using (builder.BlockInvariant($"public Builder()"))
+							else
 							{
-								builder.AppendLineInvariant($"_original = {symbolNameWithGenerics}.Default;");
+								using (builder.BlockInvariant($"public Builder({symbolNameWithGenerics} original)"))
+								{
+									builder.AppendLineInvariant($"_original = original ?? {symbolNameWithGenerics}.Default;");
+								}
+
+								builder.AppendLine();
+								using (builder.BlockInvariant($"public Builder()"))
+								{
+									builder.AppendLineInvariant($"_original = {symbolNameWithGenerics}.Default;");
+								}
 							}
 						}
 						else
 						{
-							using (builder.BlockInvariant(
-								$"public Builder({symbolNameWithGenerics} original) : base(original ?? {symbolNameWithGenerics}.Default)"))
+							using (builder.BlockInvariant($"public Builder({symbolNameWithGenerics} original) : base(original ?? {symbolNameWithGenerics}.Default)"))
 							{
 								builder.AppendLineInvariant($"// Default constructor, the _original field is assigned in base constructor.");
 							}
@@ -292,7 +329,7 @@ namespace Uno
 
 						builder.AppendLine();
 
-						var resetNone = _generateOptionCode
+						var resetNone = generateOption
 							? $"{Environment.NewLine}			_isNone = false;"
 							: "";
 
@@ -358,22 +395,21 @@ private bool _is{prop.Name}Set = false;
 							builder.AppendLine();
 						}
 
-						builder.AppendLineInvariant("/// <summary>");
-						builder.AppendLineInvariant($"/// Create an immutable instance of {symbolNameForXml}.");
-						builder.AppendLineInvariant("/// </summary>");
-						builder.AppendLineInvariant("/// <remarks>");
-						builder.AppendLineInvariant(
-							"/// Will return original if nothing changed in the builder (and an original was specified).");
-						builder.AppendLineInvariant(
-							"/// Application code should prefer the usage of implicit casting which is calling this method.");
-						builder.AppendLineInvariant(
-							$"/// **THIS METHOD IS NOT THREAD-SAFE** (it shouldn't be accessed concurrently from many threads)");
-						builder.AppendLineInvariant("/// </remarks>");
-						builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
-						using (builder.BlockInvariant($"public {newModifier}{symbolNameWithGenerics} ToImmutable()"))
+						if(!typeSymbol.IsAbstract)
 						{
-							builder.AppendLine(
-								$@"var cachedResult = _cachedResult as {symbolNameWithGenerics};
+							builder.AppendLineInvariant("/// <summary>");
+							builder.AppendLineInvariant($"/// Create an immutable instance of {symbolNameForXml}.");
+							builder.AppendLineInvariant("/// </summary>");
+							builder.AppendLineInvariant("/// <remarks>");
+							builder.AppendLineInvariant("/// Will return original if nothing changed in the builder (and an original was specified).");
+							builder.AppendLineInvariant("/// Application code should prefer the usage of implicit casting which is calling this method.");
+							builder.AppendLineInvariant($"/// **THIS METHOD IS NOT THREAD-SAFE** (it shouldn't be accessed concurrently from many threads)");
+							builder.AppendLineInvariant("/// </remarks>");
+							builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
+							using (builder.BlockInvariant($"public {newModifier}{symbolNameWithGenerics} ToImmutable()"))
+							{
+								builder.AppendLine(
+$@"var cachedResult = _cachedResult as {symbolNameWithGenerics};
 if(cachedResult != null)
 {{
 	return cachedResult; // already computed, no need to redo this.
@@ -388,10 +424,11 @@ if (_isDirty)
 	}}
 }}
 return ({symbolNameWithGenerics})(_cachedResult = _original);");
+								builder.AppendLine();
+							}
+
 							builder.AppendLine();
 						}
-
-						builder.AppendLine();
 
 						if (properties.Any())
 						{
@@ -404,15 +441,12 @@ return ({symbolNameWithGenerics})(_cachedResult = _original);");
 								builder.AppendLineInvariant($"/// Set property {prop.Name} in a fluent declaration.");
 								builder.AppendLineInvariant($"/// </summary>");
 								builder.AppendLineInvariant($"/// <remarks>");
-								builder.AppendLineInvariant(
-									$"/// **THIS METHOD IS NOT THREAD-SAFE** (it shouldn't be accessed concurrently from many threads)");
+								builder.AppendLineInvariant($"/// **THIS METHOD IS NOT THREAD-SAFE** (it shouldn't be accessed concurrently from many threads)");
 								builder.AppendLineInvariant($"/// </remarks>");
 								builder.AppendLineInvariant("/// <example>");
-								builder.AppendLineInvariant("{0}",
-									$"/// var builder = new {symbolNameForXml}.Builder {{ {prop1Name} = xxx, ... }}; // create a builder instance");
+								builder.AppendLineInvariant("{0}", $"/// var builder = new {symbolNameForXml}.Builder {{ {prop1Name} = xxx, ... }}; // create a builder instance");
 								builder.AppendLineInvariant($"/// {prop.Type} new{prop.Name}Value = [...];");
-								builder.AppendLineInvariant(
-									$"/// {symbolNameForXml} instance = builder.With{prop.Name}(new{prop.Name}Value); // create an immutable instance");
+								builder.AppendLineInvariant($"/// {symbolNameForXml} instance = builder.With{prop.Name}(new{prop.Name}Value); // create an immutable instance");
 								builder.AppendLineInvariant("/// </example>");
 								using (builder.BlockInvariant($"public {newPropertyModifier}Builder With{prop.Name}({prop.Type} value)"))
 								{
@@ -423,23 +457,17 @@ return ({symbolNameWithGenerics})(_cachedResult = _original);");
 								builder.AppendLine();
 
 								builder.AppendLineInvariant($"/// <summary>");
-								builder.AppendLineInvariant(
-									$"/// Set property {prop.Name} in a fluent declaration by projecting previous value.");
+								builder.AppendLineInvariant($"/// Set property {prop.Name} in a fluent declaration by projecting previous value.");
 								builder.AppendLineInvariant($"/// </summary>");
 								builder.AppendLineInvariant($"/// <remarks>");
-								builder.AppendLineInvariant(
-									$"/// **THIS METHOD IS NOT THREAD-SAFE** (it shouldn't be accessed concurrently from many threads)");
-								builder.AppendLineInvariant(
-									$"/// The selector will be called immediately. The main usage of this overload is to specify a _method group_.");
+								builder.AppendLineInvariant($"/// **THIS METHOD IS NOT THREAD-SAFE** (it shouldn't be accessed concurrently from many threads)");
+								builder.AppendLineInvariant($"/// The selector will be called immediately. The main usage of this overload is to specify a _method group_.");
 								builder.AppendLineInvariant($"/// </remarks>");
 								builder.AppendLineInvariant("/// <example>");
-								builder.AppendLineInvariant("{0}",
-									$"/// var builder = new {symbolNameForXml}.Builder {{ {prop1Name} = xxx, ... }}; // create a builder instance");
-								builder.AppendLineInvariant(
-									$"/// {symbolNameForXml} instance = builder.With{prop.Name}(previous{prop.Name}Value => new {prop.Type}(...)); // create an immutable instance");
+								builder.AppendLineInvariant("{0}", $"/// var builder = new {symbolNameForXml}.Builder {{ {prop1Name} = xxx, ... }}; // create a builder instance");
+								builder.AppendLineInvariant($"/// {symbolNameForXml} instance = builder.With{prop.Name}(previous{prop.Name}Value => new {prop.Type}(...)); // create an immutable instance");
 								builder.AppendLineInvariant("/// </example>");
-								using (builder.BlockInvariant(
-									$"public {newPropertyModifier}Builder With{prop.Name}(Func<{prop.Type}, {prop.Type}> valueSelector)"))
+								using (builder.BlockInvariant($"public {newPropertyModifier}Builder With{prop.Name}(Func<{prop.Type}, {prop.Type}> valueSelector)"))
 								{
 									builder.AppendLineInvariant($"{prop.Name} = valueSelector({prop.Name});");
 									builder.AppendLineInvariant("return this;");
@@ -452,13 +480,12 @@ return ({symbolNameWithGenerics})(_cachedResult = _original);");
 						}
 					}
 
-					if (_generateOptionCode)
+					if (generateOption)
 					{
 						builder.AppendLine();
 						builder.AppendLineInvariant($"#region Uno.Option<{symbolNameWithGenerics}>'s specific code");
 						builder.AppendLine();
-						builder.AppendLineInvariant(
-							$"public static readonly {newModifier}global::Uno.Option<{symbolNameWithGenerics}> None = global::Uno.Option.None<{symbolNameWithGenerics}>();");
+						builder.AppendLineInvariant($"public static readonly {newModifier}global::Uno.Option<{symbolNameWithGenerics}> None = global::Uno.Option.None<{symbolNameWithGenerics}>();");
 						builder.AppendLine();
 
 						using (builder.BlockInvariant($"partial class Builder"))
@@ -513,10 +540,8 @@ public static implicit operator global::Uno.Option<{symbolNameWithGenerics}>(Bui
 
 					builder.AppendLineInvariant($"// Default constructor - to ensure it's not defined by application code.");
 					builder.AppendLineInvariant($"//");
-					builder.AppendLineInvariant(
-						$"// \"error CS0111: Type '{symbolNameWithGenerics}' already defines a member called '.ctor' with the same parameter types\":");
-					builder.AppendLineInvariant(
-						$"//  => You have this error? it's because you defined a default constructor on your class!");
+					builder.AppendLineInvariant($"// \"error CS0111: Type '{symbolNameWithGenerics}' already defines a member called '.ctor' with the same parameter types\":");
+					builder.AppendLineInvariant($"//  => You have this error? it's because you defined a default constructor on your class!");
 					builder.AppendLineInvariant($"//");
 					builder.AppendLineInvariant($"// New instances should use the builder instead.");
 					builder.AppendLineInvariant($"// We know, it's not compatible with Newtownsoft's JSON.net: It's by-design.");
@@ -524,8 +549,7 @@ public static implicit operator global::Uno.Option<{symbolNameWithGenerics}>(Bui
 					builder.AppendLineInvariant($"//");
 					builder.AppendLineInvariant($"// Send your complaints or inquiried to \"architecture [-@-] nventive [.] com\".");
 					builder.AppendLineInvariant($"//");
-					builder.AppendLineInvariant("{0}",
-						$"protected {symbolName}() {{}} // see previous comments if you want this removed (TL;DR: you can't)");
+					builder.AppendLineInvariant("{0}", $"protected {symbolName}() {{}} // see previous comments if you want this removed (TL;DR: you can't)");
 
 					builder.AppendLine();
 
@@ -556,8 +580,10 @@ public static implicit operator global::Uno.Option<{symbolNameWithGenerics}>(Bui
 
 					builder.AppendLine();
 
-					builder.AppendLine(
-						$@"// Implicit cast from {symbolNameWithGenerics} to Builder: will simply create a new instance of the builder.
+					if (!typeSymbol.IsAbstract)
+					{
+						builder.AppendLine(
+$@"// Implicit cast from {symbolNameWithGenerics} to Builder: will simply create a new instance of the builder.
 public static implicit operator Builder({symbolNameWithGenerics} original)
 {{
 	return new Builder(original);
@@ -568,13 +594,14 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 {{
 	return builder.ToImmutable();
 }}");
-					builder.AppendLine();
+						builder.AppendLine();
+					}
 				}
 
 				builder.AppendLine();
 				using (builder.BlockInvariant($"{typeSymbol.GetAccessibilityAsCSharpCodeString()} static partial class {symbolName}Extensions"))
 				{
-					if (properties.Any())
+					if (properties.Any() && !typeSymbol.IsAbstract)
 					{
 						var builderName = $"{symbolNameWithGenerics}.Builder";
 
@@ -622,7 +649,7 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 
 							builder.AppendLine();
 
-							if (_generateOptionCode)
+							if (generateOption)
 							{
 								builder.AppendLineInvariant("/// <summary>");
 								builder.AppendLineInvariant($"/// Set property {prop.Name} in a fluent declaration.");
@@ -638,7 +665,7 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 								builder.AppendLineInvariant($"/// Option&lt;{symbolNameForXml}&gt; modified = original.With{prop.Name}(new{prop.Name}Value); // result type is Option.Some");
 								builder.AppendLineInvariant("/// </example>");
 								builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
-								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this Option<{symbolNameWithGenerics}> optionEntity, {prop.Type} value)"))
+								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this global::Uno.Option<{symbolNameWithGenerics}> optionEntity, {prop.Type} value)"))
 								{
 									builder.AppendLineInvariant($"return {builderName}.FromOption(optionEntity).With{prop.Name}(value);");
 								}
@@ -659,7 +686,7 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 								builder.AppendLineInvariant($"/// {symbolNameForXml} modified = original.With{prop.Name}(previous{prop.Name}Value => new {prop.Type}(...)); // create a new modified immutable instance");
 								builder.AppendLineInvariant("/// </example>");
 								builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
-								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this Option<{symbolNameWithGenerics}> optionEntity, Func<{prop.Type}, {prop.Type}> valueSelector)"))
+								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this global::Uno.Option<{symbolNameWithGenerics}> optionEntity, Func<{prop.Type}, {prop.Type}> valueSelector)"))
 								{
 									builder.AppendLineInvariant($"return {builderName}.FromOption(optionEntity).With{prop.Name}(valueSelector);");
 								}
@@ -674,6 +701,113 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 			}
 
 			_context.AddCompilationUnit(resultFileName, builder.ToString());
+		}
+
+		private void ValidateType(
+			IIndentedStringBuilder builder,
+			INamedTypeSymbol typeSymbol,
+			(bool isBaseType, string baseType, string builderBaseType, bool isImmutablePresent) baseTypeInfo,
+			SymbolNames symbolNames, IPropertySymbol[] typeProperties)
+		{
+			if (!IsFromPartialDeclaration(typeSymbol))
+			{
+				builder.AppendLineInvariant(
+					$"#warning {nameof(ImmutableGenerator)}: you should add the partial modifier to the class {symbolNames.SymbolNameWithGenerics}.");
+			}
+
+			if (typeSymbol.IsValueType)
+			{
+				builder.AppendLineInvariant(
+					$"#error {nameof(ImmutableGenerator)}: Type {symbolNames.SymbolNameWithGenerics} **MUST** be a class, not a struct.");
+			}
+
+			if (baseTypeInfo.isBaseType && baseTypeInfo.baseType == null)
+			{
+				builder.AppendLineInvariant(
+					$"#error {nameof(ImmutableGenerator)}: Type {symbolNames.SymbolNameWithGenerics} **MUST** derive from an immutable class.");
+			}
+
+			void CheckTypeImmutable(ITypeSymbol type, string typeSource)
+			{
+				if (type.IsGenericArgument())
+				{
+					var typeParameter = type as ITypeParameterSymbol;
+					if (typeParameter?.ConstraintTypes.Any() ?? false)
+					{
+						foreach (var constraintType in typeParameter.ConstraintTypes)
+						{
+							CheckTypeImmutable(constraintType, $"{typeSymbol} / Generic type {typeParameter}:{constraintType}");
+						}
+					}
+					else
+					{
+						builder.AppendLineInvariant(
+							$"#error {nameof(ImmutableGenerator)}: {typeSource} is of generic type {type} which isn't restricted to immutable. You can also make your class abstract.");
+					}
+
+					return; // ok
+				}
+
+				if (type.FindAttribute(_immutableBuilderAttributeSymbol) != null)
+				{
+					builder.AppendLineInvariant(
+						$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} IS A BUILDER! It cannot be used in an immutable entity.");
+				}
+				else if (!type.IsImmutable(_generationOptions.treatArrayAsImmutable))
+				{
+					builder.AppendLineInvariant(
+						$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} is not immutable. It cannot be used in an immutable entity.");
+				}
+
+				if(type is INamedTypeSymbol namedType)
+				{
+					foreach (var typeArgument in namedType.TypeArguments)
+					{
+						CheckTypeImmutable(typeArgument, $"{typeSource} (argument type {typeArgument})");
+					}
+				}
+			}
+
+			foreach (var prop in typeProperties)
+			{
+				if (prop.IsStatic)
+				{
+					continue; // we don't care about static stuff.
+				}
+				if (!prop.IsReadOnly)
+				{
+					builder.AppendLineInvariant(
+						$"#error {nameof(ImmutableGenerator)}: Non-static property {symbolNames.SymbolNameWithGenerics}.{prop.Name} cannot have a setter, even a private one. You must remove it for immutable generation.");
+				}
+
+				if (!typeSymbol.IsAbstract)
+				{
+					CheckTypeImmutable(prop.Type, $"Property {symbolNames.SymbolNameWithGenerics}.{prop.Name}");
+				}
+			}
+
+			foreach (var typeArgument in typeSymbol.BaseType.TypeArguments)
+			{
+				if (typeSymbol.IsAbstract && typeSymbol is ITypeParameterSymbol)
+				{
+					continue;
+				}
+				CheckTypeImmutable(typeArgument, $"Type Argument {typeArgument.Name}");
+			}
+
+			foreach (var field in typeSymbol.GetFields())
+			{
+				if (field.IsImplicitlyDeclared)
+				{
+					continue; // that's from the compiler, it's ok.
+				}
+
+				if (!field.IsStatic)
+				{
+					builder.AppendLineInvariant(
+						$"#error {nameof(ImmutableGenerator)}: Immutable type {symbolNames.SymbolNameWithGenerics} cannot have a non-static field {field.Name}. You must remove it for immutable generation.");
+				}
+			}
 		}
 
 		private string GetAttributes(Regex[] classCopyIgnoreRegexes, IPropertySymbol prop)
