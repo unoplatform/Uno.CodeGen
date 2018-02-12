@@ -200,6 +200,8 @@ namespace Uno.CodeGen.Tests
 		public MyImmutableEntity Entity { get; } = MyImmutableEntity.Default;
 
 		public bool IsSomething { get; } = true;
+
+		public IImmutableDictionary<string, string> Metadata { get; }
 	}
 
 	public partial class B : A

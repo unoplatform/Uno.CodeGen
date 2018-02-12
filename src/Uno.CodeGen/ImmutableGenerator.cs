@@ -800,8 +800,16 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 				}
 				else if (!type.IsImmutable(_generationOptions.treatArrayAsImmutable))
 				{
-					builder.AppendLineInvariant(
-						$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} is not immutable. It cannot be used in an immutable entity.");
+					if (type is IArrayTypeSymbol)
+					{
+						builder.AppendLineInvariant(
+							$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} is an array, which is not immutable. You can treat arrays as immutable by setting a global attribute [assembly: Uno.ImmutableGenerationOptions(TreatArrayAsImmutable = true)].");
+					}
+					else
+					{
+						builder.AppendLineInvariant(
+							$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} is not immutable. It cannot be used in an immutable entity.");
+					}
 				}
 
 				if(type is INamedTypeSymbol namedType)

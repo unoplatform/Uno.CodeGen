@@ -70,7 +70,7 @@ namespace Uno.Helpers
 
 			if (type is IArrayTypeSymbol arrayType)
 			{
-				return arrayType.ElementType.IsImmutable(treatArrayAsImmutable);
+				return arrayType.ElementType?.IsImmutable(treatArrayAsImmutable) ?? false;
 			}
 
 			var definitionType = type;
@@ -83,22 +83,42 @@ namespace Uno.Helpers
 			switch (definitionType.ToString())
 			{
 				case "System.Attribute": // strange, but valid
-				case "System.TimeSpan":
 				case "System.DateTime":
 				case "System.DateTimeOffset":
+				case "System.TimeSpan":
 				case "System.Type":
+				case "System.Uri":
+				case "System.Version":
 					return true;
 
-				case "System.Nullable<T>":
+				// .NET framework
 				case "System.Collections.Generic.IReadOnlyList<T>":
 				case "System.Collections.Generic.IReadOnlyCollection<T>":
-				case "System.Collections.Immutable.IImmutableArray<T>":
-				case "System.Collections.Immutable.ImmutableArray<T>":
+				case "System.Nullable<T>":
+				case "System.Tuple<T>":
+				// System.Collections.Immutable (nuget package)
 				case "System.Collections.Immutable.IImmutableList<T>":
+				case "System.Collections.Immutable.IImmutableQueue<T>":
+				case "System.Collections.Immutable.IImmutableSet<T>":
+				case "System.Collections.Immutable.IImmutableStack<T>":
+				case "System.Collections.Immutable.ImmutableArray<T>":
+				case "System.Collections.Immutable.ImmutableHashSet<T>":
 				case "System.Collections.Immutable.ImmutableList<T>":
+				case "System.Collections.Immutable.ImmutableQueue<T>":
+				case "System.Collections.Immutable.ImmutableSortedSet<T>":
+				case "System.Collections.Immutable.ImmutableStack<T>":
 				{
 					var argumentParameter = (type as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
 					return argumentParameter == null || argumentParameter.IsImmutable(treatArrayAsImmutable);
+				}
+				case "System.Collections.Immutable.IImmutableDictionary<TKey, TValue>":
+				case "System.Collections.Immutable.ImmutableDictionary<TKey, TValue>":
+				case "System.Collections.Immutable.ImmutableSortedDictionary<TKey, TValue>":
+				{
+					var keyTypeParameter = (type as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+					var valueTypeParameter = (type as INamedTypeSymbol)?.TypeArguments.Skip(1).FirstOrDefault();
+					return (keyTypeParameter == null || keyTypeParameter.IsImmutable(treatArrayAsImmutable))
+						&& (valueTypeParameter == null || valueTypeParameter.IsImmutable(treatArrayAsImmutable));
 				}
 			}
 
