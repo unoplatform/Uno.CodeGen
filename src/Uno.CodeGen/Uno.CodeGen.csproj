@@ -37,6 +37,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
 		<ProjectReference Include="..\Uno.Immutables\Uno.Immutables.csproj" />
+		<ProjectReference Include="..\Uno.ClassLifecycle\Uno.ClassLifecycle.csproj" />
 	</ItemGroup>
 
 </Project>
