@@ -25,6 +25,8 @@
 
 	<ItemGroup Condition="'$(TargetFramework)'!='net46'">
 		<Compile Remove="**\*.cs" />
+		<None Include="**\*.cs" />
+		<None Remove="obj\**" />
 	</ItemGroup>
 
 	<ItemGroup>
