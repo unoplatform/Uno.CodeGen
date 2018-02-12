@@ -18,11 +18,36 @@ using System;
 
 namespace Uno
 {
+	/// <summary>
+	/// Global settings for [GenerateImmutable] generator.
+	/// </summary>
 	[System.AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
 	public sealed class ImmutableGenerationOptionsAttribute : Attribute
 	{
+		/// <summary>
+		/// If you want arrays to be treat as immutable in the validation.
+		/// </summary>
+		/// <remarks>
+		/// Recommendation is to set this to false if you want actually immutable entities.
+		/// </remarks>
 		public bool TreatArrayAsImmutable { get; set; } = false;
 
+		/// <summary>
+		/// If you want to generate `Option`-specific Code
+		/// </summary>
+		/// <remarks>
+		/// No effect if not using `Uno.Core`.
+		/// Default to true.
+		/// </remarks>
 		public bool GenerateOptionCode { get; set; } = true;
+
+		/// <summary>
+		/// If you want to generate equality by default.
+		/// </summary>
+		/// <remarks>
+		/// Default is true. Can be overridden by type on the attribute declaration
+		/// `[GenerateImmutable(GenerateEquality=XXX)]`
+		/// </remarks>
+		public bool GenerateEqualityByDefault { get; set; } = true;
 	}
 }

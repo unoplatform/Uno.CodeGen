@@ -336,3 +336,26 @@ by setting this attribute on your assembly:
 ``` csharp
 [assembly: Uno.ImmutableGenerationOptions(TreatArrayAsImmutable = true)]
 ```
+
+## Are equality generation automatic for generated immutables?
+Yes they are by default. If you want to chagne this behavior, use the global
+`[ImmutableGenerationOptions]` attribute. Example:
+``` csharp
+[assembly: Uno.ImmutableGenerationOptions(GenerateEqualityByDefault = true)]
+```
+  
+You can also override this default by specifying per-type:
+```csharp
+[GeneratedImmutable(GenerateEquality = false)]
+public class MyImmutable
+{
+}
+```
+> GOOD TO KNOW: Both `[GeneratedImmutable]` and `[GeneratedEquality]` attributes
+> are _inheritable_. It means > any inherited class will be generated too,
+> even if they are defined in another assembly
+> (Assuming the `Uno.CodeGen` package is used, obviously).
+> So, disabling equality generation
+> (`[GeneratedImmutable(GenerateEquality = false)]`)
+> won't have any effect in inherited class if the generation is active on the
+> base class.

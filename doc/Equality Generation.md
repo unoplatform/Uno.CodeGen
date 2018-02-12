@@ -241,11 +241,31 @@ The generation logic for fields/properties in the class, using a first-match rul
 
   # FAQ
 
-  ## I'm getting the error `warning CS0282: There is no defined ordering between fields
-  ## in multiple declarations of partial struct '<mystruct>'. To specify an ordering, all
-  ## instance fields must be in the same declaration.`
-  You have this error because the generator is using partial declarations for a `struct`.
+  ## Why am I getting the `warning CS0282`?
+  The complete warning message is :
+  ```
+  warning CS0282: There is no defined ordering between fields in multiple declarations of partial struct '<mystruct>'. To specify an ordering, all instance fields must be in the same declaration.
+  ```
+  You have this warning because the generator is using partial declarations for a `struct`.
   If the layout is not important for your structs (mostly used for native interop), you
   can mute this warning in your project.
 
   You can also consider replacing the `struct` by a `class`.
+  
+  ## Are equality generation automatic for generated immutables?
+  Yes they are by default. If you want to chagne this behavior, use the global
+  `[ImmutableGenerationOptions]` attribute. Example:
+  ``` csharp
+  [assembly: Uno.ImmutableGenerationOptions(GenerateEqualityByDefault = true)]
+  ```
+  
+  You can also override this default by specifying per-type:
+  ```csharp
+  [GeneratedImmutable(GenerateEquality = false)]
+  public class MyImmutable
+  {
+  }
+  ```
+  > GOOD TO KNOW: The `[GenerateEquality]` attribute is _inheritable_. It means
+  > any inherited class will be generated too, even if they are defined in another
+  > assembly. (Assuming the `Uno.CodeGen` package is used, obviously)

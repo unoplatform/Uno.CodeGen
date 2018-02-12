@@ -21,7 +21,7 @@ using System.ComponentModel.DataAnnotations;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-[assembly: Uno.ImmutableGenerationOptions(TreatArrayAsImmutable = true)]
+[assembly: Uno.ImmutableGenerationOptions(TreatArrayAsImmutable = true, GenerateEqualityByDefault = true)]
 
 namespace Uno.CodeGen.Tests
 {
@@ -206,7 +206,7 @@ namespace Uno.CodeGen.Tests
 	}
 
 	[ImmutableAttributeCopyIgnore("RequiredAttribute")]
-	[GeneratedImmutable(GenerateEquality = true)]
+	[GeneratedImmutable()]
 	public abstract partial class MySuperGenericImmutable<T1, T2, T3, T4, T5, T6>
 		where T1: MyImmutableEntity
 		where T2: T1

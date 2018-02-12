@@ -44,7 +44,7 @@ namespace Uno
 		private INamedTypeSymbol _immutableGenerationOptionsAttributeSymbol;
 
 		private bool _generateOptionCode = true;
-		private (bool generateOptionCode, bool treatArrayAsImmutable) _generationOptions;
+		private (bool generateOptionCode, bool treatArrayAsImmutable, bool generateEqualityByDefault) _generationOptions;
 
 		private Regex[] _copyIgnoreAttributeRegexes;
 
@@ -90,10 +90,11 @@ namespace Uno
 				.Select(a => new Regex(a.ConstructorArguments[0].Value.ToString()));
 		}
 
-		private (bool generateOptionCode, bool treatArrayAsImmutable) ExtractGenerationOptions(IAssemblySymbol assembly)
+		private (bool generateOptionCode, bool treatArrayAsImmutable, bool generateEqualityByDefault) ExtractGenerationOptions(IAssemblySymbol assembly)
 		{
 			var generateOptionCode = true;
 			var treatArrayAsImmutable = false;
+			var generateEqualityByDefault = true;
 
 			var attribute = assembly
 				.GetAttributes()
@@ -111,19 +112,24 @@ namespace Uno
 						case nameof(ImmutableGenerationOptionsAttribute.TreatArrayAsImmutable):
 							treatArrayAsImmutable = (bool) argument.Value.Value;
 							break;
+						case nameof(ImmutableGenerationOptionsAttribute.GenerateEqualityByDefault):
+							generateEqualityByDefault = (bool)argument.Value.Value;
+							break;
 					}
 				}
 			}
 
-			return (generateOptionCode, treatArrayAsImmutable);
+			return (generateOptionCode, treatArrayAsImmutable, generateEqualityByDefault);
 		}
 
 		private bool GetShouldGenerateEquality(AttributeData attribute)
 		{
-			return attribute.NamedArguments
-				.Where(na => na.Key.Equals("GenerateEquality"))
-				.Select(na => (bool) na.Value.Value)
+			var shouldGenerateEquality = attribute.NamedArguments
+				.Where(na => na.Key.Equals(nameof(GeneratedImmutableAttribute.GenerateEquality)))
+				.Select(na => (bool?) na.Value.Value)
 				.FirstOrDefault();
+
+			return shouldGenerateEquality ?? _generationOptions.generateEqualityByDefault;
 		}
 
 		private (bool isBaseType, string baseType, string builderBaseType, bool isImmutablePresent) GetTypeInfo(
