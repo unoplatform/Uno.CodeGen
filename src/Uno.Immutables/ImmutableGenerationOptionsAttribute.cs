@@ -46,8 +46,16 @@ namespace Uno
 		/// </summary>
 		/// <remarks>
 		/// Default is true. Can be overridden by type on the attribute declaration
-		/// `[GenerateImmutable(GenerateEquality=XXX)]`
+		/// `[GenerateImmutable(GenerateEquality=false)]`
 		/// </remarks>
 		public bool GenerateEqualityByDefault { get; set; } = true;
+
+		/// <summary>
+		/// If you want to generate Newtownsoft's JSON.NET converters by default.
+		/// </summary>
+		/// <remarks>
+		/// Default is true. No effect if package `Newtownsoft.Json` is not referenced.
+		/// </remarks>
+		public bool GenerateNewtownsoftJsonNetConverters { get; set; } = true;
 	}
 }

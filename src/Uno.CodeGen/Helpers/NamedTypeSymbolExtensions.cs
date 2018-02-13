@@ -29,7 +29,7 @@ namespace Uno.Helpers
 			var symbolName = typeSymbol.Name;
 			if (typeSymbol.TypeArguments.Length == 0) // not a generic type
 			{
-				return new SymbolNames(typeSymbol, symbolName, "", symbolName, symbolName, symbolName, symbolName);
+				return new SymbolNames(typeSymbol, symbolName, "", symbolName, symbolName, symbolName, symbolName, "");
 			}
 
 			var argumentNames = typeSymbol.GetTypeArgumentNames();
@@ -49,7 +49,13 @@ namespace Uno.Helpers
 			// symbolNameWithGenerics: MyType_T1_T2
 			var symbolFilename = $"{symbolName}_{string.Join("_", argumentNames)}";
 
-			return new SymbolNames(typeSymbol, symbolName, $"<{genericArguments}>", symbolNameWithGenerics, symbolForXml, symbolNameDefinition, symbolFilename);
+			var genericConstraints = " " + string.Join(" ", typeSymbol
+				.TypeArguments
+				.OfType<ITypeParameterSymbol>()
+				.SelectMany((tps, i) => tps.ConstraintTypes.Select(c => (tps: tps, c:c, i:i)))
+				.Select(x => $"where {argumentNames[x.i]} : {x.c}"));
+
+			return new SymbolNames(typeSymbol, symbolName, $"<{genericArguments}>", symbolNameWithGenerics, symbolForXml, symbolNameDefinition, symbolFilename, genericConstraints);
 		}
 
 		public static string[] GetTypeArgumentNames(this ITypeSymbol typeSymbol)
@@ -60,7 +66,15 @@ namespace Uno.Helpers
 
 	public class SymbolNames
 	{
-		public SymbolNames(INamedTypeSymbol symbol, string symbolName, string genericArguments, string symbolNameWithGenerics, string symbolFoxXml, string symbolNameDefinition, string symbolFilename)
+		public SymbolNames(
+			INamedTypeSymbol symbol,
+			string symbolName,
+			string genericArguments,
+			string symbolNameWithGenerics,
+			string symbolFoxXml,
+			string symbolNameDefinition,
+			string symbolFilename,
+			string genericConstraints)
 		{
 			Symbol = symbol;
 			SymbolName = symbolName;
@@ -69,6 +83,7 @@ namespace Uno.Helpers
 			SymbolFoxXml = symbolFoxXml;
 			SymbolNameDefinition = symbolNameDefinition;
 			SymbolFilename = symbolFilename;
+			GenericConstraints = genericConstraints;
 		}
 
 		public INamedTypeSymbol Symbol { get; }
@@ -78,6 +93,7 @@ namespace Uno.Helpers
 		public string SymbolFoxXml { get; }
 		public string SymbolNameDefinition { get; }
 		public string SymbolFilename { get; }
+		public string GenericConstraints { get; }
 
 		public void Deconstruct(
 			out string symbolName,
@@ -85,7 +101,8 @@ namespace Uno.Helpers
 			out string symbolNameWithGenerics,
 			out string symbolFoxXml,
 			out string symbolNameDefinition,
-			out string symbolFilename)
+			out string symbolFilename,
+			out string genericConstraints)
 		{
 			symbolName = SymbolName;
 			genericArguments = GenericArguments;
@@ -93,6 +110,7 @@ namespace Uno.Helpers
 			symbolFoxXml = SymbolFoxXml;
 			symbolNameDefinition = SymbolNameDefinition;
 			symbolFilename = SymbolFilename;
+			genericConstraints = GenericConstraints;
 		}
 	}
 }

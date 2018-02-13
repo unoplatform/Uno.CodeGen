@@ -108,7 +108,7 @@ namespace Uno.Helpers
 					return true; // tuples are immutables
 			}
 
-			switch (definitionType.BaseType.ToString())
+			switch (definitionType.BaseType?.ToString())
 			{
 				case "System.Enum":
 					return true;
