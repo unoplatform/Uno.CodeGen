@@ -43,8 +43,9 @@ namespace Uno
 		private INamedTypeSymbol _immutableAttributeCopyIgnoreAttributeSymbol;
 		private INamedTypeSymbol _immutableGenerationOptionsAttributeSymbol;
 
+		private (bool generateOptionCode, bool treatArrayAsImmutable, bool generateEqualityByDefault, bool generateJsonNet) _generationOptions;
 		private bool _generateOptionCode = true;
-		private (bool generateOptionCode, bool treatArrayAsImmutable, bool generateEqualityByDefault) _generationOptions;
+		private bool _generateJsonNet = true;
 
 		private Regex[] _copyIgnoreAttributeRegexes;
 
@@ -73,6 +74,8 @@ namespace Uno
 
 			_generateOptionCode = _generationOptions.generateOptionCode && context.Compilation.GetTypeByMetadataName("Uno.Option") != null;
 
+			_generateJsonNet = _generationOptions.generateOptionCode && context.Compilation.GetTypeByMetadataName("Newtonsoft.Json.JsonConvert") != null;
+
 			foreach ((var type, var moduleAttribute) in generationData)
 			{
 				var baseTypeInfo = GetTypeInfo(context, type, immutableEntitiesToGenerate);
@@ -90,11 +93,12 @@ namespace Uno
 				.Select(a => new Regex(a.ConstructorArguments[0].Value.ToString()));
 		}
 
-		private (bool generateOptionCode, bool treatArrayAsImmutable, bool generateEqualityByDefault) ExtractGenerationOptions(IAssemblySymbol assembly)
+		private (bool generateOptionCode, bool treatArrayAsImmutable, bool generateEqualityByDefault, bool generateJsonNet) ExtractGenerationOptions(IAssemblySymbol assembly)
 		{
 			var generateOptionCode = true;
 			var treatArrayAsImmutable = false;
 			var generateEqualityByDefault = true;
+			var generateJsonNet = true;
 
 			var attribute = assembly
 				.GetAttributes()
@@ -115,11 +119,14 @@ namespace Uno
 						case nameof(ImmutableGenerationOptionsAttribute.GenerateEqualityByDefault):
 							generateEqualityByDefault = (bool)argument.Value.Value;
 							break;
+						case nameof(ImmutableGenerationOptionsAttribute.GenerateNewtownsoftJsonNetConverters):
+							generateJsonNet = (bool)argument.Value.Value;
+							break;
 					}
 				}
 			}
 
-			return (generateOptionCode, treatArrayAsImmutable, generateEqualityByDefault);
+			return (generateOptionCode, treatArrayAsImmutable, generateEqualityByDefault, generateJsonNet);
 		}
 
 		private bool GetShouldGenerateEquality(AttributeData attribute)
@@ -176,6 +183,7 @@ namespace Uno
 			var defaultMemberName = "Default";
 
 			var generateOption = _generateOptionCode && !typeSymbol.IsAbstract;
+			var generateJsonNet = _generateJsonNet && !typeSymbol.IsAbstract;
 
 			var classCopyIgnoreRegexes = ExtractCopyIgnoreAttributes(typeSymbol).ToArray();
 
@@ -206,7 +214,7 @@ namespace Uno
 			var builder = new IndentedStringBuilder();
 
 			var symbolNames = typeSymbol.GetSymbolNames();
-			var (symbolName, genericArguments, symbolNameWithGenerics, symbolNameForXml, symbolNameDefinition, resultFileName) = symbolNames;
+			var (symbolName, genericArguments, symbolNameWithGenerics, symbolNameForXml, symbolNameDefinition, resultFileName, genericConstraints) = symbolNames;
 
 			ValidateType(builder, typeSymbol, baseTypeInfo, symbolNames, typeProperties);
 
@@ -247,6 +255,11 @@ namespace Uno
 				if (generateEquality)
 				{
 					builder.AppendLineInvariant("[global::Uno.GeneratedEquality] // Set [GeneratedImmutable(GeneratedEquality = false)] if you don't want this attribute.");
+				}
+
+				if (generateJsonNet)
+				{
+					builder.AppendLineInvariant($"[global::Newtonsoft.Json.JsonConverter(typeof({symbolName}BuilderJsonConverterTo{symbolNameDefinition}))]");
 				}
 
 				builder.AppendLineInvariant($"[global::Uno.ImmutableBuilder(typeof({symbolNameDefinition}.Builder))] // Other generators can use this to find the builder.");
@@ -550,8 +563,6 @@ public static implicit operator global::Uno.Option<{symbolNameWithGenerics}>(Bui
 					builder.AppendLineInvariant($"//  => You have this error? it's because you defined a default constructor on your class!");
 					builder.AppendLineInvariant($"//");
 					builder.AppendLineInvariant($"// New instances should use the builder instead.");
-					builder.AppendLineInvariant($"// We know, it's not compatible with Newtownsoft's JSON.net: It's by-design.");
-					builder.AppendLineInvariant($"// (you need to deserialize the builder, not the immutable type itself)");
 					builder.AppendLineInvariant($"//");
 					builder.AppendLineInvariant($"// Send your complaints or inquiried to \"architecture [-@-] nventive [.] com\".");
 					builder.AppendLineInvariant($"//");
@@ -630,7 +641,7 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 							builder.AppendLineInvariant($"/// {symbolNameForXml} modified = original.With{prop.Name}(new{prop.Name}Value); // create a new modified immutable instance");
 							builder.AppendLineInvariant("/// </example>");
 							builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
-							using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this {symbolNameWithGenerics} entity, {prop.Type} value)"))
+							using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this {symbolNameWithGenerics} entity, {prop.Type} value){genericConstraints}"))
 							{
 								builder.AppendLineInvariant($"return new {builderName}(entity).With{prop.Name}(value);");
 							}
@@ -648,7 +659,7 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 							builder.AppendLineInvariant($"/// {symbolNameForXml} modified = original.With{prop.Name}(previous{prop.Name}Value => new {prop.Type}(...)); // create a new modified immutable instance");
 							builder.AppendLineInvariant("/// </example>");
 							builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
-							using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this {symbolNameWithGenerics} entity, Func<{prop.Type}, {prop.Type}> valueSelector)"))
+							using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this {symbolNameWithGenerics} entity, Func<{prop.Type}, {prop.Type}> valueSelector){genericConstraints}"))
 							{
 								builder.AppendLineInvariant($"return new {builderName}(entity).With{prop.Name}(valueSelector);");
 							}
@@ -671,7 +682,7 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 								builder.AppendLineInvariant($"/// Option&lt;{symbolNameForXml}&gt; modified = original.With{prop.Name}(new{prop.Name}Value); // result type is Option.Some");
 								builder.AppendLineInvariant("/// </example>");
 								builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
-								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this global::Uno.Option<{symbolNameWithGenerics}> optionEntity, {prop.Type} value)"))
+								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this global::Uno.Option<{symbolNameWithGenerics}> optionEntity, {prop.Type} value){genericConstraints}"))
 								{
 									builder.AppendLineInvariant($"return {builderName}.FromOption(optionEntity).With{prop.Name}(value);");
 								}
@@ -692,7 +703,7 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 								builder.AppendLineInvariant($"/// {symbolNameForXml} modified = original.With{prop.Name}(previous{prop.Name}Value => new {prop.Type}(...)); // create a new modified immutable instance");
 								builder.AppendLineInvariant("/// </example>");
 								builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
-								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this global::Uno.Option<{symbolNameWithGenerics}> optionEntity, Func<{prop.Type}, {prop.Type}> valueSelector)"))
+								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this global::Uno.Option<{symbolNameWithGenerics}> optionEntity, Func<{prop.Type}, {prop.Type}> valueSelector){genericConstraints}"))
 								{
 									builder.AppendLineInvariant($"return {builderName}.FromOption(optionEntity).With{prop.Name}(valueSelector);");
 								}
@@ -703,6 +714,34 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 
 						builder.AppendLineInvariant($"#endregion // .WithXXX() methods on {symbolNameWithGenerics}");
 					}
+
+					builder.AppendLine();
+				}
+
+				if (generateJsonNet)
+				{
+					builder.AppendLine(
+$@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArguments} : global::Newtonsoft.Json.JsonConverter{genericConstraints}
+{{
+	public override void WriteJson(global::Newtonsoft.Json.JsonWriter writer, object value, global::Newtonsoft.Json.JsonSerializer serializer)
+	{{
+		var v = ({symbolNameWithGenerics}.Builder)({symbolNameWithGenerics})value;
+		serializer.Serialize(writer, v);
+	}}
+
+	public override object ReadJson(global::Newtonsoft.Json.JsonReader reader, Type objectType, object existingValue, global::Newtonsoft.Json.JsonSerializer serializer)
+	{{
+		var o = serializer.Deserialize<{symbolNameWithGenerics}.Builder>(reader);
+		return ({symbolNameWithGenerics})o;
+	}}
+
+	public override bool CanConvert(Type objectType)
+	{{
+		return objectType == typeof({symbolNameWithGenerics}) || objectType == typeof({symbolNameWithGenerics}.Builder);
+	}}
+}}");
+
+					builder.AppendLine();
 				}
 			}
 

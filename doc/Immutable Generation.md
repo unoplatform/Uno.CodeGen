@@ -33,8 +33,10 @@
 1. The class needs to be partial - because generated code will augment it.
 1. Restrictions:
    * **No default constructor allowed**
-     (this won't work with [Newtownsoft's JSON.NET](https://www.newtonsoft.com/json)
-	 - that's intentional: You need to deserialize the builder instead)
+     (will with [Newtownsoft's JSON.NET](https://www.newtonsoft.com/json),
+     when detected, it will generate custom JSON Converter. You can disable
+     this globally by setting this attribute:
+     `[assembly: ImmutableGenerationOptions(GenerateNewtownsoftJsonNetConverters=false)]`)
    * **No property setters allowed** (even `private` ones):
      properties should be _read only_, even for the class itself.
    * **No fields allowed** (except static fields, but that would be weird).
