@@ -180,7 +180,7 @@ namespace Uno.CodeGen.Tests
 		{
 			var json = JsonConvert.SerializeObject(A.Default.WithEntity(x => null).ToImmutable());
 
-			json.Should().BeEquivalentTo("{\"T\":null,\"Entity\":null,\"IsSomething\":true}");
+			json.Should().BeEquivalentTo("{\"T\":null,\"Entity\":null,\"IsSomething\":true,\"Metadata\":null}");
 		}
 
 		[TestMethod]
@@ -188,7 +188,7 @@ namespace Uno.CodeGen.Tests
 		{
 			var json = JsonConvert.SerializeObject(A.Default.WithEntity(x => null));
 
-			json.Should().BeEquivalentTo("{\"T\":null,\"Entity\":null,\"IsSomething\":true}");
+			json.Should().BeEquivalentTo("{\"T\":null,\"Entity\":null,\"IsSomething\":true,\"Metadata\":null}");
 		}
 	}
 
