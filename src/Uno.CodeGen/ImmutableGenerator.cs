@@ -429,7 +429,7 @@ private bool _is{prop.Name}Set = false;
 							{
 								builder.AppendLine(
 $@"var cachedResult = _cachedResult as {symbolNameWithGenerics};
-if(cachedResult != null)
+if(!ReferenceEquals(cachedResult, null))
 {{
 	return cachedResult; // already computed, no need to redo this.
 }}

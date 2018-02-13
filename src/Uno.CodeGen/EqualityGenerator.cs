@@ -549,7 +549,7 @@ namespace Uno
 
 						if (type.IsReferenceType)
 						{
-							using (builder.BlockInvariant($"if ({member.Name} != null)"))
+							using (builder.BlockInvariant($"if (!ReferenceEquals({member.Name}, null))"))
 							{
 								builder.AppendLineInvariant($"hash = ({getHashCode} * {primeNumber}) ^ hash;");
 							}
