@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 // ******************************************************************
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -27,18 +29,8 @@ namespace Uno.Helpers
 			return type.GetType().Name.Equals("SourceTypeParameterSymbol");
 		}
 
-		public static bool IsImmutable(this ITypeSymbol type, bool treatArrayAsImmutable)
+		public static bool IsPrimitive(this ITypeSymbol type)
 		{
-			foreach (var attribute in type.GetAttributes())
-			{
-				switch (attribute.AttributeClass.ToString())
-				{
-					case "Uno.ImmutableAttribute":
-					case "Uno.GeneratedImmutableAttribute":
-						return true;
-				}
-			}
-
 			switch (type.SpecialType)
 			{
 				case SpecialType.System_Boolean:
@@ -60,68 +52,257 @@ namespace Uno.Helpers
 				case SpecialType.System_UInt64:
 				case SpecialType.System_UIntPtr:
 					return true;
-				case SpecialType.None:
-				case SpecialType.System_Collections_Generic_IReadOnlyCollection_T:
-				case SpecialType.System_Collections_Generic_IReadOnlyList_T:
-					break; // need further validation
-				default:
-					return false;
 			}
 
-			if (type is IArrayTypeSymbol arrayType)
+			return false;
+		}
+
+		private static ImmutableDictionary<(ITypeSymbol, bool), bool> _isImmutable =
+			ImmutableDictionary<(ITypeSymbol, bool), bool>.Empty;
+
+		public static bool IsImmutable(this ITypeSymbol type, bool treatArrayAsImmutable)
+		{
+			bool GetIsImmutable((ITypeSymbol type, bool treatArrayAsImmutable) x)
 			{
-				return arrayType.ElementType.IsImmutable(treatArrayAsImmutable);
+				var (t, asImmutable) = x;
+				foreach (var attribute in t.GetAttributes())
+				{
+					switch (attribute.AttributeClass.ToString())
+					{
+						case "Uno.ImmutableAttribute":
+						case "Uno.GeneratedImmutableAttribute":
+							return true;
+					}
+				}
+
+				if (t.IsPrimitive())
+				{
+					return true;
+				}
+
+				switch (t.SpecialType)
+				{
+					case SpecialType.None:
+					case SpecialType.System_Collections_Generic_IReadOnlyCollection_T:
+					case SpecialType.System_Collections_Generic_IReadOnlyList_T:
+						break; // need further validation
+					default:
+						return false;
+				}
+
+				if (t is IArrayTypeSymbol arrayType)
+				{
+					return arrayType.ElementType?.IsImmutable(asImmutable) ?? false;
+				}
+
+				var definitionType = t.GetDefinitionType();
+
+				switch (definitionType.ToString())
+				{
+					case "System.Attribute": // strange, but valid
+					case "System.DateTime":
+					case "System.DateTimeOffset":
+					case "System.TimeSpan":
+					case "System.Type":
+					case "System.Uri":
+					case "System.Version":
+						return true;
+
+					// .NET framework
+					case "System.Collections.Generic.IReadOnlyList<T>":
+					case "System.Collections.Generic.IReadOnlyCollection<T>":
+					case "System.Nullable<T>":
+					case "System.Tuple<T>":
+					// System.Collections.Immutable (nuget package)
+					case "System.Collections.Immutable.IImmutableList<T>":
+					case "System.Collections.Immutable.IImmutableQueue<T>":
+					case "System.Collections.Immutable.IImmutableSet<T>":
+					case "System.Collections.Immutable.IImmutableStack<T>":
+					case "System.Collections.Immutable.ImmutableArray<T>":
+					case "System.Collections.Immutable.ImmutableHashSet<T>":
+					case "System.Collections.Immutable.ImmutableList<T>":
+					case "System.Collections.Immutable.ImmutableQueue<T>":
+					case "System.Collections.Immutable.ImmutableSortedSet<T>":
+					case "System.Collections.Immutable.ImmutableStack<T>":
+					{
+						var argumentParameter = (t as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+						return argumentParameter == null || argumentParameter.IsImmutable(asImmutable);
+					}
+					case "System.Collections.Immutable.IImmutableDictionary<TKey, TValue>":
+					case "System.Collections.Immutable.ImmutableDictionary<TKey, TValue>":
+					case "System.Collections.Immutable.ImmutableSortedDictionary<TKey, TValue>":
+					{
+						var keyTypeParameter = (t as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+						var valueTypeParameter = (t as INamedTypeSymbol)?.TypeArguments.Skip(1).FirstOrDefault();
+						return (keyTypeParameter == null || keyTypeParameter.IsImmutable(asImmutable))
+							&& (valueTypeParameter == null || valueTypeParameter.IsImmutable(asImmutable));
+					}
+				}
+
+				switch (definitionType.GetType().Name)
+				{
+					case "TupleTypeSymbol":
+						return true; // tuples are immutables
+				}
+
+				switch (definitionType.BaseType?.ToString())
+				{
+					case "System.Enum":
+						return true;
+					case "System.Array":
+						return asImmutable;
+				}
+
+				if (definitionType.IsReferenceType)
+				{
+					return false;
+				}
+
+				return false;
 			}
 
+			return ImmutableInterlocked.GetOrAdd(ref _isImmutable, (type, treatArrayAsImmutable), GetIsImmutable);
+		}
+
+		public static ITypeSymbol GetDefinitionType(this ITypeSymbol type)
+		{
 			var definitionType = type;
 
 			while ((definitionType as INamedTypeSymbol)?.ConstructedFrom.Equals(definitionType) == false)
 			{
-				definitionType = ((INamedTypeSymbol)definitionType).ConstructedFrom;
+				definitionType = ((INamedTypeSymbol) definitionType).ConstructedFrom;
 			}
 
-			switch (definitionType.ToString())
-			{
-				case "System.Attribute": // strange, but valid
-				case "System.TimeSpan":
-				case "System.DateTime":
-				case "System.DateTimeOffset":
-				case "System.Type":
-					return true;
+			return definitionType;
+		}
 
-				case "System.Nullable<T>":
-				case "System.Collections.Generic.IReadOnlyList<T>":
-				case "System.Collections.Generic.IReadOnlyCollection<T>":
-				case "System.Collections.Immutable.IImmutableArray<T>":
-				case "System.Collections.Immutable.ImmutableArray<T>":
-				case "System.Collections.Immutable.IImmutableList<T>":
-				case "System.Collections.Immutable.ImmutableList<T>":
+		private static ImmutableDictionary<ITypeSymbol, (ITypeSymbol, bool, bool)> _isCollection =
+			ImmutableDictionary<ITypeSymbol, (ITypeSymbol, bool, bool)>.Empty;
+
+		public static bool IsCollection(this ITypeSymbol type, out ITypeSymbol elementType, out bool isReadonlyCollection, out bool isOrdered)
+		{
+			(ITypeSymbol elementType, bool isReadonlyCollection, bool isOrdered) GetTypeArgumentIfItIsACollection(INamedTypeSymbol t)
+			{
+				if (t != null)
 				{
-					var argumentParameter = (type as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
-					return argumentParameter == null || argumentParameter.IsImmutable(treatArrayAsImmutable);
+					var interfaceDefinition = t.GetDefinitionType();
+
+					switch (interfaceDefinition.ToString())
+					{
+						case "System.Collections.Immutable.ImmutableHashSet<T>":
+						case "System.Collections.Immutable.IImmutableSet<T>":
+						{
+								return (t.TypeArguments[0], true, false);
+						}
+						case "System.Collections.Immutable.IImmutableList<T>":
+						case "System.Collections.Immutable.IImmutableQueue<T>":
+						case "System.Collections.Immutable.IImmutableStack<T>":
+						case "System.Collections.Immutable.ImmutableArray<T>":
+						case "System.Collections.Immutable.ImmutableList<T>":
+						case "System.Collections.Immutable.ImmutableQueue<T>":
+						case "System.Collections.Immutable.ImmutableSortedSet<T>":
+						case "System.Collections.Immutable.ImmutableStack<T>":
+						{
+							return (t.TypeArguments[0], true, true);
+						}
+						case "System.Collections.Generic.IReadOnlyCollection<T>":
+						{
+							return (t.TypeArguments[0], true, true);
+						}
+						case "System.Collections.Generic.HashSet<T>":
+						{
+							return (t.TypeArguments[0], false, false);
+						}
+						case "System.Collections.Generic.ICollection<T>":
+						case "System.Collections.Generic.List<T>":
+						case "System.Collections.Generic.LinkedList<T>":
+						case "System.Collections.Generic.Queue<T>":
+						case "System.Collections.Generic.SortedSet<T>":
+						case "System.Collections.Generic.Stack<T>":
+						{
+							return (t.TypeArguments[0], false, true);
+						}
+					}
 				}
+
+				return (default(ITypeSymbol), default(bool), default(bool));
 			}
 
-			switch (definitionType.GetType().Name)
+			(ITypeSymbol elementType, bool isReadonlyCollection, bool isOrdered) GetIsCollection(ITypeSymbol t)
 			{
-				case "TupleTypeSymbol":
-					return true; // tuples are immutables
+				var r = GetTypeArgumentIfItIsACollection(t as INamedTypeSymbol);
+
+				if (r.elementType != null)
+				{
+					return r;
+				}
+
+				foreach (var @interface in t.AllInterfaces)
+				{
+					r = GetTypeArgumentIfItIsACollection(@interface);
+					if (r.elementType != null)
+					{
+						return r;
+					}
+				}
+
+				return (default(ITypeSymbol), default(bool), default(bool));
 			}
 
-			switch (definitionType.BaseType?.ToString())
+			(elementType, isReadonlyCollection, isOrdered) = ImmutableInterlocked.GetOrAdd(ref _isCollection, type, GetIsCollection);
+			return elementType != null;
+		}
+
+		private static ImmutableDictionary<ITypeSymbol, (ITypeSymbol, ITypeSymbol, bool)> _isDictionary =
+			ImmutableDictionary<ITypeSymbol, (ITypeSymbol, ITypeSymbol, bool)>.Empty;
+
+		public static bool IsDictionary(this ITypeSymbol type, out ITypeSymbol keyType, out ITypeSymbol valueType, out bool isReadonlyDictionary)
+		{
+			(ITypeSymbol keyType, ITypeSymbol valueType, bool isReadonlyDictionary) GetTypeArgumentIfItIsACollection(INamedTypeSymbol t)
 			{
-				case "System.Enum":
-					return true;
-				case "System.Array":
-					return treatArrayAsImmutable;
+				if (t != null)
+				{
+					var interfaceDefinition = t.GetDefinitionType();
+
+					switch (interfaceDefinition.ToString())
+					{
+						case "System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>":
+						{
+							return (t.TypeArguments[0], t.TypeArguments[1], true);
+						}
+						case "System.Collections.Generic.IDictionary<TKey, TValue>":
+						{
+							return (t.TypeArguments[0], t.TypeArguments[1], false);
+						}
+					}
+				}
+
+				return (null, null, false);
 			}
 
-			if (definitionType.IsReferenceType)
+			(ITypeSymbol keyType, ITypeSymbol valueType, bool isReadonlyDictionary) GetIsACollection(ITypeSymbol t)
 			{
-				return false;
+				var r = GetTypeArgumentIfItIsACollection(t as INamedTypeSymbol);
+
+				if (r.keyType != null)
+				{
+					return r;
+				}
+
+				foreach (var @interface in t.AllInterfaces)
+				{
+					r = GetTypeArgumentIfItIsACollection(@interface);
+					if (r.keyType != null)
+					{
+						return r;
+					}
+				}
+
+				return (null, null, false);
 			}
 
-			return false;
+			(keyType, valueType, isReadonlyDictionary) = ImmutableInterlocked.GetOrAdd(ref _isDictionary, type, GetIsACollection);
+			return keyType != null;
 		}
 	}
 }

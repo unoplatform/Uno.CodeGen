@@ -180,7 +180,7 @@ namespace Uno.CodeGen.Tests
 		{
 			var json = JsonConvert.SerializeObject(A.Default.WithEntity(x => null).ToImmutable());
 
-			json.Should().BeEquivalentTo("{\"T\":null,\"Entity\":null,\"IsSomething\":true}");
+			json.Should().BeEquivalentTo("{\"T\":null,\"Entity\":null,\"IsSomething\":true,\"Metadata\":null}");
 		}
 
 		[TestMethod]
@@ -188,7 +188,7 @@ namespace Uno.CodeGen.Tests
 		{
 			var json = JsonConvert.SerializeObject(A.Default.WithEntity(x => null));
 
-			json.Should().BeEquivalentTo("{\"T\":null,\"Entity\":null,\"IsSomething\":true}");
+			json.Should().BeEquivalentTo("{\"T\":null,\"Entity\":null,\"IsSomething\":true,\"Metadata\":null}");
 		}
 	}
 
@@ -200,6 +200,8 @@ namespace Uno.CodeGen.Tests
 		public MyImmutableEntity Entity { get; } = MyImmutableEntity.Default;
 
 		public bool IsSomething { get; } = true;
+
+		public IImmutableDictionary<string, string> Metadata { get; }
 	}
 
 	public partial class B : A

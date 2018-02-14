@@ -16,6 +16,7 @@
 // ******************************************************************
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -30,12 +31,20 @@ namespace Uno
 	[GenerateAfter("Uno.ImmutableGenerator")]
 	public class EqualityGenerator : SourceGenerator
 	{
+		private const int CollectionModeSorted = (int)CollectionComparerMode.Sorted; // this reference won't survive compilation
+		private const int CollectionModeUnsorted = (int)CollectionComparerMode.Sorted; // this reference won't survive compilation
+
+		private const byte StringModeIgnoreCase = (byte)StringComparerMode.IgnoreCase; // this reference won't survive compilation
+		private const byte StringModeEmptyEqualsNull = (byte)StringComparerMode.EmptyEqualsNull; // this reference won't survive compilation
+
 		private INamedTypeSymbol _objectSymbol;
 		private INamedTypeSymbol _valueTypeSymbol;
 		private INamedTypeSymbol _boolSymbol;
 		private INamedTypeSymbol _intSymbol;
+		private INamedTypeSymbol _stringSymbol;
 		private INamedTypeSymbol _arraySymbol;
 		private INamedTypeSymbol _collectionSymbol;
+		private INamedTypeSymbol _readonlyCollectionGenericSymbol;
 		private INamedTypeSymbol _collectionGenericSymbol;
 		private INamedTypeSymbol _iEquatableSymbol;
 		private INamedTypeSymbol _iKeyEquatableSymbol;
@@ -44,6 +53,7 @@ namespace Uno
 		private INamedTypeSymbol _ignoreForEqualityAttributeSymbol;
 		private INamedTypeSymbol _equalityHashCodeAttributeSymbol;
 		private INamedTypeSymbol _equalityKeyCodeAttributeSymbol;
+		private INamedTypeSymbol _equalityComparerOptionsAttributeSymbol;
 		private INamedTypeSymbol _dataAnnonationsKeyAttributeSymbol;
 		private SourceGeneratorContext _context;
 
@@ -82,8 +92,10 @@ namespace Uno
 			_valueTypeSymbol = context.Compilation.GetTypeByMetadataName("System.ValueType");
 			_boolSymbol = context.Compilation.GetTypeByMetadataName("System.Bool");
 			_intSymbol = context.Compilation.GetTypeByMetadataName("System.Int32");
+			_stringSymbol = context.Compilation.GetTypeByMetadataName("System.String");
 			_arraySymbol = context.Compilation.GetTypeByMetadataName("System.Array");
 			_collectionSymbol = context.Compilation.GetTypeByMetadataName("System.Collections.ICollection");
+			_readonlyCollectionGenericSymbol = context.Compilation.GetTypeByMetadataName("System.Collections.Generic.IReadOnlyCollection`1");
 			_collectionGenericSymbol = context.Compilation.GetTypeByMetadataName("System.Collections.Generic.ICollection`1");
 			_iEquatableSymbol = context.Compilation.GetTypeByMetadataName("System.IEquatable`1");
 			_iKeyEquatableSymbol = context.Compilation.GetTypeByMetadataName("Uno.Equality.IKeyEquatable");
@@ -92,10 +104,10 @@ namespace Uno
 			_ignoreForEqualityAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityIgnoreAttribute");
 			_equalityHashCodeAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityHashAttribute");
 			_equalityKeyCodeAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityKeyAttribute");
+			_equalityComparerOptionsAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityComparerOptionsAttribute");
 			_dataAnnonationsKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("System.ComponentModel.DataAnnotations.KeyAttribute");
 
 			_generateKeyEqualityCode = _iKeyEquatableSymbol != null;
-
 
 			foreach (var type in EnumerateEqualityTypesToGenerate())
 			{
@@ -163,7 +175,7 @@ namespace Uno
 					{
 						if (typeSymbol.IsReferenceType)
 						{
-							builder.AppendLineInvariant("if (ReferenceEquals(a, b)) return true; // Same instance");
+							builder.AppendLineInvariant("if (ReferenceEquals(a, b)) return true; // Same instance or both null");
 							using (builder.BlockInvariant("if (ReferenceEquals(null, a))"))
 							{
 								builder.AppendLineInvariant("return ReferenceEquals(null, b);");
@@ -408,18 +420,95 @@ namespace Uno
 
 				if (customComparerProperty == null)
 				{
-					builder.AppendLineInvariant($"// **{member.Name}** You can define a custom comparer for {member.Name} and it will be used.");
-					builder.AppendLineInvariant($"// CUSTOM COMPARER>> private static IEqualityComparer<{type}> {GetCustomComparerPropertyName(member)} => <custom comparer>;");
-
-					using (builder.BlockInvariant(
-						$"if(!System.Collections.Generic.EqualityComparer<{type}>.Default.Equals({member.Name}, other.{member.Name}))"))
+					if (type.IsDictionary(out var keyType, out var valueType, out var isReadonlyDictionary))
 					{
-						builder.AppendLineInvariant($"return false; // {member.Name} not equal");
+						var comparer = isReadonlyDictionary
+							? "ReadonlyDictionaryEqualityComparer"
+							: "DictionaryEqualityComparer";
+
+						using (builder.BlockInvariant($"if(!global::Uno.Equality.{comparer}<{type}, {keyType}, {valueType}>.Default.Equals({member.Name}, other.{member.Name}))"))
+						{
+							builder.AppendLineInvariant($"return false; // {member.Name} not equal");
+						}
+					}
+					else if (type.IsCollection(out var elementType, out var isReadonlyCollection, out var isOrdered))
+					{
+						// Extract mode from attribute, or default following the type of the collection (if ordered)
+						var optionsAttribute = member.FindAttribute(_equalityComparerOptionsAttributeSymbol);
+						var mode = (int)(optionsAttribute
+								?.NamedArguments
+								.FirstOrDefault(na=>na.Key.Equals(nameof(EqualityComparerOptionsAttribute.CollectionMode)))
+								.Value.Value
+							?? (isOrdered ? CollectionModeSorted : CollectionModeUnsorted));
+
+						var comparer = (mode & CollectionModeSorted) == CollectionModeSorted
+							? (isReadonlyCollection ? "SortedReadonlyCollectionEqualityComparer" : "SortedCollectionEqualityComparer")
+							: (isReadonlyCollection ? "UnsortedReadonlyCollectionEqualityComparer" : "UnsortedCollectionEqualityComparer");
+
+						if (optionsAttribute == null && mode == CollectionModeSorted)
+						{
+							// We just show that if the collection is "sorted", because "unsorted" will always work and we don't want
+							// to do a "SequenceEquals" on an non-ordered structure.
+							builder.AppendLineInvariant($"// **{member.Name}** To use an _unsorted_ comparer, add the following attribute to your member:");
+							builder.AppendLineInvariant("// [EqualityCollection(CollectionComparerMode.Unsorted)]");
+						}
+
+						using (builder.BlockInvariant($"if(!global::Uno.Equality.{comparer}<{type}, {elementType}>.Default.Equals({member.Name}, other.{member.Name}))"))
+						{
+							builder.AppendLineInvariant($"return false; // {member.Name} not equal");
+						}
+					}
+					else
+					{
+						builder.AppendLineInvariant($"// **{member.Name}** You can define a custom comparer for {member.Name} and it will be used.");
+						builder.AppendLineInvariant($"// CUSTOM COMPARER>> private static IEqualityComparer<{type}> {GetCustomComparerPropertyName(member)} => <custom comparer>;");
+
+						if (type.Equals(_stringSymbol))
+						{
+							// Extract mode from attribute, or default following the type of the collection (if ordered)
+							var optionsAttribute = member.FindAttribute(_equalityComparerOptionsAttributeSymbol);
+							var mode = (byte) (optionsAttribute
+									?.NamedArguments
+									.FirstOrDefault(na => na.Key.Equals(nameof(EqualityComparerOptionsAttribute.StringMode)))
+									.Value.Value
+								?? default(byte));
+
+							var comparer = (mode & StringModeIgnoreCase) == StringModeIgnoreCase
+								? "System.StringComparer.OrdinalIgnoreCase"
+								: "System.StringComparer.Ordinal";
+
+							var emptyEqualsNull = (mode & StringModeEmptyEqualsNull) == StringModeEmptyEqualsNull;
+							var emptyCheck = emptyEqualsNull
+								? $"(string.IsNullOrWhiteSpace({member.Name}) != string.IsNullOrWhiteSpace(other.{member.Name})) || !string.IsNullOrWhiteSpace({member.Name}) && "
+								: "";
+							var nullCoalescing = emptyEqualsNull ? " ?? \"\" " : "";
+
+							using (builder.BlockInvariant($"if({emptyCheck}!{comparer}.Equals({member.Name}{nullCoalescing}, other.{member.Name}{nullCoalescing}))"))
+							{
+								builder.AppendLineInvariant($"return false; // {member.Name} not equal");
+							}
+						}
+						else if (type.IsPrimitive())
+						{
+							using (builder.BlockInvariant($"if({member.Name} != other.{member.Name})"))
+							{
+								builder.AppendLineInvariant($"return false; // {member.Name} not equal");
+							}
+						}
+						else
+						{
+							using (builder.BlockInvariant($"if(!System.Collections.Generic.EqualityComparer<{type}>.Default.Equals({member.Name}, other.{member.Name}))"))
+							{
+								builder.AppendLineInvariant($"return false; // {member.Name} not equal");
+							}
+						}
+
 					}
 				}
 				else
 				{
-					using (builder.BlockInvariant($"if(!{customComparerProperty.Name}.Equals({member.Name}, other.{member.Name})) // Using custom comparer provided by `{customComparerProperty.Name}()`."))
+					builder.AppendLineInvariant($"// **{member.Name}** using custom comparer provided by `{customComparerProperty.Name}()` {customComparerProperty.Locations.FirstOrDefault()}");
+					using (builder.BlockInvariant($"if(!{customComparerProperty.Name}.Equals({member.Name}, other.{member.Name}))"))
 					{
 						builder.AppendLineInvariant($"return false; // {member.Name} not equal");
 					}
@@ -486,12 +575,7 @@ namespace Uno
 							builder.AppendLineInvariant($"// CUSTOM COMPARER>> private static IEqualityComparer<{type}> {GetCustomComparerPropertyName(member)} => <custom comparer>;");
 						}
 
-						var definition = type;
-
-						while (definition is INamedTypeSymbol nts && !nts.ConstructedFrom.Equals(definition))
-						{
-							definition = nts.ConstructedFrom;
-						}
+						var definition = type.GetDefinitionType();
 
 						string getHashCode;
 						if (customHashMethod != null)
@@ -514,34 +598,45 @@ namespace Uno
 						{
 							getHashCode = $"{member.Name}.Length";
 						}
+						else if (type.IsDictionary(out var dictionaryKeyType, out var dictionaryValueType, out var isReadonlyDictionary))
+						{
+							getHashCode = isReadonlyDictionary
+								? $"((global::System.Collections.Generic.IReadOnlyDictionary<{dictionaryKeyType}, {dictionaryValueType}>){member.Name}).Count"
+								: $"((global::System.Collections.Generic.IDictionary<{dictionaryKeyType}, {dictionaryValueType}>){member.Name}).Count";
+						}
+						else if (type.IsCollection(out var collectionElementType, out var isReadonlyCollection, out var _))
+						{
+							getHashCode = isReadonlyCollection
+								? $"((global::System.Collections.Generic.IReadOnlyCollection<{collectionElementType}>){member.Name}).Count"
+								: $"((global::System.Collections.Generic.ICollection<{collectionElementType}>){member.Name}).Count";
+						}
 						else if (definition.Equals(_collectionSymbol)
 							|| definition.DerivesFromType(_collectionSymbol))
 						{
 							getHashCode = $"((global::System.Collections.ICollection){member.Name}).Count";
 						}
-						else if (definition.Equals(_collectionGenericSymbol)
-							|| definition.DerivesFromType(_collectionGenericSymbol))
-						{
-							getHashCode = $"((global::System.Collections.Generic.ICollection<{type.GetTypeArgumentNames().FirstOrDefault()}>){member.Name}).Count";
-						}
 						else
 						{
-							var getHashCodeMember = definition
-								.GetMembers("GetHashCode")
-								.OfType<IMethodSymbol>()
-								.Where(m => !m.IsStatic)
-								.Where(m => m.IsOverride)
-								.Where(m => !m.IsAbstract)
-								.FirstOrDefault();
-
-							if (getHashCodeMember == null)
+							var isGeneratedEquality = type.FindAttribute(_generatedEqualityAttributeSymbol) != null;
+							if (!isGeneratedEquality)
 							{
-								builder.AppendLineInvariant(
-									$"#warning Type `{type.GetDisplayFriendlyName()}` of member `{member.Name}` " +
-									"doesn't implements .GetHashCode(): it won't be used for hash computation. " +
-									$"If you can change the type {type}, you should use a custom hash method or " +
-									"a custom comparer.");
-								continue;
+								var getHashCodeMember = definition
+									.GetMembers("GetHashCode")
+									.OfType<IMethodSymbol>()
+									.Where(m => !m.IsStatic)
+									.Where(m => m.IsOverride)
+									.Where(m => !m.IsAbstract)
+									.FirstOrDefault();
+
+								if (getHashCodeMember == null)
+								{
+									builder.AppendLineInvariant(
+										$"#warning Type `{type.GetDisplayFriendlyName()}` of member `{member.Name}` " +
+										"doesn't implements .GetHashCode(): it won't be used for hash computation. " +
+										$"If you can't change the type {type}, you should use a custom hash method or " +
+										"a custom comparer. Alternatively, use something else for hash computation.");
+									continue;
+								}
 							}
 
 							getHashCode = $"{member.Name}.GetHashCode()";
@@ -549,7 +644,7 @@ namespace Uno
 
 						if (type.IsReferenceType)
 						{
-							using (builder.BlockInvariant($"if ({member.Name} != null)"))
+							using (builder.BlockInvariant($"if (!ReferenceEquals({member.Name}, null))"))
 							{
 								builder.AppendLineInvariant($"hash = ({getHashCode} * {primeNumber}) ^ hash;");
 							}
