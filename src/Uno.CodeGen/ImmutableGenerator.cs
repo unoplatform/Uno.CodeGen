@@ -15,9 +15,7 @@
 //
 // ******************************************************************
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -25,14 +23,18 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 using Uno.Helpers;
 using Uno.RoslynHelpers;
 using Uno.SourceGeneration;
-using TypeSymbolExtensions = Uno.Helpers.TypeSymbolExtensions;
 
 namespace Uno
 {
+	/// <summary>
+	/// Responsible for the code generation of immutable types.
+	/// </summary>
+	/// <remarks>
+	/// The trigger for this generator is <see cref="GeneratedImmutableAttribute"/>.
+	/// </remarks>
 	public class ImmutableGenerator : SourceGenerator
 	{
 		private SourceGeneratorContext _context;

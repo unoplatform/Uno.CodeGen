@@ -25,8 +25,20 @@ namespace Uno
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
 	public class EqualityComparerOptionsAttribute : Attribute
 	{
+		/// <summary>
+		/// Specify a special mode when it's a collection.
+		/// </summary>
+		/// <remarks>
+		/// No effect on non-collection fields/properties
+		/// </remarks>
 		public CollectionComparerMode CollectionMode { get; set; } = CollectionComparerMode.Default;
 
+		/// <summary>
+		/// Specify a special mode when it's a string.
+		/// </summary>
+		/// <remarks>
+		/// No effect on non-string fields/properties
+		/// </remarks>
 		public StringComparerMode StringMode { get; set; } = StringComparerMode.Default;
 	}
 }

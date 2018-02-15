@@ -16,9 +16,31 @@
 // ******************************************************************
 namespace Uno
 {
-	public enum EqualityMode
+	/// <summary>
+	/// Mode to use for <see cref="EqualityKeyAttribute"/>
+	/// </summary>
+	public enum KeyEqualityMode
 	{
+		/// <summary>
+		/// Will use the KeyEquality if found on type, fallback to normal equality
+		/// </summary>
+		/// <remarks>
+		/// This is the default mode.
+		/// </remarks>
+		Auto,
+
+		/// <summary>
+		/// Delegate the key equality to the _KeyEquality_ of the member type
+		/// </summary>
+		/// <remarks>
+		/// Will fail if type is not implementing KeyEquality. If you're not sure
+		/// which you want, use `Auto`.
+		/// </remarks>
 		UseKeyEquality,
+
+		/// <summary>
+		/// Delegate the key equality to the _Equality_ of the member type.
+		/// </summary>
 		UseEquality
 	}
 }

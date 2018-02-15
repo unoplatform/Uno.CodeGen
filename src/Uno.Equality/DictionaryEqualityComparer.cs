@@ -28,6 +28,9 @@ namespace Uno.Equality
 		private readonly bool _nullIsEmpty;
 		private readonly IEqualityComparer<TValue> _valueComparer;
 
+		/// <summary>
+		/// Default instance of the comparer with a default equality comparer for values.
+		/// </summary>
 		public static IEqualityComparer<TDict> Default { get; } = new DictionaryEqualityComparer<TDict, TKey, TValue>();
 
 		/// <summary>

@@ -6,6 +6,7 @@
 		<NoWarn>1701;1702;1705;NU1701</NoWarn>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<RootNamespace>Uno</RootNamespace>
+		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 		<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
 		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
 		<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>

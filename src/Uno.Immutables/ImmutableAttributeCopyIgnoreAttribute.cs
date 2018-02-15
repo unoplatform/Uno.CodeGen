@@ -32,6 +32,7 @@ namespace Uno
 		/// </summary>
 		public string AttributeToIgnoreRegex { get; }
 
+		/// <summary />
 		public ImmutableAttributeCopyIgnoreAttribute(string attributeToIgnoreRegex)
 		{
 			AttributeToIgnoreRegex = attributeToIgnoreRegex;

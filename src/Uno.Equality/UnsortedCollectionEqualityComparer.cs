@@ -32,6 +32,9 @@ namespace Uno.Equality
 		private readonly IEqualityComparer<T> _itemComparer;
 		private readonly bool _nullIsEmpty;
 
+		/// <summary>
+		/// Default instance of the comparer with a default equality comparer for items.
+		/// </summary>
 		public static IEqualityComparer<TCollection> Default { get; } = new UnsortedCollectionEqualityComparer<TCollection, T>();
 
 		/// <summary>

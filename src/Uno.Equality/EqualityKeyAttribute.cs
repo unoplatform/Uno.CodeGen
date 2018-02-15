@@ -29,9 +29,13 @@ namespace Uno
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
 	public class EqualityKeyAttribute : Attribute
 	{
-		public EqualityMode Mode { get; }
+		/// <summary>
+		/// Override for equality mode
+		/// </summary>
+		public KeyEqualityMode Mode { get; }
 
-		public EqualityKeyAttribute(EqualityMode mode = EqualityMode.UseEquality)
+		/// <summary />
+		public EqualityKeyAttribute(KeyEqualityMode mode = KeyEqualityMode.Auto)
 		{
 			Mode = mode;
 		}

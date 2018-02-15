@@ -29,8 +29,15 @@ namespace Uno
 	[System.AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
 	public sealed class ImmutableBuilderAttribute : Attribute
 	{
+		/// <summary>
+		/// Type to use to build this entity.
+		/// </summary>
+		/// <remarks>
+		/// The type must implement <see cref="IImmutableBuilder{TImmutable}"/>.
+		/// </remarks>
 		public Type BuilderType { get; }
 
+		/// <summary />
 		public ImmutableBuilderAttribute(Type builderType)
 		{
 			BuilderType = builderType;

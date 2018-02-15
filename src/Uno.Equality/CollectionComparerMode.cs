@@ -21,11 +21,17 @@ namespace Uno
 	/// </summary>
 	public enum CollectionComparerMode : int
 	{
+		/// <summary>
+		/// No special mode for comparer
+		/// </summary>
 		Default = 0,
 		
 		/// <summary>
 		/// Use a comparer which allows for a different ordering between collections.
 		/// </summary>
+		/// <remarks>
+		/// This is not a flag, the flag is on `Sorted`
+		/// </remarks>
 		Unsorted = 0b0000,
 
 		/// <summary>
