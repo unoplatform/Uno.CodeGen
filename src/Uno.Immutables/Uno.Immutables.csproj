@@ -13,6 +13,7 @@
 		<Description>This package provides attributes for immutable entities source code generation.
 This package is part of the Uno.CodeGen to generate immutable entities in your project.</Description>
 		<RootNamespace>Uno</RootNamespace>
+		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 		<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
 		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>

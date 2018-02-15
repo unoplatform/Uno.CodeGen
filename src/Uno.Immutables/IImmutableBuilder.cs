@@ -21,6 +21,9 @@ namespace Uno
 	/// </summary>
 	public interface IImmutableBuilder<out TImmutable>
 	{
+		/// <summary>
+		/// Get an immutable version from the current state of the mutable object.
+		/// </summary>
 #if !NETSTANDARD1_0
 		[System.Diagnostics.Contracts.Pure]
 #endif

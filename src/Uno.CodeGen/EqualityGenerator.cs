@@ -28,6 +28,12 @@ using Uno.SourceGeneration;
 
 namespace Uno
 {
+	/// <summary>
+	/// Responsible to generate equality members.
+	/// </summary>
+	/// <remarks>
+	/// The trigger for this generator is <see cref="GeneratedEqualityAttribute"/>.
+	/// </remarks>
 	[GenerateAfter("Uno.ImmutableGenerator")]
 	public class EqualityGenerator : SourceGenerator
 	{

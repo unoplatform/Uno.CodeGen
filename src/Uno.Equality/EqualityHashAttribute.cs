@@ -29,11 +29,5 @@ namespace Uno
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
 	public class EqualityHashAttribute : Attribute
 	{
-		public EqualityMode Mode { get; }
-
-		public EqualityHashAttribute(EqualityMode mode = EqualityMode.UseEquality)
-		{
-			Mode = mode;
-		}
 	}
 }
