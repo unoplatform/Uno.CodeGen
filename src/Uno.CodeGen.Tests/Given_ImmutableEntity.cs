@@ -138,6 +138,7 @@ namespace Uno.CodeGen.Tests
 
 	public partial class B : A
 	{
+		public Uri FirstField { get; }
 		public string SecondField { get; }
 		public long ThirdField { get; }
 		public TimeSpan TimeSpan { get; }
@@ -159,10 +160,43 @@ namespace Uno.CodeGen.Tests
 
 		public IReadOnlyList<string[]> MyField5 { get; }
 
+		public ImplicitlyImmutableClass MyField6 { get; }
+
+		public ImplicitlyImmutableStruct MyField7 { get; }
+
 		public int Sum => MyField1 + MyField2; // won't generate any builder code
 
 		public DateTimeOffset Date { get; } = DateTimeOffset.Now;
 
 		public ImmutableList<string> List { get; } = ImmutableList.Create("a", "b");
+	}
+
+	public class ImplicitlyImmutableClass
+	{
+		public ImplicitlyImmutableClass(string a, string b, int i)
+		{
+			A = a;
+			B = b;
+			I = i;
+		}
+
+		public string A { get; }
+		public string B { get; }
+		public readonly int I;
+	}
+
+	public struct ImplicitlyImmutableStruct
+	{
+		public ImplicitlyImmutableStruct(string a, string b, int i)
+		{
+			A = a;
+			B = b;
+			I = i;
+		}
+
+		public string A { get; }
+		public string B { get; }
+
+		public readonly int I;
 	}
 }

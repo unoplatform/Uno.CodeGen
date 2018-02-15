@@ -153,15 +153,42 @@ namespace Uno.Helpers
 						return asImmutable;
 				}
 
-				if (definitionType.IsReferenceType)
-				{
-					return false;
-				}
-
-				return false;
+				return IsImmutableByRequirements(t, treatArrayAsImmutable);
 			}
 
+			Debugger.Launch();
+
 			return ImmutableInterlocked.GetOrAdd(ref _isImmutable, (type, treatArrayAsImmutable), GetIsImmutable);
+		}
+
+		private static bool IsImmutableByRequirements(ITypeSymbol type, bool treatArrayAsImmutable)
+		{
+			// Check if type is complying to immutable requirements
+			// 1) all instance fields are readonly
+			// 2) all properties are getter-only
+			// 3) base class is immutable
+
+			if (type
+				.GetMembers()
+				.OfType<IFieldSymbol>()
+				.Any(f => !(f.IsStatic || f.IsReadOnly || f.IsImplicitlyDeclared) && f.Type.IsImmutable(treatArrayAsImmutable)))
+			{
+				return false; // there's a non-readonly non-static field
+			}
+
+			if (type
+				.GetMembers()
+				.OfType<IPropertySymbol>()
+				.Any(p => !(p.IsStatic || p.IsReadOnly || p.IsImplicitlyDeclared) && p.Type.IsImmutable(treatArrayAsImmutable)))
+			{
+				return false; // there's a non-readonly non-static field
+			}
+
+			// It's immutable if the base type is (or no base type)
+			return type.BaseType == null
+				|| type.BaseType.SpecialType == SpecialType.System_Object
+				|| type.BaseType.SpecialType == SpecialType.System_ValueType
+				|| type.BaseType.IsImmutable(treatArrayAsImmutable);
 		}
 
 		public static ITypeSymbol GetDefinitionType(this ITypeSymbol type)
