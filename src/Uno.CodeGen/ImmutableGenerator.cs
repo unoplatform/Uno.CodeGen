@@ -241,7 +241,7 @@ namespace Uno
 				else
 				{
 					builderTypeNameAndBaseClass = baseTypeInfo.isBaseType
-					? $"Builder : {baseTypeInfo.builderBaseType}, Uno.IImmutableBuilder<{symbolNameWithGenerics}>"
+					? $"Builder : {baseTypeInfo.builderBaseType}, global::Uno.IImmutableBuilder<{symbolNameWithGenerics}>"
 					: $"Builder : global::Uno.IImmutableBuilder<{symbolNameWithGenerics}>";
 				}
 
@@ -318,7 +318,7 @@ namespace Uno
 							{
 								using (builder.BlockInvariant($"public Builder({symbolNameWithGenerics} original)"))
 								{
-									builder.AppendLineInvariant($"_original = original ?? throw new ArgumentNullException(nameof(original));");
+									builder.AppendLineInvariant($"_original = original ?? throw new global::System.ArgumentNullException(nameof(original));");
 								}
 							}
 							else
@@ -394,9 +394,7 @@ private bool _is{prop.Name}Set = false;
 	set
 	{{
 		var originalValue = (({symbolNameWithGenerics})_original).{prop.Name};
-		var isSameAsOriginal = global::System.Collections.Generic.EqualityComparer<{
-									prop.Type
-								}>.Default.Equals(originalValue, value);
+		var isSameAsOriginal = global::System.Collections.Generic.EqualityComparer<{prop.Type}>.Default.Equals(originalValue, value);
 		if(isSameAsOriginal)
 		{{
 			// Property {prop.Name} has been set back to original value
@@ -576,8 +574,7 @@ public static implicit operator global::Uno.Option<{symbolNameWithGenerics}>(Bui
 					builder.AppendLineInvariant($"/// Construct a new immutable instance of {symbolNameForXml} from a builder.");
 					builder.AppendLineInvariant($"/// </summary>");
 					builder.AppendLineInvariant("/// <remarks>");
-					builder.AppendLineInvariant(
-						"/// Application code should prefer the usage of implicit casting which is calling this constructor.");
+					builder.AppendLineInvariant("/// Application code should prefer the usage of implicit casting which is calling this constructor.");
 					builder.AppendLineInvariant("/// </remarks>");
 					builder.AppendLineInvariant($"/// <param name=\"builder\">The builder for {symbolNameForXml}.</param>");
 
@@ -587,7 +584,7 @@ public static implicit operator global::Uno.Option<{symbolNameWithGenerics}>(Bui
 
 					using (builder.BlockInvariant($"public {symbolName}(Builder builder){baseConstructorChaining}"))
 					{
-						builder.AppendLineInvariant("if(builder == null) throw new ArgumentNullException(nameof(builder));");
+						builder.AppendLineInvariant("if(builder == null) throw new global::System.ArgumentNullException(nameof(builder));");
 
 						foreach (var (prop, _) in properties)
 						{
@@ -805,7 +802,10 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 					if (type is IArrayTypeSymbol)
 					{
 						builder.AppendLineInvariant(
-							$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} is an array, which is not immutable. You can treat arrays as immutable by setting a global attribute [assembly: Uno.ImmutableGenerationOptions(TreatArrayAsImmutable = true)].");
+							$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} is an array, which is not immutable. "
+							+ "You can treat arrays as immutable by setting a global attribute " 
+							+ "[assembly: Uno.ImmutableGenerationOptions(TreatArrayAsImmutable = true)].");
+
 					}
 					else
 					{
@@ -832,7 +832,8 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 				if (!prop.IsReadOnly)
 				{
 					builder.AppendLineInvariant(
-						$"#error {nameof(ImmutableGenerator)}: Non-static property {symbolNames.SymbolNameWithGenerics}.{prop.Name} cannot have a setter, even a private one. You must remove it for immutable generation.");
+						$"#error {nameof(ImmutableGenerator)}: Non-static property {symbolNames.SymbolNameWithGenerics}.{prop.Name} "
+						+ "cannot have a setter, even a private one. You must remove it for immutable generation.");
 				}
 
 				if (!typeSymbol.IsAbstract)
@@ -860,7 +861,8 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 				if (!field.IsStatic)
 				{
 					builder.AppendLineInvariant(
-						$"#error {nameof(ImmutableGenerator)}: Immutable type {symbolNames.SymbolNameWithGenerics} cannot have a non-static field {field.Name}. You must remove it for immutable generation.");
+						$"#error {nameof(ImmutableGenerator)}: Immutable type {symbolNames.SymbolNameWithGenerics} cannot "
+						+ "have a non-static field {field.Name}. You must remove it for immutable generation.");
 				}
 			}
 		}

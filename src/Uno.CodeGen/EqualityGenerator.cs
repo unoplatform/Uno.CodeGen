@@ -460,7 +460,7 @@ namespace Uno
 							// We just show that if the collection is "sorted", because "unsorted" will always work and we don't want
 							// to do a "SequenceEquals" on an non-ordered structure.
 							builder.AppendLineInvariant($"// **{member.Name}** To use an _unsorted_ comparer, add the following attribute to your member:");
-							builder.AppendLineInvariant("// [EqualityCollection(CollectionComparerMode.Unsorted)]");
+							builder.AppendLineInvariant($"// [{nameof(EqualityComparerOptionsAttribute)}({nameof(CollectionComparerMode)}.{nameof(CollectionComparerMode.Unsorted)})]");
 						}
 
 						using (builder.BlockInvariant($"if(!global::Uno.Equality.{comparer}<{type}, {elementType}>.Default.Equals({member.Name}, other.{member.Name}))"))
@@ -509,7 +509,7 @@ namespace Uno
 						{
 							if (equalityMode == KeyEqualityUseEquality)
 							{
-								using (builder.BlockInvariant($"if(!System.Collections.Generic.EqualityComparer<{type}>.Default.Equals({member.Name}, other.{member.Name}))"))
+								using (builder.BlockInvariant($"if(!global::System.Collections.Generic.EqualityComparer<{type}>.Default.Equals({member.Name}, other.{member.Name}))"))
 								{
 									builder.AppendLineInvariant($"return false; // {member.Name} not equal");
 								}
@@ -558,7 +558,9 @@ namespace Uno
 		{
 			if (baseCall == null && hashMembers.Length == 0)
 			{
-				builder.AppendLineInvariant("#warning There is no members marked with [Uno.EqualityHash] or [Uno.EqualityKey]. You should add at least one. Documentation: https://github.com/nventive/Uno.CodeGen/blob/master/doc/Equality%20Generation.md");
+				builder.AppendLineInvariant(
+					"#warning There is no members marked with [Uno.EqualityHash] or [Uno.EqualityKey]. " +
+					"You should add at least one. Documentation: https://github.com/nventive/Uno.CodeGen/blob/master/doc/Equality%20Generation.md");
 				builder.AppendLineInvariant("return 0; // no members to compute hash");
 			}
 			else
