@@ -156,8 +156,6 @@ namespace Uno.Helpers
 				return IsImmutableByRequirements(t, treatArrayAsImmutable);
 			}
 
-			Debugger.Launch();
-
 			return ImmutableInterlocked.GetOrAdd(ref _isImmutable, (type, treatArrayAsImmutable), GetIsImmutable);
 		}
 
