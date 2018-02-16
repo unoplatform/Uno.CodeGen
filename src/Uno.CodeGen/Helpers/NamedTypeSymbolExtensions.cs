@@ -35,8 +35,6 @@ namespace Uno.Helpers
 			var argumentNames = typeSymbol.GetTypeArgumentNames();
 			var genericArguments = string.Join(", ", argumentNames);
 
-			//Debugger.Launch();
-
 			// symbolNameWithGenerics: MyType<T1, T2>
 			var symbolNameWithGenerics = $"{symbolName}<{genericArguments}>";
 

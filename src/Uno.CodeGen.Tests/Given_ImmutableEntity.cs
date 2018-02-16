@@ -27,7 +27,7 @@ using Newtonsoft.Json;
 namespace Uno.CodeGen.Tests
 {
 	[TestClass]
-	public class Given_ImmutableEntity
+	public partial class Given_ImmutableEntity
 	{
 		[TestMethod]
 		public void Immutable_When_CreatingFromBuilder_WithDefaultValue()
@@ -117,78 +117,10 @@ namespace Uno.CodeGen.Tests
 		[TestMethod]
 		public void Immutable_When_Using_Attributes_Then_They_Are_Copied_On_Builder()
 		{
-			var tBuilder = typeof(MySuperGenericImmutable<MyImmutableEntity, MyImmutableEntity, MyImmutableEntity[], string, string, string>.Builder);
+			var tBuilder = typeof(AbstractImmutableTypeWithManyGenerics<MyImmutableEntity, MyImmutableEntity, MyImmutableEntity[], string, string, string>.Builder);
 			var idProperty = tBuilder.GetProperty("Id");
 			var attributes = idProperty.GetCustomAttributes(false);
 			attributes.Should().HaveCount(3);
-		}
-
-		[TestMethod]
-		public void Immutable_When_Using_Options()
-		{
-			var list = ImmutableList<string>.Empty;
-
-			var original = MyImmutableEntity.None;
-			var modifiedBuilder = original.WithList(list);
-			Option<MyImmutableEntity> modifiedOption = modifiedBuilder;
-			MyImmutableEntity modified = modifiedOption;
-
-			original.MatchNone().Should().BeTrue();
-			modifiedOption.MatchSome().Should().BeTrue();
-			modified.MyField1.Should().Be(MyImmutableEntity.Default.MyField1);
-			modified.MyField2.Should().Be(MyImmutableEntity.Default.MyField2);
-			modified.Date.Should().Be(MyImmutableEntity.Default.Date);
-			modified.List.Should().BeSameAs(list);
-		}
-
-		[TestMethod]
-		public void Immutable_When_Using_OptionNone()
-		{
-			MyImmutableEntity.Builder builder = MyImmutableEntity.None;
-			Option<MyImmutableEntity> option = builder;
-			option.MatchNone().Should().BeTrue();
-		}
-
-		[TestMethod]
-		public void Immutable_When_Deserializing_A_Using_JsonNet()
-		{
-			const string json = "{IsSomething:false, T:null, Entity:{MyField1:1, MyField2:2}}";
-			var a = JsonConvert.DeserializeObject<A>(json);
-			a.Should().NotBeNull();
-			a.IsSomething.Should().BeFalse();
-			a.T.Should().BeNull();
-			a.Entity.Should().NotBeNull();
-			a.Entity­.MyField1.Should().Be(1);
-			a.Entity­.MyField2.Should().Be(2);
-		}
-
-		[TestMethod]
-		public void Immutable_When_Deserializing_ABuilder_Using_JsonNet()
-		{
-			const string json = "{IsSomething:false, T:null, Entity:{MyField1:1, MyField2:2}}";
-			var a = JsonConvert.DeserializeObject<A.Builder>(json).ToImmutable();
-			a.Should().NotBeNull();
-			a.IsSomething.Should().BeFalse();
-			a.T.Should().BeNull();
-			a.Entity.Should().NotBeNull();
-			a.Entity­.MyField1.Should().Be(1);
-			a.Entity­.MyField2.Should().Be(2);
-		}
-
-		[TestMethod]
-		public void Immutable_When_Serializing_A_Using_JsonNet()
-		{
-			var json = JsonConvert.SerializeObject(A.Default.WithEntity(x => null).ToImmutable());
-
-			json.Should().BeEquivalentTo("{\"T\":null,\"Entity\":null,\"IsSomething\":true,\"Metadata\":null}");
-		}
-
-		[TestMethod]
-		public void Immutable_When_Serializing_ABuilder_Using_JsonNet()
-		{
-			var json = JsonConvert.SerializeObject(A.Default.WithEntity(x => null));
-
-			json.Should().BeEquivalentTo("{\"T\":null,\"Entity\":null,\"IsSomething\":true,\"Metadata\":null}");
 		}
 	}
 
@@ -206,6 +138,7 @@ namespace Uno.CodeGen.Tests
 
 	public partial class B : A
 	{
+		public Uri FirstField { get; }
 		public string SecondField { get; }
 		public long ThirdField { get; }
 		public TimeSpan TimeSpan { get; }
@@ -227,6 +160,10 @@ namespace Uno.CodeGen.Tests
 
 		public IReadOnlyList<string[]> MyField5 { get; }
 
+		public ImplicitlyImmutableClass MyField6 { get; }
+
+		public ImplicitlyImmutableStruct MyField7 { get; }
+
 		public int Sum => MyField1 + MyField2; // won't generate any builder code
 
 		public DateTimeOffset Date { get; } = DateTimeOffset.Now;
@@ -234,53 +171,32 @@ namespace Uno.CodeGen.Tests
 		public ImmutableList<string> List { get; } = ImmutableList.Create("a", "b");
 	}
 
-	[GeneratedImmutable]
-	public abstract partial class MyGenericImmutable<T>
+	public class ImplicitlyImmutableClass
 	{
-		public T Entity { get; }
+		public ImplicitlyImmutableClass(string a, string b, int i)
+		{
+			A = a;
+			B = b;
+			I = i;
+		}
+
+		public string A { get; }
+		public string B { get; }
+		public readonly int I;
 	}
 
-	[GeneratedImmutable(GenerateEquality = false)]
-	public partial class MyOtherImmutable : MyGenericImmutable<MyImmutableEntity>
+	public struct ImplicitlyImmutableStruct
 	{
-	}
+		public ImplicitlyImmutableStruct(string a, string b, int i)
+		{
+			A = a;
+			B = b;
+			I = i;
+		}
 
-	[GeneratedImmutable]
-	public partial class MyVeryOtherImmutable : MyGenericImmutable<MyOtherImmutable>
-	{
-	}
+		public string A { get; }
+		public string B { get; }
 
-	[ImmutableAttributeCopyIgnore("RequiredAttribute")]
-	[GeneratedImmutable()]
-	public abstract partial class MySuperGenericImmutable<T1, T2, T3, T4, T5, T6>
-		where T1: MyImmutableEntity
-		where T2: T1
-		where T3: IReadOnlyCollection<T1>
-	{
-		[Required, System.ComponentModel.DataAnnotations.DataType(DataType.Text)]
-		[System.ComponentModel.DataAnnotations.Key]
-		[System.ComponentModel.DataAnnotations.RegularExpression("regex-pattern", ErrorMessage = "error-msg")]
-		public string Id { get; }
-
-		[Required(AllowEmptyStrings = true, ErrorMessage = "Entity1 is required!")]
-		public T1 Entity1 { get; }
-		[EqualityIgnore]
-		public T2 Entity2 { get; }
-		[EqualityIgnore]
-		public T3 Entity3 { get; }
-		[EqualityIgnore]
-		public T4 Entity4 { get; }
-		[EqualityIgnore]
-		public T5 Entity5 { get; }
-		[EqualityHash]
-		public T6 Entity6 { get; }
-		public (T1, T2, T3, T4, T5, T6) Values { get; }
-
-		private static int GetHash_Entity6(T6 value) => 50;
-	}
-
-	public partial class MySuperGenericConcrete<T> : MySuperGenericImmutable<MyImmutableEntity, MyImmutableEntity, MyImmutableEntity[], T, T, T>
-		where T: IReadOnlyCollection<string>
-	{
+		public readonly int I;
 	}
 }

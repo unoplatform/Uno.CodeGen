@@ -43,6 +43,10 @@ namespace Uno
 		private const byte StringModeIgnoreCase = (byte)StringComparerMode.IgnoreCase; // this reference won't survive compilation
 		private const byte StringModeEmptyEqualsNull = (byte)StringComparerMode.EmptyEqualsNull; // this reference won't survive compilation
 
+		private const byte KeyEqualityAuto = (byte) KeyEqualityMode.Auto; // this reference won't survive compilation
+		private const byte KeyEqualityUseEquality = (byte)KeyEqualityMode.UseEquality; // this reference won't survive compilation
+		private const byte KeyEqualityUseKeyEquality = (byte)KeyEqualityMode.UseKeyEquality; // this reference won't survive compilation
+
 		private INamedTypeSymbol _objectSymbol;
 		private INamedTypeSymbol _valueTypeSymbol;
 		private INamedTypeSymbol _boolSymbol;
@@ -57,8 +61,8 @@ namespace Uno
 		private INamedTypeSymbol _iKeyEquatableGenericSymbol;
 		private INamedTypeSymbol _generatedEqualityAttributeSymbol;
 		private INamedTypeSymbol _ignoreForEqualityAttributeSymbol;
-		private INamedTypeSymbol _equalityHashCodeAttributeSymbol;
-		private INamedTypeSymbol _equalityKeyCodeAttributeSymbol;
+		private INamedTypeSymbol _equalityHashAttributeSymbol;
+		private INamedTypeSymbol _equalityKeyAttributeSymbol;
 		private INamedTypeSymbol _equalityComparerOptionsAttributeSymbol;
 		private INamedTypeSymbol _dataAnnonationsKeyAttributeSymbol;
 		private SourceGeneratorContext _context;
@@ -108,8 +112,8 @@ namespace Uno
 			_iKeyEquatableGenericSymbol = context.Compilation.GetTypeByMetadataName("Uno.Equality.IKeyEquatable`1");
 			_generatedEqualityAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.GeneratedEqualityAttribute");
 			_ignoreForEqualityAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityIgnoreAttribute");
-			_equalityHashCodeAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityHashAttribute");
-			_equalityKeyCodeAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityKeyAttribute");
+			_equalityHashAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityHashAttribute");
+			_equalityKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityKeyAttribute");
 			_equalityComparerOptionsAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityComparerOptionsAttribute");
 			_dataAnnonationsKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("System.ComponentModel.DataAnnotations.KeyAttribute");
 
@@ -406,14 +410,14 @@ namespace Uno
 			return (true, baseOverridesGetHashCode, baseOverridesEquals, baseImplementsIEquatable, baseImplementsKeyEquals, baseImplementsKeyEqualsT);
 		}
 
-		private void GenerateEqualLogic(INamedTypeSymbol typeSymbol, IndentedStringBuilder builder, ISymbol[] equalityMembers, string baseCall)
+		private void GenerateEqualLogic(INamedTypeSymbol typeSymbol, IndentedStringBuilder builder, (ISymbol, byte)[] equalityMembers, string baseCall)
 		{
 			if (baseCall == null && equalityMembers.Length == 0)
 			{
 				builder.AppendLineInvariant("#warning No fields or properties used for equality check.");
 			}
 
-			foreach (var member in equalityMembers)
+			foreach (var (member, equalityMode) in equalityMembers)
 			{
 				var type = (member as IFieldSymbol)?.Type ?? (member as IPropertySymbol)?.Type;
 				if (type == null)
@@ -456,7 +460,7 @@ namespace Uno
 							// We just show that if the collection is "sorted", because "unsorted" will always work and we don't want
 							// to do a "SequenceEquals" on an non-ordered structure.
 							builder.AppendLineInvariant($"// **{member.Name}** To use an _unsorted_ comparer, add the following attribute to your member:");
-							builder.AppendLineInvariant("// [EqualityCollection(CollectionComparerMode.Unsorted)]");
+							builder.AppendLineInvariant($"// [{nameof(EqualityComparerOptionsAttribute)}({nameof(CollectionComparerMode)}.{nameof(CollectionComparerMode.Unsorted)})]");
 						}
 
 						using (builder.BlockInvariant($"if(!global::Uno.Equality.{comparer}<{type}, {elementType}>.Default.Equals({member.Name}, other.{member.Name}))"))
@@ -503,9 +507,29 @@ namespace Uno
 						}
 						else
 						{
-							using (builder.BlockInvariant($"if(!System.Collections.Generic.EqualityComparer<{type}>.Default.Equals({member.Name}, other.{member.Name}))"))
+							if (equalityMode == KeyEqualityUseEquality)
 							{
-								builder.AppendLineInvariant($"return false; // {member.Name} not equal");
+								using (builder.BlockInvariant($"if(!global::System.Collections.Generic.EqualityComparer<{type}>.Default.Equals({member.Name}, other.{member.Name}))"))
+								{
+									builder.AppendLineInvariant($"return false; // {member.Name} not equal");
+								}
+							}
+							else
+							{
+								if(type.IsReferenceType)
+								{ 
+									using (builder.BlockInvariant($"if(!((global::Uno.Equality.IKeyEquatable){member.Name})?.KeyEquals(other.{member.Name}) ?? false)"))
+									{
+										builder.AppendLineInvariant($"return false; // {member.Name} not equal");
+									}
+								}
+								else
+								{
+									using (builder.BlockInvariant($"if(!((global::Uno.Equality.IKeyEquatable){member.Name}).KeyEquals(other.{member.Name}))"))
+									{
+										builder.AppendLineInvariant($"return false; // {member.Name} not equal");
+									}
+								}
 							}
 						}
 
@@ -530,11 +554,13 @@ namespace Uno
 			}
 		}
 
-		private void GenerateHashLogic(INamedTypeSymbol typeSymbol, IndentedStringBuilder builder, ISymbol[] hashMembers, string baseCall)
+		private void GenerateHashLogic(INamedTypeSymbol typeSymbol, IndentedStringBuilder builder, (ISymbol, byte)[] hashMembers, string baseCall)
 		{
 			if (baseCall == null && hashMembers.Length == 0)
 			{
-				builder.AppendLineInvariant("#warning There is no members marked with [Uno.EqualityHash] or [Uno.EqualityKey]. You should add at least one. Documentation: https://github.com/nventive/Uno.CodeGen/blob/master/doc/Equality%20Generation.md");
+				builder.AppendLineInvariant(
+					"#warning There is no members marked with [Uno.EqualityHash] or [Uno.EqualityKey]. " +
+					"You should add at least one. Documentation: https://github.com/nventive/Uno.CodeGen/blob/master/doc/Equality%20Generation.md");
 				builder.AppendLineInvariant("return 0; // no members to compute hash");
 			}
 			else
@@ -551,7 +577,7 @@ namespace Uno
 				{
 					for (var i = 0; i < hashMembers.Length; i++)
 					{
-						var member = hashMembers[i];
+						var (member, equalityMode) = hashMembers[i];
 						var primeNumber = PrimeNumbers[i % PrimeNumbers.Length];
 
 						var type = (member as IFieldSymbol)?.Type ?? (member as IPropertySymbol)?.Type;
@@ -620,6 +646,10 @@ namespace Uno
 							|| definition.DerivesFromType(_collectionSymbol))
 						{
 							getHashCode = $"((global::System.Collections.ICollection){member.Name}).Count";
+						}
+						else if (equalityMode == KeyEqualityUseKeyEquality)
+						{
+							getHashCode = $"((global::Uno.Equality.IKeyEquatable){member.Name}).GetKeyHashCode()";
 						}
 						else
 						{
@@ -698,7 +728,7 @@ namespace Uno
 				where moduleAttribute != null
 				select type;
 
-		private (ISymbol[] equalitymembers, ISymbol[] hashMembers, ISymbol[] keyEqualityMembers) GetEqualityMembers(INamedTypeSymbol typeSymbol)
+		private ((ISymbol, byte)[] equalitymembers, (ISymbol, byte)[] hashMembers, (ISymbol, byte)[] keyEqualityMembers) GetEqualityMembers(INamedTypeSymbol typeSymbol)
 		{
 			var properties =
 				from property in typeSymbol.GetProperties()
@@ -715,9 +745,9 @@ namespace Uno
 				where field.DeclaredAccessibility > Accessibility.Private
 				select (symbol: (ISymbol)field, type: field.Type);
 
-			var equalityMembers = new List<ISymbol>();
-			var hashMembers = new List<ISymbol>();
-			var keyEqualityMembers = new List<ISymbol>();
+			var equalityMembers = new List<(ISymbol, byte)>();
+			var hashMembers = new List<(ISymbol, byte)>();
+			var keyEqualityMembers = new List<(ISymbol, byte)>();
 
 			foreach (var (symbol, type) in properties.Concat(fields))
 			{
@@ -730,24 +760,59 @@ namespace Uno
 					continue; // [EqualityIgnore] on the member or the type itself: this member is ignored
 				}
 
-				equalityMembers.Add(symbol);
+				equalityMembers.Add((symbol, KeyEqualityUseEquality));
 
 				if (symbolAttributes.Any(a =>
-					a.AttributeClass.Equals(_equalityKeyCodeAttributeSymbol)
+					a.AttributeClass.Equals(_equalityKeyAttributeSymbol)
 					|| a.AttributeClass.Equals(_dataAnnonationsKeyAttributeSymbol)))
 				{
+					var mode = KeyEqualityAuto;
+					var equalityKeyAttr = symbolAttributes.FirstOrDefault(a => a.AttributeClass.Equals(_equalityKeyAttributeSymbol));
+					if (equalityKeyAttr != null)
+					{
+						mode = Convert.ToByte(equalityKeyAttr.ConstructorArguments[0].Value);
+					}
+
+					if (mode == KeyEqualityAuto)
+					{
+						mode = IsTypeKeyEquatable(type) ? KeyEqualityUseKeyEquality : KeyEqualityUseEquality;
+					}
+
 					// [EqualityKey] on the member: this member is used for both key & hash
-					hashMembers.Add(symbol);
-					keyEqualityMembers.Add(symbol);
+					hashMembers.Add((symbol, KeyEqualityUseEquality));
+					keyEqualityMembers.Add((symbol, mode));
 				}
-				else if (symbolAttributes.Any(a => a.AttributeClass.Equals(_equalityHashCodeAttributeSymbol)))
+				else if (symbolAttributes.Any(a => a.AttributeClass.Equals(_equalityHashAttributeSymbol)))
 				{
 					// [EqualityHash] on the member: this member is used for hash computation
-					hashMembers.Add(symbol);
+					hashMembers.Add((symbol, KeyEqualityUseEquality));
 				}
 			}
 
 			return (equalityMembers.ToArray(), hashMembers.ToArray(), keyEqualityMembers.ToArray());
+		}
+
+		private bool IsTypeKeyEquatable(ITypeSymbol type)
+		{
+			foreach (var i in type.Interfaces)
+			{
+				if (i.Equals(_iKeyEquatableSymbol) || i.GetDefinitionType().Equals(_iKeyEquatableGenericSymbol))
+				{
+					return true;
+				}
+			}
+
+			foreach (var m in type.GetMembers())
+			{
+				if (m is IPropertySymbol p)
+				{
+					if (p.GetAttributes().Any(a => a.AttributeClass.Equals(_equalityKeyAttributeSymbol) || a.AttributeClass.Equals(_dataAnnonationsKeyAttributeSymbol)))
+					{
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		private static bool IsFromPartialDeclaration(INamedTypeSymbol symbol)
