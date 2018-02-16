@@ -166,20 +166,16 @@ namespace Uno.Helpers
 			// 2) all properties are getter-only
 			// 3) base class is immutable
 
-			if (type
-				.GetMembers()
-				.OfType<IFieldSymbol>()
-				.Any(f => !(f.IsStatic || f.IsReadOnly || f.IsImplicitlyDeclared) && f.Type.IsImmutable(treatArrayAsImmutable)))
+			foreach (var member in type.GetMembers())
 			{
-				return false; // there's a non-readonly non-static field
-			}
-
-			if (type
-				.GetMembers()
-				.OfType<IPropertySymbol>()
-				.Any(p => !(p.IsStatic || p.IsReadOnly || p.IsImplicitlyDeclared) && p.Type.IsImmutable(treatArrayAsImmutable)))
-			{
-				return false; // there's a non-readonly non-static field
+				if (member is IFieldSymbol f && !(f.IsStatic || f.IsReadOnly || f.IsImplicitlyDeclared) && f.Type.IsImmutable(treatArrayAsImmutable))
+				{
+					return false; // there's a non-readonly non-static field
+				}
+				if (member is IPropertySymbol p && !(p.IsStatic || p.IsReadOnly || p.IsImplicitlyDeclared) && p.Type.IsImmutable(treatArrayAsImmutable))
+				{
+					return false; // there's a non-readonly non-static property
+				}
 			}
 
 			// It's immutable if the base type is (or no base type)
