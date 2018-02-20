@@ -1,17 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
+   <PropertyGroup>
 		<TargetFrameworks>net46;netstandard1.0;netstandard2.0</TargetFrameworks>
-		<IsTool>true</IsTool>
-		<NoWarn>1701;1702;1705;NU1701</NoWarn>
+		<Product>Generator of class lifecycle</Product>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+		<TreatSpecificWarningsAsErrors />
+		<DebugType>full</DebugType>
+		<DebugSymbols>True</DebugSymbols>
+		<Authors>nventive</Authors>
+		<Company>nventive</Company>
+		<Description>This package provides a generator which generates the class life cycle method using the attributes from Uno.ClassLifecycle.
+This package is part of the Uno.CodeGen to generate object life cycle methods in your project.</Description>
 		<RootNamespace>Uno</RootNamespace>
-		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-		<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
-		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
-		<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
-		<Description>This package provides tooling for code generation.</Description>
 		<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
+		<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
+		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)'=='net46'">
@@ -21,12 +26,14 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.20.0-dev.17" PrivateAssets="none" />
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.20.0-dev.17" PrivateAssets="none">
+		  <NoWarn>NU1701</NoWarn>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)'!='net46'">
 		<Compile Remove="**\*.cs" />
-		<None Include="**\*.cs" Exclude="bin\**\*.cs;obj\**\*.cs" />
+		<None Include="**\*.cs" Exclude="obj\**\*.cs;bin\**\.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -35,12 +42,5 @@
 			<PackagePath>build</PackagePath>
 		</Content>
 	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Uno.ClassLifecycle.Generator\Uno.CodeGen.ClassLifecycle.csproj" />
-		<ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
-		<ProjectReference Include="..\Uno.Immutables\Uno.Immutables.csproj" />
-		<ProjectReference Include="..\Uno.ClassLifecycle\Uno.ClassLifecycle.csproj" />
-	</ItemGroup>
-
+	
 </Project>

@@ -11,7 +11,8 @@
 
 ## Available Generators
 
-| Generator | Triggering Attribute | Usage |    |
+| Generator | Triggering Attributes | Usage |    |
 | --------- | -------------------- | ----- | -- |
+| `ClassLifecycleGenerator` | `[ConstructorMethod]` `[DisposeMethod]` `[FinalizerMethod]` | Generate code to extend the lifecyle of a class. | [Documentation](doc/Class%20Lifecyle%20Generation.md) |
 | `EqualityGenerator` | `[GenerateEquality]` | Generate code for efficient `.Equals()` members generation. | [Documentation](doc/Equality%20Generation.md) |
 | `ImmutableGenerator` | `[GenerateImmutable]` | Generate code to build truly immutable entities. | [Documentation](doc/Immutable%20Generation.md) |
