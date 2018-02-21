@@ -24,6 +24,8 @@ namespace Uno.CodeGen.ClassLifecycle
 	internal class LifecycleMethods
 	{
 		public INamedTypeSymbol Owner { get; }
+		public IEnumerable<LifecycleMethods> Bases { get; set; }
+
 		public ICollection<IMethodSymbol> AllMethods { get; }
 		public ICollection<IMethodSymbol> Constructors { get; }
 		public ICollection<IMethodSymbol> Disposes { get; }

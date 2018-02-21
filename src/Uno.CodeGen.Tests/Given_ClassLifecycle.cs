@@ -33,40 +33,11 @@ namespace Uno.CodeGen.Tests
 		[TestMethod]
 		public void When_SimulateLifetimeOfObject_Then_AllMethodInvoked()
 		{
-			var counter = new LifeTimeCounter();
-
-			Lifecycle(counter);
+			var counter = Lifecycle(c => new When_SimulateLifetimeOfObject_Then_AllMethodInvoked_Subject(c));
 
 			Assert.AreEqual(1, counter.Constructed);
 			Assert.AreEqual(1, counter.Disposed);
 			Assert.AreEqual(1, counter.Finalized);
-		}
-
-		private System.WeakReference<When_SimulateLifetimeOfObject_Then_AllMethodInvoked_Subject> Create(LifeTimeCounter counter)
-		{
-			using (var sut = new When_SimulateLifetimeOfObject_Then_AllMethodInvoked_Subject(counter))
-			{
-				return new System.WeakReference<When_SimulateLifetimeOfObject_Then_AllMethodInvoked_Subject>(sut);
-			}
-		}
-
-		private void Lifecycle(LifeTimeCounter counter)
-		{
-			var sut = Create(counter);
-
-			GC.Collect(3, GCCollectionMode.Forced);
-			GC.WaitForPendingFinalizers();
-			GC.Collect(3, GCCollectionMode.Forced);
-			GC.WaitForPendingFinalizers();
-
-			Assert.IsFalse(sut.TryGetTarget(out var _));
-		}
-
-		private class LifeTimeCounter
-		{
-			public int Constructed { get; set; }
-			public int Disposed { get; set; }
-			public int Finalized { get; set; }
 		}
 
 		private partial class When_SimulateLifetimeOfObject_Then_AllMethodInvoked_Subject : IDisposable
@@ -87,6 +58,46 @@ namespace Uno.CodeGen.Tests
 
 			[FinalizerMethod]
 			private void MyFinalizer() => _counter.Finalized++;
+		}
+		#endregion
+
+		#region When_InheritFromAnotherLifecycleObject_Then_AllMethodInvoked
+		[TestMethod]
+		public void When_InheritFromAnotherLifecycleObject_Then_AllMethodInvoked()
+		{
+			var counter = Lifecycle(c => new When_InheritFromAnotherLifecycleObject_Then_AllMethodInvoked_Subject(c));
+
+			Assert.AreEqual(2, counter.Constructed);
+			Assert.AreEqual(2, counter.Disposed);
+			Assert.AreEqual(2, counter.Finalized);
+		}
+
+		private partial class When_InheritFromAnotherLifecycleObject_Then_AllMethodInvoked_Base : IDisposable
+		{
+			protected readonly LifeTimeCounter _counter;
+
+			public When_InheritFromAnotherLifecycleObject_Then_AllMethodInvoked_Base(LifeTimeCounter counter)
+			{
+				_counter = counter;
+				Initialize();
+			}
+
+			[ConstructorMethod] public void BaseConstructor() => _counter.Constructed++;
+			[DisposeMethod] public void BaseDispose() => _counter.Disposed++;
+			[FinalizerMethod] public void BaseFinalizer() => _counter.Finalized++;
+		}
+
+		private partial class When_InheritFromAnotherLifecycleObject_Then_AllMethodInvoked_Subject : When_InheritFromAnotherLifecycleObject_Then_AllMethodInvoked_Base
+		{
+			public When_InheritFromAnotherLifecycleObject_Then_AllMethodInvoked_Subject(LifeTimeCounter counter)
+				: base(counter)
+			{
+				Initialize();
+			}
+
+			[ConstructorMethod] public void ChildConstructor() => _counter.Constructed++;
+			[DisposeMethod] public void ChildDispose() => _counter.Disposed++;
+			[FinalizerMethod] public void ChildFinalizer() => _counter.Finalized++;
 		}
 		#endregion
 
@@ -116,6 +127,24 @@ namespace Uno.CodeGen.Tests
 		//	public void MyConstructor()
 		//	{
 		//	}
+		//}
+		#endregion
+
+		#region When_RealConstructor_DoesNotInvokesInitialzie_With_InheritFromAnotherLifecycleObject_Then_Fails
+		// Compilation test
+		//private partial class When_RealConstructor_DoesNotInvokesInitialzie_With_InheritFromAnotherLifecycleObject_Then_Fails_Base
+		//{
+		//	[ConstructorMethod] private void MyConstructor() { }
+		//}
+
+		//private partial class When_RealConstructor_DoesNotInvokesInitialzie_With_InheritFromAnotherLifecycleObject_Then_Fails
+		//	: When_RealConstructor_DoesNotInvokesInitialzie_With_InheritFromAnotherLifecycleObject_Then_Fails_Base
+		//{
+		//	public When_RealConstructor_DoesNotInvokesInitialzie_With_InheritFromAnotherLifecycleObject_Then_Fails()
+		//		: base()
+		//	{
+		//	}
+		//	[ConstructorMethod] private void MyConstructor() { }
 		//}
 		#endregion
 
@@ -379,6 +408,48 @@ namespace Uno.CodeGen.Tests
 		//	[FinalizerMethod]
 		//	private string MyFinalizer(string text) => "";
 		//}
+		#endregion
+
+		#region -- Helpers --
+		private System.WeakReference<When_SimulateLifetimeOfObject_Then_AllMethodInvoked_Subject> Create(LifeTimeCounter counter)
+		{
+			using (var sut = new When_SimulateLifetimeOfObject_Then_AllMethodInvoked_Subject(counter))
+			{
+				return new System.WeakReference<When_SimulateLifetimeOfObject_Then_AllMethodInvoked_Subject>(sut);
+			}
+		}
+
+		private System.WeakReference<T> Create<T>(LifeTimeCounter counter, Func<LifeTimeCounter, T> factory)
+			where T : class, IDisposable
+		{
+			using (var sut = factory(counter))
+			{
+				return new System.WeakReference<T>(sut);
+			}
+		}
+
+		private LifeTimeCounter Lifecycle<T>(Func<LifeTimeCounter, T> factory)
+			where T : class, IDisposable
+		{
+			var counter = new LifeTimeCounter();
+			var sut = Create(counter, factory);
+
+			GC.Collect(3, GCCollectionMode.Forced);
+			GC.WaitForPendingFinalizers();
+			GC.Collect(3, GCCollectionMode.Forced);
+			GC.WaitForPendingFinalizers();
+
+			Assert.IsFalse(sut.TryGetTarget(out var _));
+
+			return counter;
+		}
+
+		private class LifeTimeCounter
+		{
+			public int Constructed { get; set; }
+			public int Disposed { get; set; }
+			public int Finalized { get; set; }
+		}
 		#endregion
 	}
 }

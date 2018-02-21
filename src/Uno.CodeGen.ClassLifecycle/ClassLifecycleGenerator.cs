@@ -17,6 +17,7 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -61,7 +62,8 @@ namespace Uno.CodeGen.ClassLifecycle
 		}
 
 		private IEnumerable<LifecycleMethods> GetLifecycleMethods()
-			=> _context
+		{
+			var allTypes = _context
 				.Compilation
 				.SourceModule
 				.GlobalNamespace
@@ -77,7 +79,30 @@ namespace Uno.CodeGen.ClassLifecycle
 						methods.Where(method => method.HasAttribute(_disposeAttribute)).ToList(),
 						methods.Where(method => method.HasAttribute(_finalizerAttribute)).ToList());
 				})
-				.Where(methods => methods.HasLifecycleMethods);
+				.Where(methods => methods.HasLifecycleMethods)
+				.ToImmutableDictionary(methods => methods.Owner);
+
+			foreach (var methodsDefinition in allTypes.Values)
+			{
+				methodsDefinition.Bases = GetBaseMethods(methodsDefinition.Owner.BaseType);
+			}
+
+			IEnumerable<LifecycleMethods> GetBaseMethods(INamedTypeSymbol type)
+			{
+				while (type != null && type.SpecialType != SpecialType.System_Object)
+				{
+					if (allTypes.TryGetValue(type, out var methods))
+					{
+						yield return methods;
+					}
+
+					type = type.BaseType;
+				}
+			}
+
+			return allTypes.Values;
+		}
+			
 
 		private void Generate(LifecycleMethods methods)
 		{
@@ -165,8 +190,10 @@ namespace Uno.CodeGen.ClassLifecycle
 				.Select(parameter => $"{parameter.type.GlobalTypeDefinitionText()} {parameter.name} {(parameter.isOptional ? $"= {parameter.defaultValue?.ToString() ?? "null"}" : "")}")
 				.JoinBy(", ");
 
-			var initializeParametersAreOptionalOrEmpty = parameters
-				.None(p => !p.isOptional);
+			var initializeParametersAreOptionalOrEmpty = parameters.None(p => !p.isOptional)
+				&& (methods.Owner.BaseType == null
+					|| methods.Owner.BaseType.SpecialType == SpecialType.System_Object
+					|| methods.Owner.BaseType.Constructors.Any(ctor => ctor.Parameters.None(p => !p.IsOptional)));
 
 			var result = string.Empty;
 
@@ -280,6 +307,13 @@ namespace Uno.CodeGen.ClassLifecycle
 							// It is invoking the parameter less contructor we are generating !
 							return declaredParameterlessConstructor == null && initializer.ArgumentList.Arguments.None();
 						}
+						else if (parentConstructor.ContainingSymbol != constructor.ContainingSymbol)
+						{
+							// Currently we don't support Intialize inheritance (the issue is that as each inheriance layer may add some parameters,
+							// the base class cannot invoke a single method that is overriden by children)
+							// We could allow this scenario for parameter-less Initialize(), but it would propably be more confusing.
+							return false;
+						}
 						else
 						{
 							return InvokesInitialize(parentConstructor);
@@ -326,11 +360,19 @@ namespace Uno.CodeGen.ClassLifecycle
 			var (patternKind, patternMethod) = methods.Owner.GetDisposablePatternImplementation();
 			var (disposeKind, disposeMethod) = methods.Owner.GetDisposableImplementation();
 
-			if (iDisposableImplementation == null)
+			// If the class inherits from another class that has [DisposeMtehod], we know that it will implement the dispose pattern
+			var baseHasDisposableMethods = methods.Bases.Any(b => b.Disposes.Any());
+			if (baseHasDisposableMethods)
+			{
+				patternKind = DisposePatternImplementationKind.DisposePatternOnBase;
+			}
+
+			// Finaliy generate the code
+			if (iDisposableImplementation == null && !baseHasDisposableMethods)
 			{
 				ImplementIDisposable();
 			}
-			else if (patternKind != DisposePatternImplementationKind.None)
+			else if (patternKind != DisposePatternImplementationKind.None || baseHasDisposableMethods)
 			{
 				ExtendDisposePattern();
 			}
@@ -418,7 +460,7 @@ namespace Uno.CodeGen.ClassLifecycle
 							private int __lifecycleIsDisposed;
 
 							/// <inheritdoc />
-							{patternMethod.DeclaredAccessibility.ToString().ToLowerInvariant()} override void Dispose(bool isDisposing)
+							{patternMethod?.DeclaredAccessibility.ToString().ToLowerInvariant() ?? "protected"} override void Dispose(bool isDisposing)
 							{{
 								base.Dispose(isDisposing);
 
