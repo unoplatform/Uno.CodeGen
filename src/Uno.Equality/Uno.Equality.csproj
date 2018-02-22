@@ -12,7 +12,7 @@
 		<Company>nventive</Company>
 		<Description>This package provides attributes for Equality source code generation.
 This package is part of the Uno.CodeGen to generate equality members in your project.</Description>
-		<RootNamespace>Uno</RootNamespace>
+		<RootNamespace>Uno.Equality</RootNamespace>
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 		<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
 		<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>

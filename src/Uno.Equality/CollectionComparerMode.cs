@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 // ******************************************************************
-namespace Uno
+namespace Uno.Equality
 {
 	/// <summary>
 	/// Use to qualify the collection mode in <see cref="EqualityComparerOptionsAttribute"/> attribute.

@@ -16,7 +16,7 @@
 // ******************************************************************
 using System;
 
-namespace Uno
+namespace Uno.Equality
 {
 	/// <summary>
 	/// Attribute to put on a collection field/property to specify the kind

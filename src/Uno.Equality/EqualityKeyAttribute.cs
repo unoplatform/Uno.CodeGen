@@ -15,6 +15,7 @@
 //
 // ******************************************************************
 using System;
+using Uno.Equality;
 
 namespace Uno
 {

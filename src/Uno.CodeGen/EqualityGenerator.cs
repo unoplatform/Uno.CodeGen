@@ -22,6 +22,7 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Uno.Equality;
 using Uno.Helpers;
 using Uno.RoslynHelpers;
 using Uno.SourceGeneration;
@@ -95,6 +96,7 @@ namespace Uno
 			249449, // 22001st prime number
 		};
 
+		/// <inheritdoc />
 		public override void Execute(SourceGeneratorContext context)
 		{
 			 _context = context;

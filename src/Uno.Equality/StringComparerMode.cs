@@ -16,7 +16,7 @@
 // ******************************************************************
 using System;
 
-namespace Uno
+namespace Uno.Equality
 {
 	/// <summary>
 	/// Use to qualify the string mode in <see cref="EqualityComparerOptionsAttribute"/> attribute.

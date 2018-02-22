@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 // ******************************************************************
-namespace Uno
+namespace Uno.Equality
 {
 	/// <summary>
 	/// Mode to use for <see cref="EqualityKeyAttribute"/>
