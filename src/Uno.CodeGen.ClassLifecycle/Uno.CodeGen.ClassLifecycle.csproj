@@ -11,7 +11,7 @@
 		<Authors>nventive</Authors>
 		<Company>nventive</Company>
 		<Description>This package provides a generator which generates the class life cycle method using the attributes from Uno.ClassLifecycle.
-This package is part of the Uno.CodeGen to generate object life cycle methods in your project.</Description>
+This package is part of the Uno.CodeGen to generate classes lifecycle methods in your project.</Description>
 		<RootNamespace>Uno</RootNamespace>
 		<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
 		<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
