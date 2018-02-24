@@ -119,8 +119,14 @@ namespace Uno.CodeGen.Tests
 	}
 
 	[GeneratedImmutable]
-	public abstract partial class KeyEqualityConcreteWrapper : KeyEqualityAbstractWrapper<KeyEqualityId>
+	public abstract partial class KeyEqualityConcreteAbstractWrapper : KeyEqualityAbstractWrapper<KeyEqualityId>
 	{
 		public string NonKeyField2 { get; }
+	}
+
+	[GeneratedImmutable]
+	public partial class KeyEqualityConcreteWrapper : KeyEqualityConcreteAbstractWrapper
+	{
+		public string NonKeyField3 { get; }
 	}
 }

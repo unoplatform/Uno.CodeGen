@@ -318,8 +318,10 @@ namespace Uno
 					builder.AppendLineInvariant($"/// // The following code will use implicit cast to create a new {symbolNameForXml} immutable instance:");
 					builder.AppendLineInvariant("{0}", $"/// {symbolNameForXml} my{symbolName}Instance = new {symbolNameForXml}.Builder {{ {prop1Name} = [{prop1Name} value], ... }};");
 					builder.AppendLineInvariant("/// </example>");
+
+					var abstractBuilder = typeSymbol.IsAbstract ? "abstract " : "";
 					using (builder.BlockInvariant(
-						$"{typeSymbol.GetAccessibilityAsCSharpCodeString()} {newModifier}partial class {builderTypeNameAndBaseClass}"))
+						$"{typeSymbol.GetAccessibilityAsCSharpCodeString()} {abstractBuilder}{newModifier}partial class {builderTypeNameAndBaseClass}"))
 					{
 						if (!baseTypeInfo.isBaseTypePresent)
 						{
@@ -357,14 +359,25 @@ namespace Uno
 						}
 						else
 						{
-							using (builder.BlockInvariant($"public Builder({symbolNameWithGenerics} original) : base(original ?? {symbolNameWithGenerics}.Default)"))
+							if (typeSymbol.IsAbstract)
 							{
-								builder.AppendLineInvariant($"// Default constructor, the _original field is assigned in base constructor.");
+								using (builder.BlockInvariant($"protected Builder({symbolNameWithGenerics} original) : base(original)"))
+								{
+									builder.AppendLineInvariant($"// It's an abstract class, we can't create an instance of this builder directly.");
+									builder.AppendLineInvariant($"// The _original field is assigned in base constructor.");
+								}
 							}
-
-							using (builder.BlockInvariant($"public Builder() : base({symbolNameWithGenerics}.Default)"))
+							else
 							{
-								builder.AppendLineInvariant($"// Default constructor, the _original field is assigned in base constructor.");
+								using (builder.BlockInvariant($"public Builder({symbolNameWithGenerics} original) : base(original ?? {symbolNameWithGenerics}.Default)"))
+								{
+									builder.AppendLineInvariant($"// Default constructor, the _original field is assigned in base constructor.");
+								}
+
+								using (builder.BlockInvariant($"public Builder() : base({symbolNameWithGenerics}.Default)"))
+								{
+									builder.AppendLineInvariant($"// Default constructor, the _original field is assigned in base constructor.");
+								}
 							}
 						}
 
