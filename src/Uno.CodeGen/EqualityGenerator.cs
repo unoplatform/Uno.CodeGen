@@ -39,7 +39,7 @@ namespace Uno
 	public class EqualityGenerator : SourceGenerator
 	{
 		private const int CollectionModeSorted = (int)CollectionComparerMode.Sorted; // this reference won't survive compilation
-		private const int CollectionModeUnsorted = (int)CollectionComparerMode.Sorted; // this reference won't survive compilation
+		private const int CollectionModeUnsorted = (int)CollectionComparerMode.Unsorted; // this reference won't survive compilation
 
 		private const byte StringModeIgnoreCase = (byte)StringComparerMode.IgnoreCase; // this reference won't survive compilation
 		private const byte StringModeEmptyEqualsNull = (byte)StringComparerMode.EmptyEqualsNull; // this reference won't survive compilation
@@ -116,7 +116,7 @@ namespace Uno
 			_ignoreForEqualityAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityIgnoreAttribute");
 			_equalityHashAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityHashAttribute");
 			_equalityKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityKeyAttribute");
-			_equalityComparerOptionsAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityComparerOptionsAttribute");
+			_equalityComparerOptionsAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.Equality.EqualityComparerOptionsAttribute");
 			_dataAnnonationsKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("System.ComponentModel.DataAnnotations.KeyAttribute");
 
 			_generateKeyEqualityCode = _iKeyEquatableSymbol != null;
