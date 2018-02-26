@@ -16,6 +16,7 @@
 // ******************************************************************
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Uno.Equality;
 
 namespace Uno.CodeGen.Tests
 {

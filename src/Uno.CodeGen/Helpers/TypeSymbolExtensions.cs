@@ -14,11 +14,16 @@
 // limitations under the License.
 //
 // ******************************************************************
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Uno.Helpers
 {
@@ -324,6 +329,56 @@ namespace Uno.Helpers
 
 			(keyType, valueType, isReadonlyDictionary) = ImmutableInterlocked.GetOrAdd(ref _isDictionary, type, GetIsACollection);
 			return keyType != null;
+		}
+
+		private static MethodInfo _isAutoPropertyGetter;
+
+		public static bool IsAutoProperty(this IPropertySymbol symbol)
+		{
+			if (symbol.IsWithEvents || symbol.IsIndexer || !symbol.IsReadOnly)
+			{
+				return false;
+			}
+
+			while (!Equals(symbol.OriginalDefinition, symbol))
+			{
+				// In some cases we're dealing with a derived type of `WrappedPropertySymbol`.
+				// This code needs to deal with the SourcePropertySymbol from Roslyn,
+				// the type containing the `IsAutoProperty` internal member.
+				symbol = symbol.OriginalDefinition;
+			}
+
+			var type = symbol.GetType();
+			switch (type.FullName)
+			{
+				case "Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE.PEPropertySymbol":
+					return symbol.IsReadOnly; // It's from compiled code. We assume it's an auto-property when "read only"
+				case "Microsoft.CodeAnalysis.CSharp.Symbols.SourcePropertySymbol":
+					break; // ok
+				default:
+					throw new InvalidOperationException(
+						"Unable to find the internal property `IsAutoProperty` on implementation of `IPropertySymbol`. " +
+						"Should be on internal class `PropertySymbol`. Maybe you are using an incompatible version of Roslyn.");
+			}
+
+			if (_isAutoPropertyGetter == null)
+			{
+				_isAutoPropertyGetter = type
+					.GetProperty("IsAutoProperty", BindingFlags.Instance | BindingFlags.NonPublic)
+					.GetMethod;
+			}
+
+			var isAuto = _isAutoPropertyGetter.Invoke(symbol, new object[] { });
+			return (bool) isAuto;
+		}
+
+		public static bool IsFromPartialDeclaration(this ISymbol symbol)
+		{
+			return symbol
+				.DeclaringSyntaxReferences
+				.Select(reference => reference.GetSyntax(CancellationToken.None))
+				.OfType<ClassDeclarationSyntax>()
+				.Any(node => node.Modifiers.Any(SyntaxKind.PartialKeyword));
 		}
 	}
 }

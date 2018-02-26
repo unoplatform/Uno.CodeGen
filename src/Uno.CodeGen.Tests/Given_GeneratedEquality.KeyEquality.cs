@@ -16,6 +16,7 @@
 // ******************************************************************
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Uno.Equality;
 
 namespace Uno.CodeGen.Tests
 {
@@ -39,6 +40,7 @@ namespace Uno.CodeGen.Tests
 			e1.Equals(e2).Should().BeFalse();
 			e1.KeyEquals(e2).Should().BeTrue();
 		}
+
 		[TestMethod]
 		public void KeyEquality_WhenUsingEqualityMode()
 		{
@@ -58,6 +60,25 @@ namespace Uno.CodeGen.Tests
 			e1.KeyEquals(e2).Should().BeFalse();
 			e1.IdField.KeyEquals(e2.IdField).Should().BeTrue();
 		}
+
+		//[TestMethod]
+		//public void KeyEquality_WhenUsingKeyEqualityMode_OnAbstractClass()
+		//{
+		//	var e1 = new KeyEqualityConcreteWrapper.Builder
+		//	{
+		//		IdField = new KeyEqualityId.Builder { Id = "a", Name = "n" },
+		//		NonKeyField = "nkf1"
+		//	}.ToImmutable();
+
+		//	var e2 = new KeyEqualityWrapper.Builder
+		//	{
+		//		IdField = new KeyEqualityConcreteWrapper.Builder { Id = "a", Name = "n-bis" },
+		//		NonKeyField = "nkf2"
+		//	}.ToImmutable();
+
+		//	e1.Equals(e2).Should().BeFalse();
+		//	e1.KeyEquals(e2).Should().BeTrue();
+		//}
 	}
 
 	[GeneratedImmutable]
@@ -85,5 +106,27 @@ namespace Uno.CodeGen.Tests
 		public string Id { get; }
 
 		public string Name { get; }
+	}
+
+	[GeneratedImmutable]
+	public abstract partial class KeyEqualityAbstractWrapper<T>
+		where T:IKeyEquatable<T>
+	{
+		[EqualityKey]
+		public T IdField { get; }
+
+		public string NonKeyField { get; }
+	}
+
+	[GeneratedImmutable]
+	public abstract partial class KeyEqualityConcreteAbstractWrapper : KeyEqualityAbstractWrapper<KeyEqualityId>
+	{
+		public string NonKeyField2 { get; }
+	}
+
+	[GeneratedImmutable]
+	public partial class KeyEqualityConcreteWrapper : KeyEqualityConcreteAbstractWrapper
+	{
+		public string NonKeyField3 { get; }
 	}
 }

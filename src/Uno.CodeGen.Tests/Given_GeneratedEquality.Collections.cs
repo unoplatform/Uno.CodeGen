@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Uno.Equality;
 
 namespace Uno.CodeGen.Tests
 {

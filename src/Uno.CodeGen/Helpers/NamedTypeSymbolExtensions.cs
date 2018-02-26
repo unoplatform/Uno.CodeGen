@@ -15,24 +15,28 @@
 //
 // ******************************************************************
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 
 namespace Uno.Helpers
 {
 	public static class NamedTypeSymbolExtensions
 	{
-		public static SymbolNames GetSymbolNames(this INamedTypeSymbol typeSymbol)
+		public static SymbolNames GetSymbolNames(this INamedTypeSymbol typeSymbol, INamedTypeSymbol typeToUseForSubstitutions = null)
 		{
+			var substitutions = typeToUseForSubstitutions.GetSubstitutionTypes();
+
 			var symbolName = typeSymbol.Name;
 			if (typeSymbol.TypeArguments.Length == 0) // not a generic type
 			{
 				return new SymbolNames(typeSymbol, symbolName, "", symbolName, symbolName, symbolName, symbolName, "");
 			}
 
-			var argumentNames = typeSymbol.GetTypeArgumentNames();
+			var argumentNames = typeSymbol.GetTypeArgumentNames(substitutions);
 			var genericArguments = string.Join(", ", argumentNames);
 
 			// symbolNameWithGenerics: MyType<T1, T2>
@@ -56,9 +60,43 @@ namespace Uno.Helpers
 			return new SymbolNames(typeSymbol, symbolName, $"<{genericArguments}>", symbolNameWithGenerics, symbolForXml, symbolNameDefinition, symbolFilename, genericConstraints);
 		}
 
-		public static string[] GetTypeArgumentNames(this ITypeSymbol typeSymbol)
+		public static string[] GetTypeArgumentNames(
+			this ITypeSymbol typeSymbol,
+			(string argumentName, string type)[] substitutions)
 		{
-			return (typeSymbol as INamedTypeSymbol)?.TypeArguments.Select(ta => ta.ToString()).ToArray() ?? new string[0];
+			if (typeSymbol is INamedTypeSymbol namedSymbol)
+			{
+				var dict = substitutions.ToDictionary(x => x.argumentName, x => x.type);
+
+				return namedSymbol.TypeArguments
+					.Select(ta => ta.ToString())
+					.Select(t=> dict.ContainsKey(t) ? dict[t] : t)
+					.ToArray();
+			}
+			return new string[0];
+		}
+
+		public static (string argumentName, string type)[] GetSubstitutionTypes(this INamedTypeSymbol type)
+		{
+			if (type == null || type.TypeArguments.Length == 0)
+			{
+				return new(string, string)[] { };
+			}
+
+			var argumentParameters = type.TypeParameters;
+			var argumentTypes = type.TypeArguments;
+
+			var result = new (string, string)[type.TypeArguments.Length];
+
+			for (var i = 0; i < argumentParameters.Length; i++)
+			{
+				var parameterType = argumentTypes[i] as INamedTypeSymbol;
+				var parameterNames = parameterType.GetSymbolNames();
+
+				result[i]= (argumentParameters[i].Name, parameterNames.GetSymbolFullNameWithGenerics());
+			}
+
+			return result;
 		}
 	}
 
@@ -92,6 +130,24 @@ namespace Uno.Helpers
 		public string SymbolNameDefinition { get; }
 		public string SymbolFilename { get; }
 		public string GenericConstraints { get; }
+
+		public string GetContainingTypeFullName(INamedTypeSymbol typeForSubstitutions = null)
+		{
+			if (Symbol.ContainingType != null)
+			{
+				return Symbol
+					.ContainingType
+					.GetSymbolNames(typeForSubstitutions)
+					.GetSymbolFullNameWithGenerics();
+			}
+
+			return Symbol.ContainingNamespace.ToString();
+		}
+
+		public string GetSymbolFullNameWithGenerics(INamedTypeSymbol typeForSubstitutions = null)
+		{
+			return $"{GetContainingTypeFullName(typeForSubstitutions)}.{SymbolNameWithGenerics}";
+		}
 
 		public void Deconstruct(
 			out string symbolName,

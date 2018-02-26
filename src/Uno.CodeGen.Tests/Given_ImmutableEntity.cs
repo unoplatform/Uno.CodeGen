@@ -17,10 +17,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.ComponentModel.DataAnnotations;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 
 [assembly: Uno.ImmutableGenerationOptions(TreatArrayAsImmutable = true, GenerateEqualityByDefault = true)]
 

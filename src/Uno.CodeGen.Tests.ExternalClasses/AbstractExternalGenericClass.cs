@@ -14,34 +14,12 @@
 // limitations under the License.
 //
 // ******************************************************************
-namespace Uno.Equality
+namespace Uno.CodeGen.Tests.ExternalClasses
 {
-	/// <summary>
-	/// Use to qualify the collection mode in <see cref="EqualityComparerOptionsAttribute"/> attribute.
-	/// </summary>
-	public enum CollectionComparerMode : int
+	[GeneratedImmutable]
+	public abstract partial class AbstractExternalGenericClass<T>
 	{
-		/// <summary>
-		/// No special mode for comparer
-		/// </summary>
-		Default = 0,
-		
-		/// <summary>
-		/// Use a comparer which allows for a different ordering between collections.
-		/// </summary>
-		/// <remarks>
-		/// This is not a flag, the flag is on `Sorted`
-		/// </remarks>
-		Unsorted = 0b0000,
-
-		/// <summary>
-		/// Use a comparer which checks the ordering in the collections.
-		/// </summary>
-		Sorted = 0b0001,
-
-		/// <summary>
-		/// Treat null collection and empty ones are equals.
-		/// </summary>
-		NullIsEmpty = 0b0010,
+		[EqualityHash]
+		public T Id { get; }
 	}
 }
