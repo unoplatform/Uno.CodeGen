@@ -643,11 +643,11 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 				}
 
 				builder.AppendLine();
-				using (builder.BlockInvariant($"{typeSymbol.GetAccessibilityAsCSharpCodeString()} static partial class {symbolName}Extensions"))
-				{
-					var propertiesForWithExtensions = GetPropertiesForWithExtensions(baseTypeInfo.baseBuilderType, properties);
+				var propertiesForWithExtensions = GetPropertiesForWithExtensions(baseTypeInfo.baseBuilderType, properties);
 
-					if (propertiesForWithExtensions.Any() && !typeSymbol.IsAbstract)
+				if (propertiesForWithExtensions.Any() && !typeSymbol.IsAbstract)
+				{
+					using (builder.BlockInvariant($"{typeSymbol.GetAccessibilityAsCSharpCodeString()} static partial class {symbolName}Extensions"))
 					{
 						var builderName = $"{symbolNameWithGenerics}.Builder";
 
@@ -674,6 +674,8 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 							{
 								builder.AppendLineInvariant($"return ({builderName})(new {builderName}(entity).With{prop.Name}(value));");
 							}
+
+							builder.AppendLine();
 
 							builder.AppendLineInvariant("/// <summary>");
 							builder.AppendLineInvariant($"/// Set property {prop.Name} in a fluent declaration by projecting previous value.");
@@ -818,16 +820,18 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 					$"#error {nameof(ImmutableGenerator)}: Type {symbolNames.SymbolNameWithGenerics} **MUST** derive from an immutable class.");
 			}
 
-			void CheckTypeImmutable(ITypeSymbol type, string typeSource)
+			void CheckTypeImmutable(ITypeSymbol type, string typeSource, bool constraintsChecked = false)
 			{
-				if (type.IsGenericArgument())
+				if (type is ITypeParameterSymbol typeParameter)
 				{
-					var typeParameter = type as ITypeParameterSymbol;
-					if (typeParameter?.ConstraintTypes.Any() ?? false)
+					if (typeParameter.ConstraintTypes.Any())
 					{
-						foreach (var constraintType in typeParameter.ConstraintTypes)
+						if (!constraintsChecked)
 						{
-							CheckTypeImmutable(constraintType, $"{typeSymbol} / Generic type {typeParameter}:{constraintType}");
+							foreach (var constraintType in typeParameter.ConstraintTypes)
+							{
+								CheckTypeImmutable(constraintType, $"{typeSymbol} / Generic type {typeParameter}:{constraintType}", constraintsChecked: true);
+							}
 						}
 					}
 					else
@@ -865,7 +869,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 				{
 					foreach (var typeArgument in namedType.TypeArguments)
 					{
-						CheckTypeImmutable(typeArgument, $"{typeSource} (argument type {typeArgument})");
+						CheckTypeImmutable(typeArgument, $"{typeSource} (argument type {typeArgument})", constraintsChecked);
 					}
 				}
 			}

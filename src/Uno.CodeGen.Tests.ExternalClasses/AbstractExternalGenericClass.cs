@@ -17,9 +17,9 @@
 namespace Uno.CodeGen.Tests.ExternalClasses
 {
 	[GeneratedImmutable]
-	public abstract partial class AbstractExternalGenericClass<T>
+	public abstract partial class AbstractExternalGenericClass<TId>
 	{
 		[EqualityHash]
-		public T Id { get; }
+		public TId Id { get; }
 	}
 }

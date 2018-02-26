@@ -29,11 +29,6 @@ namespace Uno.Helpers
 {
 	public static class TypeSymbolExtensions
 	{
-		public static bool IsGenericArgument(this ITypeSymbol type)
-		{
-			return type.GetType().Name.Equals("SourceTypeParameterSymbol");
-		}
-
 		public static bool IsPrimitive(this ITypeSymbol type)
 		{
 			switch (type.SpecialType)

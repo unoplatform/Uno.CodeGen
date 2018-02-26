@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // ******************************************************************
+using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Uno.Equality;
 using AbstractExternalClass = Uno.CodeGen.Tests.ExternalClasses.AbstractExternalClass;
@@ -25,40 +26,26 @@ namespace Uno.CodeGen.Tests
 		[TestMethod]
 		public void Immutable_When_Abstracted_Base_Class()
 		{
-			// var sut1 = InheritanceDerivedClass.Default.WithKeyValue(null);
+			InheritanceDerivedClassFromExternal sut1 = InheritanceDerivedClassFromExternal.Default.WithId("id1");
+			InheritanceDerivedClassFromExternal sut2 = new InheritanceDerivedClassFromExternal.Builder() {Id = "id1"};
+
+			sut1.Equals(sut2).Should().BeTrue();
 		}
 	}
 
-	//public interface IImmutable<out TBuilder>
-	//{
-	//	TBuilder GetBuilder();
-	//}
-
 	[GeneratedImmutable]
-	public abstract partial class InheritanceAbstractBaseClass<T> // : IImmutable<InheritanceAbstractBaseClass<T>.Builder>
+	public abstract partial class InheritanceAbstractBaseClass<T>
 		where T : IKeyEquatable<T>
 	{
 		[EqualityKey]
 		public T KeyValue { get; }
-
-		//public abstract TBuilder GetBuilder<TBuilder>() where TBuilder : Builder;
-
-		//Builder IImmutable<Builder>.GetBuilder()
-		//{
-		//	throw new System.NotImplementedException();
-		//}
 	}
 
-	//[GeneratedImmutable]
-	//public abstract partial class InheritanceAbstractBaseClass2<T> : InheritanceAbstractBaseClass<T>
-	//	where T : IKeyEquatable<T>
-	//{
-	//	//Builder IImmutable<InheritanceAbstractBaseClass2<T>.Builder>.GetBuilder()
-	//	//{
-	//	//	throw new System.NotImplementedException();
-	//	//}
-
-	//}
+	[GeneratedImmutable]
+	public abstract partial class InheritanceAbstractBaseClass2<T> : InheritanceAbstractBaseClass<T>
+		where T : IKeyEquatable<T>
+	{
+	}
 
 	[GeneratedImmutable]
 	public partial class InheritanceHashedClass
@@ -70,10 +57,6 @@ namespace Uno.CodeGen.Tests
 	[GeneratedImmutable]
 	public partial class InheritanceDerivedClass : InheritanceAbstractBaseClass<InheritanceHashedClass>
 	{
-		//public override TBuilder GetBuilder<TBuilder>() where TBuilder : Builder
-		//{
-		//	throw new System.NotImplementedException();
-		//}
 	}
 
 	public partial class InheritanceDerivedClassFromExternal : AbstractExternalClass
