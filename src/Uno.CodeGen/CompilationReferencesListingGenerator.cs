@@ -42,13 +42,9 @@ namespace Uno
 				.OrderBy(r => r.Display, StringComparer.InvariantCultureIgnoreCase)
 				.Select((r, i) => $"// #{i}: {r.Display}");
 
-			foreach (var line in lines)
-			{
-				output.AppendLine(line);
-			}
+			output.AppendLine(string.Join(Environment.NewLine, lines));
 
-			var filename = $"{nameof(CompilationReferencesListingGenerator)}.cs";
-			context.AddCompilationUnit(filename, output.ToString());
+			context.AddCompilationUnit(nameof(CompilationReferencesListingGenerator), output.ToString());
 		}
 	}
 }
