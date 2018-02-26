@@ -15,6 +15,7 @@
 //
 // ******************************************************************
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -143,7 +144,7 @@ namespace Uno
 			return shouldGenerateEquality ?? _generationOptions.generateEqualityByDefault;
 		}
 
-		private (bool isBaseTypePresent, string baseType, string builderBaseType, bool isImmutablePresent) GetTypeInfo(
+		private (bool isBaseTypePresent, string baseType, string builderBaseType, bool isImmutablePresent, INamedTypeSymbol baseBuilderType) GetTypeInfo(
 			SourceGeneratorContext context,
 			INamedTypeSymbol type, INamedTypeSymbol[] immutableEntitiesToGenerate)
 		{
@@ -153,7 +154,7 @@ namespace Uno
 			var baseType = type.BaseType;
 			if (baseType == null || baseType.Equals(_systemObject))
 			{
-				return (false, null, null, isImmutablePresent); // no base type
+				return (false, null, null, isImmutablePresent, null); // no base type
 			}
 
 			// Is Builder already compiled ? (in another project/assembly)
@@ -164,7 +165,9 @@ namespace Uno
 				var baseTypeNames = baseType.GetSymbolNames();
 				var baseTypeBuilderNames = baseTypeBuilder.GetSymbolNames(baseType);
 
-				return (true, baseTypeNames.GetSymbolFullNameWithGenerics(baseType), baseTypeBuilderNames.GetSymbolFullNameWithGenerics(baseType), isImmutablePresent);
+				var resultBaseType = baseTypeNames.GetSymbolFullNameWithGenerics(baseType);
+				var resultBuilderType = baseTypeBuilderNames.GetSymbolFullNameWithGenerics(baseType);
+				return (true, resultBaseType, resultBuilderType, isImmutablePresent, baseTypeBuilder);
 			}
 
 			var baseTypeDefinition = baseType.ConstructedFrom ?? baseType;
@@ -178,14 +181,14 @@ namespace Uno
 				var baseTypeName = isSameNamespace ? names.SymbolNameWithGenerics : baseType.ToDisplayString();
 				var builderBaseType = baseTypeName + ".Builder";
 
-				return (true, baseTypeName, builderBaseType, isImmutablePresent);
+				return (true, baseTypeName, builderBaseType, isImmutablePresent, null);
 			}
 
-			return (false, null, null, isImmutablePresent); // no relevant basetype
+			return (false, null, null, isImmutablePresent, null); // no relevant basetype
 		}
 
 		private void GenerateImmutable(INamedTypeSymbol typeSymbol,
-			(bool isBaseTypePresent, string baseType, string builderBaseType, bool isImmutablePresent) baseTypeInfo,
+			(bool isBaseTypePresent, string baseType, string builderBaseType, bool isImmutablePresent, INamedTypeSymbol baseBuilderType) baseTypeInfo,
 			bool generateEquality)
 		{
 			var defaultMemberName = "Default";
@@ -282,22 +285,7 @@ namespace Uno
 						builder.AppendLineInvariant($"/// {defaultMemberName} instance with only property initializer set.");
 						builder.AppendLineInvariant($"/// </summary>");
 						builder.AppendLineInvariant($"public static readonly {newModifier}{symbolNameWithGenerics} {defaultMemberName} = new {symbolNameWithGenerics}();");
-
-						//builder.AppendLine();
-
-						//builder.AppendLineInvariant($"/// <summary>");
-						//builder.AppendLineInvariant($"/// {defaultMemberName} instance with only property initializer set.");
-						//builder.AppendLineInvariant($"/// </summary>");
-						//using (builder.BlockInvariant($"internal {newModifier}{symbolNameWithGenerics} {defaultMemberName}({symbolNameWithGenerics} original = default({symbolNameWithGenerics}));"))
-						//{
-
-						//}
-
-
-							builder.AppendLine();
-					}
-					else
-					{
+						builder.AppendLine();
 					}
 
 					var prop1Name = properties.Select(p => p.property.Name).FirstOrDefault() ?? symbolName + "Property";
@@ -330,7 +318,7 @@ namespace Uno
 							builder.AppendLineInvariant("protected bool _isDirty = false;");
 							builder.AppendLine();
 							builder.AppendLineInvariant("// This is the original entity, if any (could be null))");
-							builder.AppendLineInvariant("{0}", $"protected internal readonly {symbolNameWithGenerics} _original;");
+							builder.AppendLineInvariant("{0}", $"protected readonly {symbolNameWithGenerics} _original;");
 							builder.AppendLine();
 							builder.AppendLineInvariant("// Cached version of generated entity (flushed when the builder is updated)");
 							builder.AppendLineInvariant($"protected {symbolNameWithGenerics} _cachedResult = default({symbolNameWithGenerics});");
@@ -657,13 +645,15 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 				builder.AppendLine();
 				using (builder.BlockInvariant($"{typeSymbol.GetAccessibilityAsCSharpCodeString()} static partial class {symbolName}Extensions"))
 				{
-					if (properties.Any() && !typeSymbol.IsAbstract)
+					var propertiesForWithExtensions = GetPropertiesForWithExtensions(baseTypeInfo.baseBuilderType, properties);
+
+					if (propertiesForWithExtensions.Any() && !typeSymbol.IsAbstract)
 					{
 						var builderName = $"{symbolNameWithGenerics}.Builder";
 
 						builder.AppendLine();
 						builder.AppendLineInvariant($"#region .WithXXX() methods on {symbolNameWithGenerics}");
-						foreach (var (prop, isNew) in properties)
+						foreach (var prop in propertiesForWithExtensions)
 						{
 							builder.AppendLine();
 
@@ -682,7 +672,7 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 							builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
 							using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this {symbolNameWithGenerics} entity, {prop.Type} value){genericConstraints}"))
 							{
-								builder.AppendLineInvariant($"return new {builderName}(entity).With{prop.Name}(value);");
+								builder.AppendLineInvariant($"return ({builderName})(new {builderName}(entity).With{prop.Name}(value));");
 							}
 
 							builder.AppendLineInvariant("/// <summary>");
@@ -700,7 +690,7 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 							builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
 							using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this {symbolNameWithGenerics} entity, Func<{prop.Type}, {prop.Type}> valueSelector){genericConstraints}"))
 							{
-								builder.AppendLineInvariant($"return new {builderName}(entity).With{prop.Name}(valueSelector);");
+								builder.AppendLineInvariant($"return ({builderName})(new {builderName}(entity).With{prop.Name}(valueSelector));");
 							}
 
 							builder.AppendLine();
@@ -723,7 +713,7 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 								builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
 								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this global::Uno.Option<{symbolNameWithGenerics}> optionEntity, {prop.Type} value){genericConstraints}"))
 								{
-									builder.AppendLineInvariant($"return {builderName}.FromOption(optionEntity).With{prop.Name}(value);");
+									builder.AppendLineInvariant($"return ({builderName})({builderName}.FromOption(optionEntity).With{prop.Name}(value));");
 								}
 
 								builder.AppendLine();
@@ -744,7 +734,7 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 								builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
 								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this global::Uno.Option<{symbolNameWithGenerics}> optionEntity, Func<{prop.Type}, {prop.Type}> valueSelector){genericConstraints}"))
 								{
-									builder.AppendLineInvariant($"return {builderName}.FromOption(optionEntity).With{prop.Name}(valueSelector);");
+									builder.AppendLineInvariant($"return ({builderName})({builderName}.FromOption(optionEntity).With{prop.Name}(valueSelector));");
 								}
 
 								builder.AppendLine();
@@ -787,10 +777,27 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 			_context.AddCompilationUnit(resultFileName, builder.ToString());
 		}
 
+		private IPropertySymbol[] GetPropertiesForWithExtensions(INamedTypeSymbol baseBuilderSymbol, (IPropertySymbol property, bool isNew)[] currentTypeProperties)
+		{
+			if (baseBuilderSymbol == null || baseBuilderSymbol.SpecialType == SpecialType.System_Object)
+			{
+				return currentTypeProperties.Select(x => x.property).ToArray();
+			}
+
+			var baseBuildeProperties = baseBuilderSymbol
+				.GetProperties()
+				.Where(p => !p.IsReadOnly && p.DeclaredAccessibility == Accessibility.Public);
+
+			return currentTypeProperties
+				.Select(x => x.property)
+				.Concat(baseBuildeProperties)
+				.ToArray();
+		}
+
 		private void ValidateType(
 			IIndentedStringBuilder builder,
 			INamedTypeSymbol typeSymbol,
-			(bool isBaseType, string baseType, string builderBaseType, bool isImmutablePresent) baseTypeInfo,
+			(bool isBaseType, string baseType, string builderBaseType, bool isImmutablePresent, INamedTypeSymbol baseBuilderType) baseTypeInfo,
 			SymbolNames symbolNames, IPropertySymbol[] typeProperties)
 		{
 			if (!typeSymbol.IsFromPartialDeclaration())

@@ -93,7 +93,7 @@ namespace Uno.Helpers
 				var parameterType = argumentTypes[i] as INamedTypeSymbol;
 				var parameterNames = parameterType.GetSymbolNames();
 
-				result[i]= (argumentParameters[i].Name, parameterNames.SymbolNameWithGenerics);
+				result[i]= (argumentParameters[i].Name, parameterNames.GetSymbolFullNameWithGenerics());
 			}
 
 			return result;
