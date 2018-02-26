@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 // ******************************************************************
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;

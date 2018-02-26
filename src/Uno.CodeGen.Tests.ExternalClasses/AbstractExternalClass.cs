@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 // ******************************************************************
-namespace Uno.CodeGen.Tests.ExternalClass
+namespace Uno.CodeGen.Tests.ExternalClasses
 {
 	[GeneratedImmutable]
-	public abstract partial class AbstractExternalGenericClass<T>
+	public abstract partial class AbstractExternalClass
 	{
 		[EqualityHash]
-		public T Id { get; }
+		public string Id { get; }
 	}
 }

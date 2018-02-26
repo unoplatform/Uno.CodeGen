@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2027
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.CodeGen", "Uno.CodeGen\Uno.CodeGen.csproj", "{7A05DD54-F3F1-4A48-97A5-1A5F45D9F315}"
 EndProject
@@ -26,7 +26,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.ClassLifecycle", "Uno.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.CodeGen.ClassLifecycle", "Uno.CodeGen.ClassLifecycle\Uno.CodeGen.ClassLifecycle.csproj", "{3F7D2A75-2FBE-4B2C-AB93-1FBF7EFFE3C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Uno.CodeGen.Tests.ExternalClass", "Uno.CodeGen.Tests.ExternalClass\Uno.CodeGen.Tests.ExternalClass.csproj", "{907C30BD-0984-4D75-8A43-107C98235F65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.CodeGen.Tests.ExternalClasses", "Uno.CodeGen.Tests.ExternalClasses\Uno.CodeGen.Tests.ExternalClasses.csproj", "{907C30BD-0984-4D75-8A43-107C98235F65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

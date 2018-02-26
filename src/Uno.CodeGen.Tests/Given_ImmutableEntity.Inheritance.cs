@@ -14,10 +14,9 @@
 // limitations under the License.
 //
 // ******************************************************************
-using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Uno.CodeGen.Tests.ExternalClass;
 using Uno.Equality;
+using AbstractExternalClass = Uno.CodeGen.Tests.ExternalClasses.AbstractExternalClass;
 
 namespace Uno.CodeGen.Tests
 {
@@ -82,7 +81,7 @@ namespace Uno.CodeGen.Tests
 
 	}
 
-	public partial class InheritanceDerivedClassFromExternalGeneric : AbstractExternalGenericClass<string>
+	public partial class InheritanceDerivedClassFromExternalGeneric : ExternalClasses.AbstractExternalGenericClass<string>
 	{
 
 	}

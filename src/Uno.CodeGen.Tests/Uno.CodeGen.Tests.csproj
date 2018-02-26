@@ -29,7 +29,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Uno.ClassLifecycle\Uno.ClassLifecycle.csproj" />
-		<ProjectReference Include="..\Uno.CodeGen.Tests.ExternalClass\Uno.CodeGen.Tests.ExternalClass.csproj" />
+		<ProjectReference Include="..\Uno.CodeGen.Tests.ExternalClasses\Uno.CodeGen.Tests.ExternalClasses.csproj" />
 		<ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
 		<ProjectReference Include="..\Uno.Immutables\Uno.Immutables.csproj" />
 	</ItemGroup>
