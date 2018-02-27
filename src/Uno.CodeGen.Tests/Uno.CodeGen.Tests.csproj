@@ -17,14 +17,14 @@
 	<Import Project="..\Uno.CodeGen.ClassLifecycle\Build\Uno.CodeGen.ClassLifecycle.props" />  
 
 	<ItemGroup>
-		<PackageReference Include="FluentAssertions" Version="5.0.0" />
+		<PackageReference Include="FluentAssertions" Version="5.1.2" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
 		<PackageReference Include="MSTest.TestAdapter" Version="1.2.0" />
 		<PackageReference Include="MSTest.TestFramework" Version="1.2.0" />
-		<PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+		<PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
-		<PackageReference Include="Uno.Core" Version="1.20.0-dev.8" />
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.20.0-dev.17" />
+		<PackageReference Include="Uno.Core" Version="1.20.2" />
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.20.1" />
 	</ItemGroup>
 
 	<ItemGroup>

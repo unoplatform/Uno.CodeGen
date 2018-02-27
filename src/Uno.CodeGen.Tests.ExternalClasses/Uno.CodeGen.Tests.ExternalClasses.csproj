@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net46;netstandard2.0;netstandard1.6</TargetFrameworks>
+		<TargetFrameworks>net46;netstandard2.0;netstandard1.3</TargetFrameworks>
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
@@ -13,7 +13,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.20.0-dev.17" />
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.20.1" />
 	</ItemGroup>
 
 	<ItemGroup>
