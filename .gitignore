@@ -228,5 +228,6 @@ Resource.Designer.cs
 *.bak
 */nuget_version_override.txt
 /src/crosstargeting_override.props
-/build/tools
+/build/tools/**
+!build/tools/packages.config
 /build/*.nupkg
