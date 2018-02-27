@@ -24,7 +24,7 @@ namespace Uno
 		/// <summary>
 		/// Get an immutable version from the current state of the mutable object.
 		/// </summary>
-#if !NETSTANDARD1_0
+#if !NETSTANDARD1_3
 		[System.Diagnostics.Contracts.Pure]
 #endif
 		TImmutable ToImmutable();

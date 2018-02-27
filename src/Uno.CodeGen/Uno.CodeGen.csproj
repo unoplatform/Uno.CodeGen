@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net46;netstandard1.0;netstandard2.0</TargetFrameworks>
+		<TargetFrameworks>net46;netstandard1.3;netstandard2.0</TargetFrameworks>
 		<IsTool>true</IsTool>
 		<NoWarn>1701;1702;1705;NU1701</NoWarn>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -16,12 +16,12 @@
 
 	<ItemGroup Condition="'$(TargetFramework)'=='net46'">
 		<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />
-		<PackageReference Include="Uno.RoslynHelpers" Version="1.1.0-dev.5" PrivateAssets="all" />
-		<PackageReference Include="Uno.SourceGeneration" Version="1.20.0-dev.17" PrivateAssets="all" />
+		<PackageReference Include="Uno.RoslynHelpers" Version="1.1.1" PrivateAssets="all" />
+		<PackageReference Include="Uno.SourceGeneration" Version="1.20.1" PrivateAssets="all" />
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.20.0-dev.17" PrivateAssets="none" />
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.20.1" PrivateAssets="none" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)'!='net46'">

@@ -6,8 +6,8 @@
 
 | Target | Branch | Status | Recent builds | Recommended Nuget packages version |
 | ------ | ------ | ------ | ------ | ------ |
-| `development` | [master](https://github.com/nventive/Uno.CodeGen/tree/master) | [![Build status](https://ci.appveyor.com/api/projects/status/bh83u4i2lp0hrg8r/branch/master?svg=true)](https://ci.appveyor.com/project/nventivedevops/uno-codegen/branch/master) | ![Build Stats](https://buildstats.info/appveyor/chart/nventivedevops/uno-codegen?branch=master&includeBuildsFromPullRequest=false) | [![NuGet](https://img.shields.io/nuget/v/Uno.CodeGen.svg)](https://www.nuget.org/packages/Uno.CodeGen/) |
-| `stable` | [stable](https://github.com/nventive/Uno.CodeGen/tree/stable) | (no build yet) | (not published yet) |
+| `development` | [master](https://github.com/nventive/Uno.CodeGen/tree/master) | [![Build status](https://ci.appveyor.com/api/projects/status/bh83u4i2lp0hrg8r/branch/master?svg=true)](https://ci.appveyor.com/project/nventivedevops/uno-codegen/branch/master) | ![Build Stats](https://buildstats.info/appveyor/chart/nventivedevops/uno-codegen?branch=master&includeBuildsFromPullRequest=false) | [![NuGet](https://buildstats.info/nuget/Uno.CodeGen?includePreReleases=true)](https://www.nuget.org/packages/Uno.CodeGen/) |
+| `stable` | [stable](https://github.com/nventive/Uno.CodeGen/tree/stable) | [![Build status](https://ci.appveyor.com/api/projects/status/bh83u4i2lp0hrg8r/branch/stable?svg=true)](https://ci.appveyor.com/project/nventivedevops/uno-codegen/branch/stable) | ![Build Stats](https://buildstats.info/appveyor/chart/nventivedevops/uno-codegen?branch=stable&includeBuildsFromPullRequest=false) | [![NuGet](https://buildstats.info/nuget/Uno.CodeGen?includePreReleases=false)](https://www.nuget.org/packages/Uno.CodeGen/) |
 
 
 ## Available Generators
