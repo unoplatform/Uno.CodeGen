@@ -13,6 +13,8 @@
 		<Description>This package provides tooling for code generation.</Description>
 		<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
 	</PropertyGroup>
+	
+	<Import Project="..\Uno.Common.props" />
 
 	<ItemGroup Condition="'$(TargetFramework)'=='net46'">
 		<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />

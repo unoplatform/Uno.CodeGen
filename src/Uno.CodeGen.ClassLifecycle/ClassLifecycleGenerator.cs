@@ -53,7 +53,7 @@ namespace Uno.CodeGen.ClassLifecycle
 			_finalizerAttribute = context.Compilation.GetTypeByMetadataName("Uno.FinalizerMethodAttribute");
 			
 			_iDisposable_Dispose = context.Compilation.GetTypeByMetadataName("System.IDisposable").GetMembers("Dispose").Single();
-			_extentibleDisposable_RegisterExtension = context.Compilation.GetTypeByMetadataName("Uno.Disposables.IExtensibleDisposable").GetMembers("RegisterExtension").SingleOrDefault();
+			_extentibleDisposable_RegisterExtension = context.Compilation.GetTypeByMetadataName("Uno.Disposables.IExtensibleDisposable")?.GetMembers("RegisterExtension").SingleOrDefault();
 
 			foreach (var methods in GetLifecycleMethods())
 			{
@@ -356,7 +356,9 @@ namespace Uno.CodeGen.ClassLifecycle
 				.JoinByEmpty();
 
 			var iDisposableImplementation = methods.Owner.FindImplementationForInterfaceMember(_iDisposable_Dispose);
-			var iExtensibleDisposableImplementation = methods.Owner.FindImplementationForInterfaceMember(_extentibleDisposable_RegisterExtension) as IMethodSymbol;
+			var iExtensibleDisposableImplementation = _extentibleDisposable_RegisterExtension == null
+				? default(IMethodSymbol)
+				: methods.Owner.FindImplementationForInterfaceMember(_extentibleDisposable_RegisterExtension) as IMethodSymbol;
 			var (patternKind, patternMethod) = methods.Owner.GetDisposablePatternImplementation();
 			var (disposeKind, disposeMethod) = methods.Owner.GetDisposableImplementation();
 

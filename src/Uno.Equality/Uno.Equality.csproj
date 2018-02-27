@@ -19,5 +19,7 @@ This package is part of the Uno.CodeGen to generate equality members in your pro
 		<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
 		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
 	</PropertyGroup>
-
+	
+	<Import Project="..\Uno.Common.props" />
+	
 </Project>
