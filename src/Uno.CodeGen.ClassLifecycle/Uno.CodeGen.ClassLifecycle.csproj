@@ -19,6 +19,8 @@ This package is part of the Uno.CodeGen to generate classes lifecycle methods in
 		<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
 		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
 	</PropertyGroup>
+	
+	<Import Project="..\Uno.Common.props" />
 
 	<ItemGroup Condition="'$(TargetFramework)'=='net46'">
 		<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />

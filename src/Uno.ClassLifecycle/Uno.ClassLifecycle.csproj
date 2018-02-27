@@ -20,4 +20,5 @@ This package is part of the Uno.CodeGen to generate object life cycle methods in
 		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
 	</PropertyGroup>
 
+	<Import Project="..\Uno.Common.props" />
 </Project>
