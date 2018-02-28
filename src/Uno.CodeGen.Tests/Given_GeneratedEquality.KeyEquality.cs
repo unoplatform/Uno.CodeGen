@@ -20,7 +20,7 @@ using Uno.Equality;
 
 namespace Uno.CodeGen.Tests
 {
-	partial class Given_GeneratedEquality
+	public partial class Given_GeneratedEquality
 	{
 		[TestMethod]
 		public void KeyEquality_WhenUsingKeyEqualityMode()

@@ -27,7 +27,7 @@ using Uno.Extensions;
 namespace Uno.CodeGen.Tests
 {
 	[TestClass]
-    public partial class Given_ClassLifecycle
+	public partial class Given_ClassLifecycle
 	{
 		#region When_SimulateLifetimeOfObject_Then_AllMethodInvoked
 		[TestMethod]
@@ -82,9 +82,14 @@ namespace Uno.CodeGen.Tests
 				Initialize();
 			}
 
-			[ConstructorMethod] public void BaseConstructor() => _counter.Constructed++;
-			[DisposeMethod] public void BaseDispose() => _counter.Disposed++;
-			[FinalizerMethod] public void BaseFinalizer() => _counter.Finalized++;
+			[ConstructorMethod]
+			public void BaseConstructor() => _counter.Constructed++;
+
+			[DisposeMethod]
+			public void BaseDispose() => _counter.Disposed++;
+
+			[FinalizerMethod]
+			public void BaseFinalizer() => _counter.Finalized++;
 		}
 
 		private partial class When_InheritFromAnotherLifecycleObject_Then_AllMethodInvoked_Subject : When_InheritFromAnotherLifecycleObject_Then_AllMethodInvoked_Base
@@ -95,9 +100,14 @@ namespace Uno.CodeGen.Tests
 				Initialize();
 			}
 
-			[ConstructorMethod] public void ChildConstructor() => _counter.Constructed++;
-			[DisposeMethod] public void ChildDispose() => _counter.Disposed++;
-			[FinalizerMethod] public void ChildFinalizer() => _counter.Finalized++;
+			[ConstructorMethod]
+			public void ChildConstructor() => _counter.Constructed++;
+
+			[DisposeMethod]
+			public void ChildDispose() => _counter.Disposed++;
+
+			[FinalizerMethod]
+			public void ChildFinalizer() => _counter.Finalized++;
 		}
 		#endregion
 
@@ -107,11 +117,15 @@ namespace Uno.CodeGen.Tests
 		{
 			Assert.AreEqual(1, new When_RealConstructor_InvokesInitialize_Subject().Constructed);
 		}
+
 		private partial class When_RealConstructor_InvokesInitialize_Subject
 		{
 			public int Constructed { get; set; }
+
 			public When_RealConstructor_InvokesInitialize_Subject() => Initialize();
-			[ConstructorMethod] public void MyConstructor() => Constructed++;
+
+			[ConstructorMethod]
+			public void MyConstructor() => Constructed++;
 		}
 		#endregion
 
@@ -155,13 +169,24 @@ namespace Uno.CodeGen.Tests
 			Assert.AreEqual(1, new When_RealConstructor_InvokesParameterLessContructor_Subject("").Constructed);
 			Assert.AreEqual(1, new When_RealConstructor_InvokesParameterLessContructor_Subject(0).Constructed);
 		}
+
 		private partial class When_RealConstructor_InvokesParameterLessContructor_Subject
 		{
 			public int Constructed { get; private set; }
-			public When_RealConstructor_InvokesParameterLessContructor_Subject(string test) : this() { }
-			public When_RealConstructor_InvokesParameterLessContructor_Subject(int integer) : this(integer.ToString()) { }
-			[ConstructorMethod] public void MyConstructor() => Constructed++;
-		} 
+
+			public When_RealConstructor_InvokesParameterLessContructor_Subject(string test)
+				: this()
+			{
+			}
+
+			public When_RealConstructor_InvokesParameterLessContructor_Subject(int integer)
+				: this(integer.ToString())
+			{
+			}
+
+			[ConstructorMethod]
+			public void MyConstructor() => Constructed++;
+		}
 		#endregion
 
 		#region When_Constructor_With_NullableParameter
@@ -172,7 +197,7 @@ namespace Uno.CodeGen.Tests
 			public void MyConstructor(int? value)
 			{
 			}
-		} 
+		}
 		#endregion
 
 		#region When_Constructor_With_NullableOptionalParameter
@@ -183,7 +208,7 @@ namespace Uno.CodeGen.Tests
 			public void MyConstructor(int? value = null)
 			{
 			}
-		} 
+		}
 		#endregion
 
 		#region When_Constructor_With_OptionalParameter
@@ -194,7 +219,7 @@ namespace Uno.CodeGen.Tests
 			public void MyConstructor(When_Constructor_With_OptionalParameter value = null)
 			{
 			}
-		} 
+		}
 		#endregion
 
 		#region When_Constructor_With_OptionalParameter_And_DefaultValue_Then_DefaultValueCopied
@@ -213,7 +238,7 @@ namespace Uno.CodeGen.Tests
 			}
 
 			public int? Value { get; set; }
-		} 
+		}
 		#endregion
 
 		#region When_Constructors_With_Parameters_Then_ParametersAggregatedOnInitialize
@@ -250,7 +275,7 @@ namespace Uno.CodeGen.Tests
 		//	public void MyConstructor2(int value)
 		//	{
 		//	}
-		//} 
+		//}
 		#endregion
 
 		#region When_Constructors_With_OptionalParameters_And_DefaultValueMismatch_Then_Fails
@@ -266,7 +291,7 @@ namespace Uno.CodeGen.Tests
 		//	public void MyConstructor2(int value = 6)
 		//	{
 		//	}
-		//} 
+		//}
 		#endregion
 
 		#region When_Dispose_With_Parameter_Then_Fails
@@ -300,19 +325,25 @@ namespace Uno.CodeGen.Tests
 
 		private class DisposablePatternBase : IDisposable
 		{
-			protected virtual void Dispose(bool disposing) { }
+			protected virtual void Dispose(bool disposing)
+			{
+			}
+
 			public void Dispose()
 			{
 				Dispose(true);
 				GC.SuppressFinalize(this);
 			}
+
 			~DisposablePatternBase() => Dispose(false);
 		}
 
 		private partial class When_Dispose_And_InheritFromDisposablePattern_Then_ChildGetDispose_Subject : DisposablePatternBase
 		{
 			public int Disposed { get; private set; }
-			[DisposeMethod] public void ChildDispose() => Disposed++;
+
+			[DisposeMethod]
+			public void ChildDispose() => Disposed++;
 		}
 		#endregion
 
@@ -326,11 +357,20 @@ namespace Uno.CodeGen.Tests
 
 			Assert.AreEqual(1, sut.Disposed);
 		}
-		private class SimpleVirtualDisposableBaseClass : IDisposable { public virtual void Dispose() { } }
+
+		private class SimpleVirtualDisposableBaseClass : IDisposable
+		{
+			public virtual void Dispose()
+			{
+			}
+		}
+
 		private partial class When_Dispose_And_InheritFromSimpleDisposable_With_Override_Then_ChildGetDispose_Subject : SimpleVirtualDisposableBaseClass
 		{
 			public int Disposed { get; private set; }
-			[DisposeMethod] public void ChildDispose() => Disposed++;
+
+			[DisposeMethod]
+			public void ChildDispose() => Disposed++;
 		}
 		#endregion
 
@@ -354,17 +394,24 @@ namespace Uno.CodeGen.Tests
 
 			Assert.AreEqual(1, sut.Disposed);
 		}
+
 		private class ExtensibleDisposable : IExtensibleDisposable
 		{
 			private readonly List<IDisposable> _extensions = new List<IDisposable>();
+
 			public void Dispose() => _extensions.DisposeAll();
+
 			public IReadOnlyCollection<object> Extensions => _extensions;
+
 			public IDisposable RegisterExtension<T>(T extension) where T : class, IDisposable => _extensions.DisposableAdd(extension);
 		}
+
 		private partial class When_Dispose_And_InheritFromExtensibleDisposable_Then_ChildGetDispose_Subject : ExtensibleDisposable
 		{
 			public int Disposed { get; private set; }
-			[DisposeMethod] public void ChildDispose() => Disposed++;
+
+			[DisposeMethod]
+			public void ChildDispose() => Disposed++;
 		}
 		#endregion
 
@@ -378,17 +425,24 @@ namespace Uno.CodeGen.Tests
 
 			Assert.AreEqual(1, sut.Disposed);
 		}
+
 		private class ExtensibleDisposableExplicit : IExtensibleDisposable
 		{
 			private readonly List<IDisposable> _extensions = new List<IDisposable>();
+
 			void IDisposable.Dispose() => _extensions.DisposeAll();
+
 			IReadOnlyCollection<object> IExtensibleDisposable.Extensions => _extensions;
+
 			IDisposable IExtensibleDisposable.RegisterExtension<T>(T extension) => _extensions.DisposableAdd(extension);
 		}
+
 		private partial class When_Dispose_And_InheritFromExtensibleDisposable_With_ExplicitImplementation_Then_ChildGetDispose_Subject : ExtensibleDisposableExplicit
 		{
 			public int Disposed { get; private set; }
-			[DisposeMethod] public void ChildDispose() => Disposed++;
+
+			[DisposeMethod]
+			public void ChildDispose() => Disposed++;
 		}
 		#endregion
 
@@ -447,7 +501,9 @@ namespace Uno.CodeGen.Tests
 		private class LifeTimeCounter
 		{
 			public int Constructed { get; set; }
+
 			public int Disposed { get; set; }
+
 			public int Finalized { get; set; }
 		}
 		#endregion

@@ -42,7 +42,7 @@ namespace Uno.CodeGen.Tests
 			new MyEntityForAllCollectionsAndDictionaryTypes(arrayUnsorted: new[] { "a", "b" })
 				.Equals(new MyEntityForAllCollectionsAndDictionaryTypes(arrayUnsorted: new[] { "b", "a" })).Should().BeTrue();
 
-			new MyEntityForAllCollectionsAndDictionaryTypes(listSorted: new List<string>{"a", "b"})
+			new MyEntityForAllCollectionsAndDictionaryTypes(listSorted: new List<string> {"a", "b"})
 				.Equals(new MyEntityForAllCollectionsAndDictionaryTypes(listSorted: new List<string> { "a", "b" })).Should().BeTrue();
 
 			new MyEntityForAllCollectionsAndDictionaryTypes(listSorted: new List<string> { "a", "b" })
@@ -66,7 +66,7 @@ namespace Uno.CodeGen.Tests
 			new MyEntityForAllCollectionsAndDictionaryTypes(readonlyCollectionUnsorted: ImmutableList.Create("a", "b"))
 				.Equals(new MyEntityForAllCollectionsAndDictionaryTypes(readonlyCollectionUnsorted: ImmutableList.Create("b", "a"))).Should().BeTrue();
 
-			new MyEntityForAllCollectionsAndDictionaryTypes(dictionary: new Dictionary<string, string>{{"a", "a"}, {"b", "b"}})
+			new MyEntityForAllCollectionsAndDictionaryTypes(dictionary: new Dictionary<string, string> {{"a", "a"}, {"b", "b"}})
 				.Equals(new MyEntityForAllCollectionsAndDictionaryTypes(dictionary: new Dictionary<string, string> { { "a", "a" }, { "b", "b" } })).Should().BeTrue();
 
 			new MyEntityForAllCollectionsAndDictionaryTypes(dictionary: new Dictionary<string, string> { { "a", "a" }, { "b", "b" } })

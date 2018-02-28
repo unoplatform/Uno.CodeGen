@@ -20,7 +20,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Uno.CodeGen.Tests
 {
-	partial class Given_ImmutableEntity
+	public partial class Given_ImmutableEntity
 	{
 		[TestMethod]
 		public void Immutable_When_Using_Options()

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Uno.Equality;
 
 [assembly: Uno.ImmutableGenerationOptions(TreatArrayAsImmutable = true, GenerateEqualityByDefault = true)]
 
@@ -72,7 +73,6 @@ namespace Uno.CodeGen.Tests
 				MyField1 = 42
 			};
 
-
 			var builder = new MyImmutableEntity.Builder(original);
 			var newInstance = builder.ToImmutable();
 
@@ -120,6 +120,23 @@ namespace Uno.CodeGen.Tests
 			var attributes = idProperty.GetCustomAttributes(false);
 			attributes.Should().HaveCount(3);
 		}
+
+		[TestMethod]
+		public void Immutable_When_Assigning_EquivalentParameters()
+		{
+			ImmutableForTypeEquality original = ImmutableForTypeEquality.Default
+				.WithString("str")
+				.WithSortedBytes(new byte[] {1, 2, 3})
+				.WithUnsortedBytes(new byte[] {1, 2, 3});
+
+			ImmutableForTypeEquality modified = original
+				.WithString("str")
+				.WithSortedBytes(new byte[] { 1, 2, 3 })
+				.WithUnsortedBytes(new byte[] { 1, 2, 3 });
+
+			original.Should().BeEquivalentTo(modified);
+			original.Should().BeSameAs(modified);
+		}
 	}
 
 	[GeneratedImmutable]
@@ -137,11 +154,17 @@ namespace Uno.CodeGen.Tests
 	public partial class B : A
 	{
 		public Uri FirstField { get; }
+
 		public string SecondField { get; }
+
 		public long ThirdField { get; }
+
 		public TimeSpan TimeSpan { get; }
+
 		public bool Boolean { get; }
+
 		public DateTimeKind Enum { get; }
+
 		public new bool IsSomething { get; }
 	}
 
@@ -179,8 +202,12 @@ namespace Uno.CodeGen.Tests
 		}
 
 		public string A { get; }
+
 		public string B { get; }
+
+#pragma warning disable SA1401 // Fields must be private
 		public readonly int I;
+#pragma warning restore SA1401 // Fields must be private
 	}
 
 	public struct ImplicitlyImmutableStruct
@@ -193,8 +220,21 @@ namespace Uno.CodeGen.Tests
 		}
 
 		public string A { get; }
+
 		public string B { get; }
 
 		public readonly int I;
+	}
+
+	[GeneratedImmutable]
+	public partial class ImmutableForTypeEquality
+	{
+		public string String { get; }
+
+		[EqualityComparerOptions(CollectionMode = CollectionComparerMode.Sorted)]
+		public byte[] SortedBytes { get; }
+
+		[EqualityComparerOptions(CollectionMode = CollectionComparerMode.Unsorted)]
+		public byte[] UnsortedBytes { get; }
 	}
 }

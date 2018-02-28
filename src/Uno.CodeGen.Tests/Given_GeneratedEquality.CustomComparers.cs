@@ -16,7 +16,7 @@
 // ******************************************************************
 namespace Uno.CodeGen.Tests
 {
-	partial class Given_GeneratedEquality
+	public partial class Given_GeneratedEquality
 	{
 	}
 }
