@@ -21,7 +21,7 @@ using AbstractExternalClass = Uno.CodeGen.Tests.ExternalClasses.AbstractExternal
 
 namespace Uno.CodeGen.Tests
 {
-	partial class Given_ImmutableEntity
+	public partial class Given_ImmutableEntity
 	{
 		[TestMethod]
 		public void Immutable_When_Abstracted_Base_Class()
@@ -61,11 +61,9 @@ namespace Uno.CodeGen.Tests
 
 	public partial class InheritanceDerivedClassFromExternal : AbstractExternalClass
 	{
-
 	}
 
 	public partial class InheritanceDerivedClassFromExternalGeneric : ExternalClasses.AbstractExternalGenericClass<string>
 	{
-
 	}
 }

@@ -19,7 +19,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Uno.CodeGen.Tests
 {
-	partial class Given_ImmutableEntity
+	public partial class Given_ImmutableEntity
 	{
 	}
 
@@ -53,16 +53,22 @@ namespace Uno.CodeGen.Tests
 
 		[Required(AllowEmptyStrings = true, ErrorMessage = "Entity1 is required!")]
 		public T1 Entity1 { get; }
+
 		[EqualityIgnore]
 		public T2 Entity2 { get; }
+
 		[EqualityIgnore]
 		public T3 Entity3 { get; }
+
 		[EqualityIgnore]
 		public T4 Entity4 { get; }
+
 		[EqualityIgnore]
 		public T5 Entity5 { get; }
+
 		[EqualityHash]
 		public T6 Entity6 { get; }
+
 		public (T1, T2, T3, T4, T5, T6) Values { get; }
 
 		private static int GetHash_Entity6(T6 value) => 50;
