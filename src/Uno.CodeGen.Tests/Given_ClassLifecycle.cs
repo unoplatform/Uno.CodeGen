@@ -24,6 +24,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Uno.Disposables;
 using Uno.Extensions;
 
+// Disable style cop since it's a test project and rules are here only to validate that the generated code is compatible with them.
+// Conforming this class to all rules only reduce lisibility of the code as there is a lot of nested class which are only test sujects.
+#pragma warning disable SA1028, SA1128, SA1134, SA1400, SA1502, SA1516
+
 namespace Uno.CodeGen.Tests
 {
 	[TestClass]
@@ -82,14 +86,9 @@ namespace Uno.CodeGen.Tests
 				Initialize();
 			}
 
-			[ConstructorMethod]
-			public void BaseConstructor() => _counter.Constructed++;
-
-			[DisposeMethod]
-			public void BaseDispose() => _counter.Disposed++;
-
-			[FinalizerMethod]
-			public void BaseFinalizer() => _counter.Finalized++;
+			[ConstructorMethod] public void BaseConstructor() => _counter.Constructed++;
+			[DisposeMethod] public void BaseDispose() => _counter.Disposed++;
+			[FinalizerMethod] public void BaseFinalizer() => _counter.Finalized++;
 		}
 
 		private partial class When_InheritFromAnotherLifecycleObject_Then_AllMethodInvoked_Subject : When_InheritFromAnotherLifecycleObject_Then_AllMethodInvoked_Base
@@ -100,14 +99,9 @@ namespace Uno.CodeGen.Tests
 				Initialize();
 			}
 
-			[ConstructorMethod]
-			public void ChildConstructor() => _counter.Constructed++;
-
-			[DisposeMethod]
-			public void ChildDispose() => _counter.Disposed++;
-
-			[FinalizerMethod]
-			public void ChildFinalizer() => _counter.Finalized++;
+			[ConstructorMethod] public void ChildConstructor() => _counter.Constructed++;
+			[DisposeMethod] public void ChildDispose() => _counter.Disposed++;
+			[FinalizerMethod] public void ChildFinalizer() => _counter.Finalized++;
 		}
 		#endregion
 
@@ -117,15 +111,11 @@ namespace Uno.CodeGen.Tests
 		{
 			Assert.AreEqual(1, new When_RealConstructor_InvokesInitialize_Subject().Constructed);
 		}
-
 		private partial class When_RealConstructor_InvokesInitialize_Subject
 		{
 			public int Constructed { get; set; }
-
 			public When_RealConstructor_InvokesInitialize_Subject() => Initialize();
-
-			[ConstructorMethod]
-			public void MyConstructor() => Constructed++;
+			[ConstructorMethod] public void MyConstructor() => Constructed++;
 		}
 		#endregion
 
@@ -169,23 +159,12 @@ namespace Uno.CodeGen.Tests
 			Assert.AreEqual(1, new When_RealConstructor_InvokesParameterLessContructor_Subject("").Constructed);
 			Assert.AreEqual(1, new When_RealConstructor_InvokesParameterLessContructor_Subject(0).Constructed);
 		}
-
 		private partial class When_RealConstructor_InvokesParameterLessContructor_Subject
 		{
 			public int Constructed { get; private set; }
-
-			public When_RealConstructor_InvokesParameterLessContructor_Subject(string test)
-				: this()
-			{
-			}
-
-			public When_RealConstructor_InvokesParameterLessContructor_Subject(int integer)
-				: this(integer.ToString())
-			{
-			}
-
-			[ConstructorMethod]
-			public void MyConstructor() => Constructed++;
+			public When_RealConstructor_InvokesParameterLessContructor_Subject(string test) : this() { }
+			public When_RealConstructor_InvokesParameterLessContructor_Subject(int integer) : this(integer.ToString()) { }
+			[ConstructorMethod] public void MyConstructor() => Constructed++;
 		}
 		#endregion
 
@@ -275,7 +254,7 @@ namespace Uno.CodeGen.Tests
 		//	public void MyConstructor2(int value)
 		//	{
 		//	}
-		//}
+		//} 
 		#endregion
 
 		#region When_Constructors_With_OptionalParameters_And_DefaultValueMismatch_Then_Fails
@@ -291,7 +270,7 @@ namespace Uno.CodeGen.Tests
 		//	public void MyConstructor2(int value = 6)
 		//	{
 		//	}
-		//}
+		//} 
 		#endregion
 
 		#region When_Dispose_With_Parameter_Then_Fails
@@ -325,25 +304,19 @@ namespace Uno.CodeGen.Tests
 
 		private class DisposablePatternBase : IDisposable
 		{
-			protected virtual void Dispose(bool disposing)
-			{
-			}
-
+			protected virtual void Dispose(bool disposing) { }
 			public void Dispose()
 			{
 				Dispose(true);
 				GC.SuppressFinalize(this);
 			}
-
 			~DisposablePatternBase() => Dispose(false);
 		}
 
 		private partial class When_Dispose_And_InheritFromDisposablePattern_Then_ChildGetDispose_Subject : DisposablePatternBase
 		{
 			public int Disposed { get; private set; }
-
-			[DisposeMethod]
-			public void ChildDispose() => Disposed++;
+			[DisposeMethod] public void ChildDispose() => Disposed++;
 		}
 		#endregion
 
@@ -357,20 +330,11 @@ namespace Uno.CodeGen.Tests
 
 			Assert.AreEqual(1, sut.Disposed);
 		}
-
-		private class SimpleVirtualDisposableBaseClass : IDisposable
-		{
-			public virtual void Dispose()
-			{
-			}
-		}
-
+		private class SimpleVirtualDisposableBaseClass : IDisposable { public virtual void Dispose() { } }
 		private partial class When_Dispose_And_InheritFromSimpleDisposable_With_Override_Then_ChildGetDispose_Subject : SimpleVirtualDisposableBaseClass
 		{
 			public int Disposed { get; private set; }
-
-			[DisposeMethod]
-			public void ChildDispose() => Disposed++;
+			[DisposeMethod] public void ChildDispose() => Disposed++;
 		}
 		#endregion
 
@@ -394,24 +358,17 @@ namespace Uno.CodeGen.Tests
 
 			Assert.AreEqual(1, sut.Disposed);
 		}
-
 		private class ExtensibleDisposable : IExtensibleDisposable
 		{
 			private readonly List<IDisposable> _extensions = new List<IDisposable>();
-
 			public void Dispose() => _extensions.DisposeAll();
-
 			public IReadOnlyCollection<object> Extensions => _extensions;
-
 			public IDisposable RegisterExtension<T>(T extension) where T : class, IDisposable => _extensions.DisposableAdd(extension);
 		}
-
 		private partial class When_Dispose_And_InheritFromExtensibleDisposable_Then_ChildGetDispose_Subject : ExtensibleDisposable
 		{
 			public int Disposed { get; private set; }
-
-			[DisposeMethod]
-			public void ChildDispose() => Disposed++;
+			[DisposeMethod] public void ChildDispose() => Disposed++;
 		}
 		#endregion
 
@@ -425,24 +382,17 @@ namespace Uno.CodeGen.Tests
 
 			Assert.AreEqual(1, sut.Disposed);
 		}
-
 		private class ExtensibleDisposableExplicit : IExtensibleDisposable
 		{
 			private readonly List<IDisposable> _extensions = new List<IDisposable>();
-
 			void IDisposable.Dispose() => _extensions.DisposeAll();
-
 			IReadOnlyCollection<object> IExtensibleDisposable.Extensions => _extensions;
-
 			IDisposable IExtensibleDisposable.RegisterExtension<T>(T extension) => _extensions.DisposableAdd(extension);
 		}
-
 		private partial class When_Dispose_And_InheritFromExtensibleDisposable_With_ExplicitImplementation_Then_ChildGetDispose_Subject : ExtensibleDisposableExplicit
 		{
 			public int Disposed { get; private set; }
-
-			[DisposeMethod]
-			public void ChildDispose() => Disposed++;
+			[DisposeMethod] public void ChildDispose() => Disposed++;
 		}
 		#endregion
 
@@ -462,6 +412,56 @@ namespace Uno.CodeGen.Tests
 		//	[FinalizerMethod]
 		//	private string MyFinalizer(string text) => "";
 		//}
+		#endregion
+
+		#region When_NestedClass_Then_NamespaceIsValid
+		// Compilation test
+		private partial class When_NestedClass_Then_NamespaceIsValid
+		{
+			[ConstructorMethod] public void MyCtor() { }
+			void Void() => Initialize();
+		}
+		#endregion
+
+		#region When_DoubledNestedClass_Then_NamespaceIsValid
+		// Compilation test
+		private partial class When_DoubleNestedClass_Then_NamespaceIsValid
+		{
+			public partial class SecondLevelNextedCalss
+			{
+				[ConstructorMethod] public void MyCtor() { }
+				void Void() => Initialize();
+			}
+		}
+		#endregion
+
+		#region When_MultipleClassesWithSameName_Then_NamespaceAreValid
+		// Compilation test
+		private partial class When_MultipleClassesWithSameName_Then_NamespaceAreValid_Container1
+		{
+			public partial class SameNameClass
+			{
+				[ConstructorMethod] public void MyCtor() { }
+				void Void() => Initialize();
+			}
+		}
+		private partial class When_MultipleClassesWithSameName_Then_NamespaceAreValid_Container2
+		{
+			public partial class SameNameClass
+			{
+				[ConstructorMethod] public void MyCtor() { }
+				void Void() => Initialize();
+			}
+		}
+		#endregion
+
+		#region When_GenericClass
+		// Compilation test
+		private partial class GenericClass<T>
+		{
+			[ConstructorMethod] private void MyCtor() { }
+			[FinalizerMethod] private void MyFinalize() { }
+		}
 		#endregion
 
 		#region -- Helpers --
@@ -501,9 +501,7 @@ namespace Uno.CodeGen.Tests
 		private class LifeTimeCounter
 		{
 			public int Constructed { get; set; }
-
 			public int Disposed { get; set; }
-
 			public int Finalized { get; set; }
 		}
 		#endregion
