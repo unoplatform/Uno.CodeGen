@@ -80,7 +80,7 @@ namespace Uno.CodeGen.ClassLifecycle.Utils
 
 		public static IDisposable NameSpaceOf(this IndentedTextWriter writer, INamedTypeSymbol type)
 		{
-			return type.GetContainingTypes().Aggregate(writer.Block($"namespace {type.ContainingNamespace}"), CreateContainingBlock);
+			return type.GetContainingTypes().Reverse().Aggregate(writer.Block($"namespace {type.ContainingNamespace}"), CreateContainingBlock);
 
 			IDisposable CreateContainingBlock(IDisposable previousLevel, INamedTypeSymbol containingType)
 			{

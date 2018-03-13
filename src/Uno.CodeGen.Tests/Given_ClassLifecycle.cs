@@ -24,10 +24,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Uno.Disposables;
 using Uno.Extensions;
 
+// Disable style cop since it's a test project and rules are here only to validate that the generated code is compatible with them.
+// Conforming this class to all rules only reduce lisibility of the code as there is a lot of nested class which are only test sujects.
+#pragma warning disable SA1028, SA1128, SA1134, SA1400, SA1502, SA1516
+
 namespace Uno.CodeGen.Tests
 {
 	[TestClass]
-    public partial class Given_ClassLifecycle
+	public partial class Given_ClassLifecycle
 	{
 		#region When_SimulateLifetimeOfObject_Then_AllMethodInvoked
 		[TestMethod]
@@ -161,7 +165,7 @@ namespace Uno.CodeGen.Tests
 			public When_RealConstructor_InvokesParameterLessContructor_Subject(string test) : this() { }
 			public When_RealConstructor_InvokesParameterLessContructor_Subject(int integer) : this(integer.ToString()) { }
 			[ConstructorMethod] public void MyConstructor() => Constructed++;
-		} 
+		}
 		#endregion
 
 		#region When_Constructor_With_NullableParameter
@@ -172,7 +176,7 @@ namespace Uno.CodeGen.Tests
 			public void MyConstructor(int? value)
 			{
 			}
-		} 
+		}
 		#endregion
 
 		#region When_Constructor_With_NullableOptionalParameter
@@ -183,7 +187,7 @@ namespace Uno.CodeGen.Tests
 			public void MyConstructor(int? value = null)
 			{
 			}
-		} 
+		}
 		#endregion
 
 		#region When_Constructor_With_OptionalParameter
@@ -194,7 +198,7 @@ namespace Uno.CodeGen.Tests
 			public void MyConstructor(When_Constructor_With_OptionalParameter value = null)
 			{
 			}
-		} 
+		}
 		#endregion
 
 		#region When_Constructor_With_OptionalParameter_And_DefaultValue_Then_DefaultValueCopied
@@ -213,7 +217,7 @@ namespace Uno.CodeGen.Tests
 			}
 
 			public int? Value { get; set; }
-		} 
+		}
 		#endregion
 
 		#region When_Constructors_With_Parameters_Then_ParametersAggregatedOnInitialize
@@ -408,6 +412,56 @@ namespace Uno.CodeGen.Tests
 		//	[FinalizerMethod]
 		//	private string MyFinalizer(string text) => "";
 		//}
+		#endregion
+
+		#region When_NestedClass_Then_NamespaceIsValid
+		// Compilation test
+		private partial class When_NestedClass_Then_NamespaceIsValid
+		{
+			[ConstructorMethod] public void MyCtor() { }
+			void Void() => Initialize();
+		}
+		#endregion
+
+		#region When_DoubledNestedClass_Then_NamespaceIsValid
+		// Compilation test
+		private partial class When_DoubleNestedClass_Then_NamespaceIsValid
+		{
+			public partial class SecondLevelNextedCalss
+			{
+				[ConstructorMethod] public void MyCtor() { }
+				void Void() => Initialize();
+			}
+		}
+		#endregion
+
+		#region When_MultipleClassesWithSameName_Then_NamespaceAreValid
+		// Compilation test
+		private partial class When_MultipleClassesWithSameName_Then_NamespaceAreValid_Container1
+		{
+			public partial class SameNameClass
+			{
+				[ConstructorMethod] public void MyCtor() { }
+				void Void() => Initialize();
+			}
+		}
+		private partial class When_MultipleClassesWithSameName_Then_NamespaceAreValid_Container2
+		{
+			public partial class SameNameClass
+			{
+				[ConstructorMethod] public void MyCtor() { }
+				void Void() => Initialize();
+			}
+		}
+		#endregion
+
+		#region When_GenericClass
+		// Compilation test
+		private partial class GenericClass<T>
+		{
+			[ConstructorMethod] private void MyCtor() { }
+			[FinalizerMethod] private void MyFinalize() { }
+		}
 		#endregion
 
 		#region -- Helpers --

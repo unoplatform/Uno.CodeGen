@@ -45,6 +45,20 @@ namespace Uno
 			output.AppendLine(string.Join(Environment.NewLine, lines));
 
 			context.AddCompilationUnit(nameof(CompilationReferencesListingGenerator), output.ToString());
+
+			var projectReferences = context
+				.GetProjectInstance()
+				.Items
+				.Where(i => i.ItemType.Equals("PackageReference", StringComparison.OrdinalIgnoreCase))
+				.ToArray();
+
+			var projectDependencies = context
+				.GetProjectInstance()
+				.Items
+				.Where(i => i.ItemType.Equals("PackageDependencies", StringComparison.OrdinalIgnoreCase))
+				.ToArray();
+
+			projectReferences.ToString();
 		}
 	}
 }

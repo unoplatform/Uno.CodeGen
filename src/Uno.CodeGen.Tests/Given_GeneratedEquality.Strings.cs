@@ -20,7 +20,7 @@ using Uno.Equality;
 
 namespace Uno.CodeGen.Tests
 {
-	partial class Given_GeneratedEquality
+	public partial class Given_GeneratedEquality
 	{
 		[TestMethod]
 		public void Equality_WhenUsingMyEntityForStringComparison()
@@ -28,45 +28,44 @@ namespace Uno.CodeGen.Tests
 			new MyEntityForStringComparison.Builder {DefaultMode = "a"}.ToImmutable()
 				.Equals(new MyEntityForStringComparison.Builder {DefaultMode = "a"}.ToImmutable()).Should().BeTrue();
 
-			new MyEntityForStringComparison.Builder { DefaultMode = "a" }.ToImmutable()
-				.Equals(new MyEntityForStringComparison.Builder { DefaultMode = "A" }.ToImmutable()).Should().BeFalse();
+			new MyEntityForStringComparison.Builder {DefaultMode = "a"}.ToImmutable()
+				.Equals(new MyEntityForStringComparison.Builder {DefaultMode = "A"}.ToImmutable()).Should().BeFalse();
 
-			new MyEntityForStringComparison.Builder { DefaultMode = "" }.ToImmutable()
+			new MyEntityForStringComparison.Builder {DefaultMode = ""}.ToImmutable()
 				.Equals(MyEntityForStringComparison.Default).Should().BeFalse();
 
-			new MyEntityForStringComparison.Builder { IgnoreCase = "a" }.ToImmutable()
-				.Equals(new MyEntityForStringComparison.Builder { IgnoreCase = "a" }.ToImmutable()).Should().BeTrue();
+			new MyEntityForStringComparison.Builder {IgnoreCase = "a"}.ToImmutable()
+				.Equals(new MyEntityForStringComparison.Builder {IgnoreCase = "a"}.ToImmutable()).Should().BeTrue();
 
-			new MyEntityForStringComparison.Builder { IgnoreCase = "a" }.ToImmutable()
-				.Equals(new MyEntityForStringComparison.Builder { IgnoreCase = "A" }.ToImmutable()).Should().BeTrue();
+			new MyEntityForStringComparison.Builder {IgnoreCase = "a"}.ToImmutable()
+				.Equals(new MyEntityForStringComparison.Builder {IgnoreCase = "A"}.ToImmutable()).Should().BeTrue();
 
-			new MyEntityForStringComparison.Builder { IgnoreCase = "" }.ToImmutable()
+			new MyEntityForStringComparison.Builder {IgnoreCase = ""}.ToImmutable()
 				.Equals(MyEntityForStringComparison.Default).Should().BeFalse();
 
-			new MyEntityForStringComparison.Builder { EmptyEqualsNull = "a" }.ToImmutable()
-				.Equals(new MyEntityForStringComparison.Builder { EmptyEqualsNull = "a" }.ToImmutable()).Should().BeTrue();
+			new MyEntityForStringComparison.Builder {EmptyEqualsNull = "a"}.ToImmutable()
+				.Equals(new MyEntityForStringComparison.Builder {EmptyEqualsNull = "a"}.ToImmutable()).Should().BeTrue();
 
-			new MyEntityForStringComparison.Builder { EmptyEqualsNull = "a" }.ToImmutable()
-				.Equals(new MyEntityForStringComparison.Builder { EmptyEqualsNull = "A" }.ToImmutable()).Should().BeFalse();
+			new MyEntityForStringComparison.Builder {EmptyEqualsNull = "a"}.ToImmutable()
+				.Equals(new MyEntityForStringComparison.Builder {EmptyEqualsNull = "A"}.ToImmutable()).Should().BeFalse();
 
-			new MyEntityForStringComparison.Builder { EmptyEqualsNull = "" }.ToImmutable()
+			new MyEntityForStringComparison.Builder {EmptyEqualsNull = ""}.ToImmutable()
 				.Equals(MyEntityForStringComparison.Default).Should().BeTrue();
 
 			new MyEntityForStringComparison.Builder {EmptyEqualsNull = ""}.ToImmutable()
 				.Should().BeSameAs(MyEntityForStringComparison.Default);
 
-			new MyEntityForStringComparison.Builder { EmptyEqualsNullIgnoreCase = "a" }.ToImmutable()
-				.Equals(new MyEntityForStringComparison.Builder { EmptyEqualsNullIgnoreCase = "a" }.ToImmutable()).Should().BeTrue();
+			new MyEntityForStringComparison.Builder {EmptyEqualsNullIgnoreCase = "a"}.ToImmutable()
+				.Equals(new MyEntityForStringComparison.Builder {EmptyEqualsNullIgnoreCase = "a"}.ToImmutable()).Should().BeTrue();
 
-			new MyEntityForStringComparison.Builder { EmptyEqualsNullIgnoreCase = "a" }.ToImmutable()
-				.Equals(new MyEntityForStringComparison.Builder { EmptyEqualsNullIgnoreCase = "A" }.ToImmutable()).Should().BeTrue();
+			new MyEntityForStringComparison.Builder {EmptyEqualsNullIgnoreCase = "a"}.ToImmutable()
+				.Equals(new MyEntityForStringComparison.Builder {EmptyEqualsNullIgnoreCase = "A"}.ToImmutable()).Should().BeTrue();
 
-			new MyEntityForStringComparison.Builder { EmptyEqualsNullIgnoreCase = "" }.ToImmutable()
+			new MyEntityForStringComparison.Builder {EmptyEqualsNullIgnoreCase = ""}.ToImmutable()
 				.Equals(MyEntityForStringComparison.Default).Should().BeTrue();
 
-			new MyEntityForStringComparison.Builder { EmptyEqualsNullIgnoreCase = "" }.ToImmutable()
+			new MyEntityForStringComparison.Builder {EmptyEqualsNullIgnoreCase = ""}.ToImmutable()
 				.Should().BeSameAs(MyEntityForStringComparison.Default);
-
 		}
 	}
 

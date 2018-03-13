@@ -34,6 +34,7 @@ namespace Uno.CodeGen.Tests
 		internal string A { get; set; }
 
 		private static int GetHash_A(string value) => -1;
+
 		private static IEqualityComparer<string> A_CustomComparer => StringComparer.OrdinalIgnoreCase;
 
 		[EqualityKey]
@@ -44,10 +45,12 @@ namespace Uno.CodeGen.Tests
 
 		[EqualityHash]
 		internal string D { get; set; }
+
 		private static IEqualityComparer<string> D_CustomComparer => StringComparer.OrdinalIgnoreCase;
 
 		[EqualityHash]
 		internal TSomething E { get; set; }
+
 		private static IEqualityComparer<TSomething> E_CustomComparer => EqualityComparer<TSomething>.Default;
 
 		[EqualityHash]
@@ -63,7 +66,6 @@ namespace Uno.CodeGen.Tests
 	[GeneratedEquality]
 	internal partial class DerivedEqualityClass : MyEqualityClass<int>
 	{
-
 	}
 
 	[GeneratedEquality]
@@ -71,8 +73,8 @@ namespace Uno.CodeGen.Tests
 	{
 		[EqualityKey]
 		internal string A { get; }
+
 		[Key]
 		internal string B { get; }
 	}
-
 }

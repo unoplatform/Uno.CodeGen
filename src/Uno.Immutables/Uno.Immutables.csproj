@@ -19,6 +19,8 @@ This package is part of the Uno.CodeGen to generate immutable entities in your p
 		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
 		<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
 	</PropertyGroup>
+	
+	<Import Project="..\Uno.Common.props" />
 
 	<ItemGroup>
 		<ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
