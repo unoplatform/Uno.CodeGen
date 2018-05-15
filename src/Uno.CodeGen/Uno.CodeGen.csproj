@@ -13,7 +13,7 @@
 		<Description>This package provides tooling for code generation.</Description>
 		<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
 	</PropertyGroup>
-	
+
 	<Import Project="..\Uno.Common.props" />
 
 	<ItemGroup Condition="'$(TargetFramework)'=='net46'">
@@ -41,6 +41,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
 		<ProjectReference Include="..\Uno.Immutables\Uno.Immutables.csproj" />
+		<ProjectReference Include="..\Uno.Injectable\Uno.Injectable.csproj" />
 	</ItemGroup>
 
 </Project>
