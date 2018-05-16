@@ -28,6 +28,7 @@ You should never have to implement `IInjectable` yourself, but you must manually
         {
             MyService = (IMyService)resolver(type: typeof(IMyService), name: null);
             MyNamedService = (IMyService)resolver(type: typeof(IMyService), name: "name");
+            MyLazyService = () => (IMyService)resolver(type: typeof(IMyService), name: null);
         } 
     }
     ```

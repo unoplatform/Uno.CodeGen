@@ -10,6 +10,7 @@ namespace Uno.CodeGen.Tests.ExternalClasses
 		[Inject] public int MyIntegerProperty { get; private set; }
 		[Inject] public DateTime MyDateTimeProperty { get; private set; }
 		[Inject("name")] public object MyObjectProperty { get; private set; }
+		[Inject] public Func<string> MyFuncStringProperty { get; private set; }
 
 		// Fields
 		[Inject] public string MyStringField;
@@ -17,5 +18,6 @@ namespace Uno.CodeGen.Tests.ExternalClasses
 		[Inject] public int MyIntegerField;
 		[Inject] public DateTime MyDateTimeField;
 		[Inject("name")] public object MyObjectField;
+		[Inject] public Func<string> MyFuncStringField;
 	}
 }

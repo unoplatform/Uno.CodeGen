@@ -69,6 +69,7 @@ namespace Uno.CodeGen.Tests
 			Assert.AreEqual(@string, vm.MyStringProperty);
 			Assert.AreEqual(dateTime, vm.MyDateTimeProperty);
 			Assert.AreEqual(providedName, vm.MyObjectProperty);
+			Assert.AreEqual(@string, vm.MyFuncStringProperty());
 
 			// Fields
 			Assert.AreEqual(boolean, vm.MyBooleanField);
@@ -76,6 +77,7 @@ namespace Uno.CodeGen.Tests
 			Assert.AreEqual(@string, vm.MyStringField);
 			Assert.AreEqual(dateTime, vm.MyDateTimeField);
 			Assert.AreEqual(providedName, vm.MyObjectField);
+			Assert.AreEqual(@string, vm.MyFuncStringField());
 		}
 	}
 }

@@ -82,11 +82,20 @@ namespace Uno
 						foreach (var attribute in injectable.attributes)
 						{
 							var memberName = attribute.member.Name;
-							var memberType = GetMemberType(attribute.member)?.GetFullMetadataName();
+							var memberType = GetMemberType(attribute.member);
+							var memberTypeName = memberType?.GetFullMetadataName();
 							var name = attribute.attribute.ConstructorArguments.Select(x => x.Value?.ToString()).FirstOrDefault();
 							var nameLiteral = name != null ? $"\"{name}\"" : "null";
 
-							builder.AppendLineInvariant($"{memberName} = ({memberType})resolver(typeof({memberType}), {nameLiteral});");
+							if (memberType.IsFunc(out ITypeSymbol funcResultType)) // Resolve lazily
+							{
+								var funcResultTypeName = funcResultType?.GetFullMetadataName();
+								builder.AppendLineInvariant($"{memberName} = () => ({funcResultTypeName})resolver(typeof({funcResultTypeName}), {nameLiteral});");
+							}
+							else
+							{
+								builder.AppendLineInvariant($"{memberName} = ({memberTypeName})resolver(typeof({memberTypeName}), {nameLiteral});");
+							}
 						}
 					}
 				}
