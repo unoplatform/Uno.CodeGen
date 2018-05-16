@@ -77,7 +77,7 @@ namespace Uno
 			{
 				using (builder.BlockInvariant($"partial class {injectable.type.Name} : Uno.IInjectable"))
 				{
-					using (builder.BlockInvariant($"void Uno.IInjectable.Inject(Func<Type, string, object> resolver)"))
+					using (builder.BlockInvariant($"void Uno.IInjectable.Inject(Uno.DependencyResolver resolver)"))
 					{
 						foreach (var attribute in injectable.attributes)
 						{

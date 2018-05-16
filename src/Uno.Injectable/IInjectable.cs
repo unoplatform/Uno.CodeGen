@@ -32,7 +32,7 @@ namespace Uno
 		/// <remarks>
 		/// You are responsible for calling this method and provide the appropriate dependency resolver.
 		/// </remarks>
-		/// <param name="resolver">The dependency resolver</param>
-		void Inject(Func<Type, string, object> resolver);
+		/// <param name="resolver">The dependency resolver.</param>
+		void Inject(DependencyResolver resolver);
 	}
 }
