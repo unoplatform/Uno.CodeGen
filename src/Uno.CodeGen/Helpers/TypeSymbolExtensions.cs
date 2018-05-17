@@ -102,6 +102,7 @@ namespace Uno.Helpers
 					case "System.Attribute": // strange, but valid
 					case "System.DateTime":
 					case "System.DateTimeOffset":
+					case "System.Guid":
 					case "System.TimeSpan":
 					case "System.Type":
 					case "System.Uri":
