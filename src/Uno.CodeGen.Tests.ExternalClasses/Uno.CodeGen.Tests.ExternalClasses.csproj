@@ -17,6 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Uno.Injectable\Uno.Injectable.csproj" />
 		<ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
 		<ProjectReference Include="..\Uno.Immutables\Uno.Immutables.csproj" />
 	</ItemGroup>

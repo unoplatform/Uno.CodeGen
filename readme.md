@@ -18,6 +18,7 @@
 | `CompilationReferencesListingGenerator` | _none_ | Generate a file without _useful_ code, containing only comments detailing references used to compile the project. | [Documentation](doc/Compilation%20References.md) |
 | `EqualityGenerator` | `[GenerateEquality]` | Generate code for efficient `.Equals()` members generation. | [Documentation](doc/Equality%20Generation.md) |
 | `ImmutableGenerator` | `[GenerateImmutable]` | Generate code to build truly immutable entities. | [Documentation](doc/Immutable%20Generation.md) |
+| `InjectableGenerator` | `[Inject]` | Generate code to resolve and inject dependencies. | [Documentation](doc/Injectable%20Generation.md) |
 
 ## Release Notes
 
