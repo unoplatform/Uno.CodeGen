@@ -33,6 +33,7 @@ namespace Uno.CodeGen.Tests
 			var @string = "Hello world!";
 			var dateTime = DateTime.Now;
 			var providedName = default(string);
+			var strings = new List<string> { "A", "B", "C" };
 
 			var vm = new MyViewModel();
 
@@ -59,6 +60,10 @@ namespace Uno.CodeGen.Tests
 					providedName = name;
 					return name;
 				}
+				if (type == typeof(List<string>))
+				{
+					return strings;
+				}
 
 				throw new NotSupportedException();
 			});
@@ -70,6 +75,7 @@ namespace Uno.CodeGen.Tests
 			Assert.AreEqual(dateTime, vm.MyDateTimeProperty);
 			Assert.AreEqual(providedName, vm.MyObjectProperty);
 			Assert.AreEqual(@string, vm.MyFuncStringProperty());
+			Assert.AreEqual(strings, vm.MyListStringProperty);
 
 			// Fields
 			Assert.AreEqual(boolean, vm.MyBooleanField);
@@ -78,6 +84,7 @@ namespace Uno.CodeGen.Tests
 			Assert.AreEqual(dateTime, vm.MyDateTimeField);
 			Assert.AreEqual(providedName, vm.MyObjectField);
 			Assert.AreEqual(@string, vm.MyFuncStringField());
+			Assert.AreEqual(strings, vm.MyListStringField);
 		}
 	}
 }
