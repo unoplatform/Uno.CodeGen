@@ -83,13 +83,13 @@ namespace Uno
 						{
 							var memberName = attribute.member.Name;
 							var memberType = GetMemberType(attribute.member);
-							var memberTypeName = memberType?.GetFullMetadataName();
+							var memberTypeName = memberType?.ToDisplayString();
 							var name = attribute.attribute.ConstructorArguments.Select(x => x.Value?.ToString()).FirstOrDefault();
 							var nameLiteral = name != null ? $"\"{name}\"" : "null";
 
 							if (memberType.IsFunc(out ITypeSymbol funcResultType)) // Resolve lazily
 							{
-								var funcResultTypeName = funcResultType?.GetFullMetadataName();
+								var funcResultTypeName = funcResultType?.ToDisplayString();
 								builder.AppendLineInvariant($"{memberName} = () => ({funcResultTypeName})resolver(typeof({funcResultTypeName}), {nameLiteral});");
 							}
 							else
