@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.CodeGen", "Uno.CodeGen\Uno.CodeGen.csproj", "{7A05DD54-F3F1-4A48-97A5-1A5F45D9F315}"
 EndProject
@@ -19,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{0C1D81C9-BE0
 		..\doc\Class Lifecycle Generation.md = ..\doc\Class Lifecycle Generation.md
 		..\doc\Equality Generation.md = ..\doc\Equality Generation.md
 		..\doc\Immutable Generation.md = ..\doc\Immutable Generation.md
+		..\doc\Injectable Generation.md = ..\doc\Injectable Generation.md
 		..\readme.md = ..\readme.md
 	EndProjectSection
 EndProject
@@ -27,6 +28,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.CodeGen.ClassLifecycle", "Uno.CodeGen.ClassLifecycle\Uno.CodeGen.ClassLifecycle.csproj", "{3F7D2A75-2FBE-4B2C-AB93-1FBF7EFFE3C9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.CodeGen.Tests.ExternalClasses", "Uno.CodeGen.Tests.ExternalClasses\Uno.CodeGen.Tests.ExternalClasses.csproj", "{907C30BD-0984-4D75-8A43-107C98235F65}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.Injectable", "Uno.Injectable\Uno.Injectable.csproj", "{5D545289-1318-428E-8ED9-5D5BA9BFE244}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,6 +65,10 @@ Global
 		{907C30BD-0984-4D75-8A43-107C98235F65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{907C30BD-0984-4D75-8A43-107C98235F65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{907C30BD-0984-4D75-8A43-107C98235F65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D545289-1318-428E-8ED9-5D5BA9BFE244}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D545289-1318-428E-8ED9-5D5BA9BFE244}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D545289-1318-428E-8ED9-5D5BA9BFE244}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D545289-1318-428E-8ED9-5D5BA9BFE244}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

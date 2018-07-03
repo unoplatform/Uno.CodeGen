@@ -125,19 +125,19 @@ namespace Uno.Helpers
 					case "System.Collections.Immutable.ImmutableQueue<T>":
 					case "System.Collections.Immutable.ImmutableSortedSet<T>":
 					case "System.Collections.Immutable.ImmutableStack<T>":
-					{
-						var argumentParameter = (t as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
-						return argumentParameter == null || argumentParameter.IsImmutable(asImmutable);
-					}
+						{
+							var argumentParameter = (t as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+							return argumentParameter == null || argumentParameter.IsImmutable(asImmutable);
+						}
 					case "System.Collections.Immutable.IImmutableDictionary<TKey, TValue>":
 					case "System.Collections.Immutable.ImmutableDictionary<TKey, TValue>":
 					case "System.Collections.Immutable.ImmutableSortedDictionary<TKey, TValue>":
-					{
-						var keyTypeParameter = (t as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
-						var valueTypeParameter = (t as INamedTypeSymbol)?.TypeArguments.Skip(1).FirstOrDefault();
-						return (keyTypeParameter == null || keyTypeParameter.IsImmutable(asImmutable))
-							&& (valueTypeParameter == null || valueTypeParameter.IsImmutable(asImmutable));
-					}
+						{
+							var keyTypeParameter = (t as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
+							var valueTypeParameter = (t as INamedTypeSymbol)?.TypeArguments.Skip(1).FirstOrDefault();
+							return (keyTypeParameter == null || keyTypeParameter.IsImmutable(asImmutable))
+								&& (valueTypeParameter == null || valueTypeParameter.IsImmutable(asImmutable));
+						}
 				}
 
 				switch (definitionType.GetType().Name)
@@ -192,7 +192,7 @@ namespace Uno.Helpers
 
 			while ((definitionType as INamedTypeSymbol)?.ConstructedFrom.Equals(definitionType) == false)
 			{
-				definitionType = ((INamedTypeSymbol) definitionType).ConstructedFrom;
+				definitionType = ((INamedTypeSymbol)definitionType).ConstructedFrom;
 			}
 
 			return definitionType;
@@ -213,9 +213,9 @@ namespace Uno.Helpers
 					{
 						case "System.Collections.Immutable.ImmutableHashSet<T>":
 						case "System.Collections.Immutable.IImmutableSet<T>":
-						{
+							{
 								return (t.TypeArguments[0], true, false);
-						}
+							}
 						case "System.Collections.Immutable.IImmutableList<T>":
 						case "System.Collections.Immutable.IImmutableQueue<T>":
 						case "System.Collections.Immutable.IImmutableStack<T>":
@@ -224,26 +224,26 @@ namespace Uno.Helpers
 						case "System.Collections.Immutable.ImmutableQueue<T>":
 						case "System.Collections.Immutable.ImmutableSortedSet<T>":
 						case "System.Collections.Immutable.ImmutableStack<T>":
-						{
-							return (t.TypeArguments[0], true, true);
-						}
+							{
+								return (t.TypeArguments[0], true, true);
+							}
 						case "System.Collections.Generic.IReadOnlyCollection<T>":
-						{
-							return (t.TypeArguments[0], true, true);
-						}
+							{
+								return (t.TypeArguments[0], true, true);
+							}
 						case "System.Collections.Generic.HashSet<T>":
-						{
-							return (t.TypeArguments[0], false, false);
-						}
+							{
+								return (t.TypeArguments[0], false, false);
+							}
 						case "System.Collections.Generic.ICollection<T>":
 						case "System.Collections.Generic.List<T>":
 						case "System.Collections.Generic.LinkedList<T>":
 						case "System.Collections.Generic.Queue<T>":
 						case "System.Collections.Generic.SortedSet<T>":
 						case "System.Collections.Generic.Stack<T>":
-						{
-							return (t.TypeArguments[0], false, true);
-						}
+							{
+								return (t.TypeArguments[0], false, true);
+							}
 					}
 				}
 
@@ -289,13 +289,13 @@ namespace Uno.Helpers
 					switch (interfaceDefinition.ToString())
 					{
 						case "System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>":
-						{
-							return (t.TypeArguments[0], t.TypeArguments[1], true);
-						}
+							{
+								return (t.TypeArguments[0], t.TypeArguments[1], true);
+							}
 						case "System.Collections.Generic.IDictionary<TKey, TValue>":
-						{
-							return (t.TypeArguments[0], t.TypeArguments[1], false);
-						}
+							{
+								return (t.TypeArguments[0], t.TypeArguments[1], false);
+							}
 					}
 				}
 
@@ -365,7 +365,7 @@ namespace Uno.Helpers
 			}
 
 			var isAuto = _isAutoPropertyGetter.Invoke(symbol, new object[] { });
-			return (bool) isAuto;
+			return (bool)isAuto;
 		}
 
 		public static bool IsFromPartialDeclaration(this ISymbol symbol)
@@ -375,6 +375,31 @@ namespace Uno.Helpers
 				.Select(reference => reference.GetSyntax(CancellationToken.None))
 				.OfType<ClassDeclarationSyntax>()
 				.Any(node => node.Modifiers.Any(SyntaxKind.PartialKeyword));
+		}
+
+		private static ImmutableDictionary<ITypeSymbol, ITypeSymbol> _isFunc =
+			ImmutableDictionary<ITypeSymbol, ITypeSymbol>.Empty;
+
+		public static bool IsFunc(this ITypeSymbol type, out ITypeSymbol resultType)
+		{
+			ITypeSymbol GetIsFunc(ITypeSymbol t)
+			{
+				if (t != null && t is INamedTypeSymbol namedTypeSymbol)
+				{
+					var interfaceDefinition = t.GetDefinitionType();
+
+					switch (interfaceDefinition.ToString())
+					{
+						case "System.Func<TResult>":
+							return namedTypeSymbol.TypeArguments[0];
+					}
+				}
+
+				return null;
+			}
+
+			resultType = ImmutableInterlocked.GetOrAdd(ref _isFunc, type, GetIsFunc);
+			return resultType != null;
 		}
 	}
 }
