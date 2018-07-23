@@ -1,9 +1,9 @@
 {
-  "profiles": {
-    "Uno.CodeGen": {
-      "commandName": "Executable",
-      "executablePath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Professional\\MSBuild\\15.0\\Bin\\MSBuild.exe",
-      "commandLineArgs": "..\\Uno.CodeGen.Tests\\Uno.CodeGen.Tests.csproj  /p:Configuration=Debug"
-    }
-  }
+	"profiles": {
+		"Uno.CodeGen": {
+			"commandName": "Executable",
+			"executablePath": "$(DevEnvDir)..\\..\\MSBuild\\15.0\\Bin\\MSBuild.exe",
+			"commandLineArgs": "..\\..\\..\\..\\Uno.CodeGen.Tests\\Uno.CodeGen.Tests.csproj /p:Configuration=Debug"
+		}
+	}
 }

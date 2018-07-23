@@ -12,8 +12,8 @@
 	<Import Project="..\Uno.CodeGen\build\Uno.CodeGen.props" />
 
 	<ItemGroup>
-		<PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.21.0" />
+		<PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.22.0" />
 	</ItemGroup>
 
 	<ItemGroup>
