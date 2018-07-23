@@ -25,7 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-	<PackageReference Include="Uno.SourceGenerationTasks" Version="1.21.0" PrivateAssets="none" />
+	<PackageReference Include="Uno.SourceGenerationTasks" Version="1.21.0" PrivateAssets="none">
+		<NoWarn>NU1701</NoWarn>
+	</PackageReference>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'!='net46'">
