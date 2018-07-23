@@ -67,21 +67,65 @@ namespace Uno.CodeGen.Tests
 			new MyEntityForStringComparison.Builder {EmptyEqualsNullIgnoreCase = ""}.ToImmutable()
 				.Should().BeSameAs(MyEntityForStringComparison.Default);
 		}
+
+		[TestMethod]
+		public void Equality_WhenUsingMyEntityForStringHashcodeComparison()
+		{
+			new MyEntityForStringComparison.Builder { DefaultMode = "a" }.ToImmutable().GetHashCode()
+				.Should().Be(new MyEntityForStringComparison.Builder { DefaultMode = "a" }.ToImmutable().GetHashCode(), "DefaultMode: a == a");
+
+			new MyEntityForStringComparison.Builder { DefaultMode = "a" }.ToImmutable().GetHashCode()
+				.Should().NotBe(new MyEntityForStringComparison.Builder { DefaultMode = "A" }.ToImmutable().GetHashCode(), "DefaultMode: a != A");
+
+			new MyEntityForStringComparison.Builder { DefaultMode = "" }.ToImmutable().GetHashCode()
+				.Should().NotBe(MyEntityForStringComparison.Default.GetHashCode(), "DefaultMode: \"\" != null");
+
+			new MyEntityForStringComparison.Builder { IgnoreCase = "a" }.ToImmutable().GetHashCode()
+				.Should().Be(new MyEntityForStringComparison.Builder { IgnoreCase = "a" }.ToImmutable().GetHashCode(), "IgnoreCase: a == a");
+
+			new MyEntityForStringComparison.Builder { IgnoreCase = "a" }.ToImmutable().GetHashCode()
+				.Should().Be(new MyEntityForStringComparison.Builder { IgnoreCase = "A" }.ToImmutable().GetHashCode(), "IgnoreCase: a == A");
+
+			new MyEntityForStringComparison.Builder { IgnoreCase = "" }.ToImmutable().GetHashCode()
+				.Should().NotBe(MyEntityForStringComparison.Default.GetHashCode(), "IgnoreCase: \"\" != null");
+
+			new MyEntityForStringComparison.Builder { EmptyEqualsNull = "a" }.ToImmutable().GetHashCode()
+				.Should().Be(new MyEntityForStringComparison.Builder { EmptyEqualsNull = "a" }.ToImmutable().GetHashCode(), "EmptyEqualsNull: a == a");
+
+			new MyEntityForStringComparison.Builder { EmptyEqualsNull = "a" }.ToImmutable().GetHashCode()
+				.Should().NotBe(new MyEntityForStringComparison.Builder { EmptyEqualsNull = "A" }.ToImmutable().GetHashCode(), "EmptyEqualsNull: a != A");
+
+			new MyEntityForStringComparison.Builder { EmptyEqualsNull = "" }.ToImmutable().GetHashCode()
+				.Should().Be(MyEntityForStringComparison.Default.GetHashCode(), "EmptyEqualsNull: \"\" == null");
+
+			new MyEntityForStringComparison.Builder { EmptyEqualsNullIgnoreCase = "a" }.ToImmutable().GetHashCode()
+				.Should().Be(new MyEntityForStringComparison.Builder { EmptyEqualsNullIgnoreCase = "a" }.ToImmutable().GetHashCode(), "EmptyEqualsNullIgnoreCase: a == a");
+
+			new MyEntityForStringComparison.Builder { EmptyEqualsNullIgnoreCase = "a" }.ToImmutable().GetHashCode()
+				.Should().Be(new MyEntityForStringComparison.Builder { EmptyEqualsNullIgnoreCase = "A" }.ToImmutable().GetHashCode(), "EmptyEqualsNullIgnoreCase: a == A");
+
+			new MyEntityForStringComparison.Builder { EmptyEqualsNullIgnoreCase = "" }.ToImmutable().GetHashCode()
+				.Should().Be(MyEntityForStringComparison.Default.GetHashCode(), "EmptyEqualsNullIgnoreCase: \"\" == null");
+		}
 	}
 
 	[GeneratedImmutable(GenerateEquality = true)]
 	public partial class MyEntityForStringComparison
 	{
 		[EqualityComparerOptions(StringMode = StringComparerMode.Default)]
+		[EqualityHash]
 		public string DefaultMode { get; }
 
 		[EqualityComparerOptions(StringMode = StringComparerMode.IgnoreCase)]
+		[EqualityHash]
 		public string IgnoreCase { get; }
 
 		[EqualityComparerOptions(StringMode = StringComparerMode.EmptyEqualsNull)]
+		[EqualityHash]
 		public string EmptyEqualsNull { get; }
 
 		[EqualityComparerOptions(StringMode = StringComparerMode.EmptyEqualsNull | StringComparerMode.IgnoreCase)]
+		[EqualityHash]
 		public string EmptyEqualsNullIgnoreCase { get; }
 	}
 }

@@ -66,6 +66,7 @@ namespace Uno
 		private INamedTypeSymbol _equalityKeyAttributeSymbol;
 		private INamedTypeSymbol _equalityComparerOptionsAttributeSymbol;
 		private INamedTypeSymbol _dataAnnonationsKeyAttributeSymbol;
+		private bool _isPureAttributePresent;
 		private SourceGeneratorContext _context;
 
 		private bool _generateKeyEqualityCode;
@@ -118,6 +119,7 @@ namespace Uno
 			_equalityKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityKeyAttribute");
 			_equalityComparerOptionsAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.Equality.EqualityComparerOptionsAttribute");
 			_dataAnnonationsKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("System.ComponentModel.DataAnnotations.KeyAttribute");
+			_isPureAttributePresent = context.Compilation.GetTypeByMetadataName("System.Diagnostics.Contracts.Pure") != null;
 
 			_generateKeyEqualityCode = _iKeyEquatableSymbol != null;
 
@@ -182,7 +184,10 @@ namespace Uno
 					builder.AppendLineInvariant("/// <remarks>");
 					builder.AppendLineInvariant("/// You can also simply use the overriden '==' and '!=' operators.");
 					builder.AppendLineInvariant("/// </remarks>");
-					builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
+					if (_isPureAttributePresent)
+					{
+						builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
+					}
 
 					using (builder.BlockInvariant($"public static bool Equals({symbolNameWithGenerics} a, {symbolNameWithGenerics} b)"))
 					{
@@ -204,7 +209,10 @@ namespace Uno
 					builder.AppendLine();
 
 					builder.AppendLineInvariant("/// <inheritdoc />");
-					builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
+					if (_isPureAttributePresent)
+					{
+						builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
+					}
 					using (builder.BlockInvariant($"public bool Equals({symbolNameWithGenerics} other) // Implementation of `IEquatable<{symbolNameWithGenerics}>.Equals()`"))
 					{
 						if (typeSymbol.IsReferenceType)
@@ -218,7 +226,10 @@ namespace Uno
 					builder.AppendLine();
 
 					builder.AppendLineInvariant("/// <inheritdoc />");
-					builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
+					if (_isPureAttributePresent)
+					{
+						builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
+					}
 					using (builder.BlockInvariant("public override bool Equals(object other)  // This one from `System.Object.Equals()`"))
 					{
 						if (typeSymbol.IsReferenceType)
@@ -268,7 +279,10 @@ namespace Uno
 					builder.AppendLineInvariant("#region \".GetHashCode()\" Section -- THIS IS WHERE HASH CODE IS COMPUTED");
 
 					builder.AppendLineInvariant("/// <inheritdoc />");
-					builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
+					if (_isPureAttributePresent)
+					{
+						builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
+					}
 					using (builder.BlockInvariant("public override int GetHashCode()"))
 					{
 						builder.AppendLineInvariant("return _computedHashCode ?? (int)(_computedHashCode = ComputeHashCode());");
@@ -296,7 +310,10 @@ namespace Uno
 						builder.AppendLineInvariant("#region \"Key Equality\" Section -- THIS IS WHERE KEY EQUALS IS DONE + KEY HASH CODE IS COMPUTED");
 
 						builder.AppendLineInvariant("/// <inheritdoc />");
-						builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
+						if (_isPureAttributePresent)
+						{
+							builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
+						}
 						using (builder.BlockInvariant("public bool KeyEquals(object other)"))
 						{
 							if (typeSymbol.IsReferenceType)
@@ -337,7 +354,10 @@ namespace Uno
 						builder.AppendLine();
 
 						builder.AppendLineInvariant("/// <inheritdoc />");
-						builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
+						if (_isPureAttributePresent)
+						{
+							builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
+						}
 						using (builder.BlockInvariant("public int GetKeyHashCode()"))
 						{
 							builder.AppendLineInvariant("return _computedKeyHashCode ?? (int)(_computedKeyHashCode = ComputeKeyHashCode());");
@@ -479,12 +499,7 @@ namespace Uno
 						if (type.Equals(_stringSymbol))
 						{
 							// Extract mode from attribute, or default following the type of the collection (if ordered)
-							var optionsAttribute = member.FindAttribute(_equalityComparerOptionsAttributeSymbol);
-							var mode = (byte) (optionsAttribute
-									?.NamedArguments
-									.FirstOrDefault(na => na.Key.Equals(nameof(EqualityComparerOptionsAttribute.StringMode)))
-									.Value.Value
-								?? default(byte));
+							var mode = GetStringMode(member);
 
 							var comparer = (mode & StringModeIgnoreCase) == StringModeIgnoreCase
 								? "System.StringComparer.OrdinalIgnoreCase"
@@ -555,6 +570,17 @@ namespace Uno
 			{
 				builder.AppendLineInvariant("return true; // no differences found");
 			}
+		}
+
+		private byte GetStringMode(ISymbol member)
+		{
+			var optionsAttribute = member.FindAttribute(_equalityComparerOptionsAttributeSymbol);
+			var mode = (byte) (optionsAttribute
+				                   ?.NamedArguments
+				                   .FirstOrDefault(na => na.Key.Equals(nameof(EqualityComparerOptionsAttribute.StringMode)))
+				                   .Value.Value
+			                   ?? default(byte));
+			return mode;
 		}
 
 		private void GenerateHashLogic(INamedTypeSymbol typeSymbol, IndentedStringBuilder builder, (ISymbol, byte)[] hashMembers, string baseCall)
@@ -654,6 +680,14 @@ namespace Uno
 						{
 							getHashCode = $"((global::Uno.Equality.IKeyEquatable){member.Name}).GetKeyHashCode()";
 						}
+						else if (type.IsReferenceType)
+						{
+							var mode = GetStringMode(member);
+
+							getHashCode = (mode & StringModeIgnoreCase) == StringModeIgnoreCase
+								? $"System.StringComparer.OrdinalIgnoreCase.GetHashCode({member.Name})"
+								: $"System.StringComparer.Ordinal.GetHashCode({member.Name})";
+						}
 						else
 						{
 							var isGeneratedEquality = type.FindAttribute(_generatedEqualityAttributeSymbol) != null;
@@ -683,7 +717,19 @@ namespace Uno
 
 						if (type.IsReferenceType)
 						{
-							using (builder.BlockInvariant($"if (!ReferenceEquals({member.Name}, null))"))
+							var emptyEqualsNull = false;
+
+							if (type.Equals(_stringSymbol))
+							{
+								var mode = GetStringMode(member);
+								emptyEqualsNull = (mode & StringModeEmptyEqualsNull) == StringModeEmptyEqualsNull;
+							}
+
+							var nullCheckCode = emptyEqualsNull
+								? $"!string.IsNullOrWhiteSpace({member.Name})"
+								: $"!ReferenceEquals({member.Name}, null)";
+
+							using (builder.BlockInvariant($"if ({nullCheckCode})"))
 							{
 								builder.AppendLineInvariant($"hash = ({getHashCode} * {primeNumber}) ^ hash;");
 							}
