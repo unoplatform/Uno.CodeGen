@@ -361,3 +361,17 @@ public class MyImmutable
 > (`[GeneratedImmutable(GenerateEquality = false)]`)
 > won't have any effect in inherited class if the generation is active on the
 > base class.
+
+## I want to reference external classes from my entities.
+
+I'm getting this error:
+
+``` csharp
+#error: 'ImmutableGenerator: Property MyClass.SomeField type ExternalClass.SuperClass is not immutable. It cannot be used in an immutable entity.'
+```
+
+To fix this, put this attribute on your assembly:
+
+``` csharp
+[assembly: Uno.KnownAsImmutable(typeof(ExternalClass.SuperClass))]
+```

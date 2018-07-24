@@ -21,7 +21,7 @@ namespace Uno
 	/// <summary>
 	/// Global settings for [GenerateImmutable] generator.
 	/// </summary>
-	[System.AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
+	[System.AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
 	public sealed class ImmutableGenerationOptionsAttribute : Attribute
 	{
 		/// <summary>

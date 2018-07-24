@@ -60,7 +60,7 @@ namespace Uno.Helpers
 		private static ImmutableDictionary<(ITypeSymbol, bool), bool> _isImmutable =
 			ImmutableDictionary<(ITypeSymbol, bool), bool>.Empty;
 
-		public static bool IsImmutable(this ITypeSymbol type, bool treatArrayAsImmutable)
+		public static bool IsImmutable(this ITypeSymbol type, bool treatArrayAsImmutable, IReadOnlyList<ITypeSymbol> knownAsImmutable)
 		{
 			bool GetIsImmutable((ITypeSymbol type, bool treatArrayAsImmutable) x)
 			{
@@ -92,7 +92,7 @@ namespace Uno.Helpers
 
 				if (t is IArrayTypeSymbol arrayType)
 				{
-					return arrayType.ElementType?.IsImmutable(asImmutable) ?? false;
+					return arrayType.ElementType?.IsImmutable(asImmutable, knownAsImmutable) ?? false;
 				}
 
 				var definitionType = t.GetDefinitionType();
@@ -127,7 +127,7 @@ namespace Uno.Helpers
 					case "System.Collections.Immutable.ImmutableStack<T>":
 						{
 							var argumentParameter = (t as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
-							return argumentParameter == null || argumentParameter.IsImmutable(asImmutable);
+							return argumentParameter == null || argumentParameter.IsImmutable(asImmutable, knownAsImmutable);
 						}
 					case "System.Collections.Immutable.IImmutableDictionary<TKey, TValue>":
 					case "System.Collections.Immutable.ImmutableDictionary<TKey, TValue>":
@@ -135,9 +135,14 @@ namespace Uno.Helpers
 						{
 							var keyTypeParameter = (t as INamedTypeSymbol)?.TypeArguments.FirstOrDefault();
 							var valueTypeParameter = (t as INamedTypeSymbol)?.TypeArguments.Skip(1).FirstOrDefault();
-							return (keyTypeParameter == null || keyTypeParameter.IsImmutable(asImmutable))
-								&& (valueTypeParameter == null || valueTypeParameter.IsImmutable(asImmutable));
+							return (keyTypeParameter == null || keyTypeParameter.IsImmutable(asImmutable, knownAsImmutable))
+								&& (valueTypeParameter == null || valueTypeParameter.IsImmutable(asImmutable, knownAsImmutable));
 						}
+				}
+
+				if (knownAsImmutable.Contains(definitionType))
+				{
+					return true;
 				}
 
 				switch (definitionType.GetType().Name)
@@ -154,13 +159,13 @@ namespace Uno.Helpers
 						return asImmutable;
 				}
 
-				return IsImmutableByRequirements(t, treatArrayAsImmutable);
+				return IsImmutableByRequirements(t, treatArrayAsImmutable, knownAsImmutable);
 			}
 
 			return ImmutableInterlocked.GetOrAdd(ref _isImmutable, (type, treatArrayAsImmutable), GetIsImmutable);
 		}
 
-		private static bool IsImmutableByRequirements(ITypeSymbol type, bool treatArrayAsImmutable)
+		private static bool IsImmutableByRequirements(ITypeSymbol type, bool treatArrayAsImmutable, IReadOnlyList<ITypeSymbol> knownAsImmutable)
 		{
 			// Check if type is complying to immutable requirements
 			// 1) all instance fields are readonly
@@ -169,11 +174,11 @@ namespace Uno.Helpers
 
 			foreach (var member in type.GetMembers())
 			{
-				if (member is IFieldSymbol f && !(f.IsStatic || f.IsReadOnly || f.IsImplicitlyDeclared) && f.Type.IsImmutable(treatArrayAsImmutable))
+				if (member is IFieldSymbol f && !(f.IsStatic || f.IsReadOnly || f.IsImplicitlyDeclared) && f.Type.IsImmutable(treatArrayAsImmutable, knownAsImmutable))
 				{
 					return false; // there's a non-readonly non-static field
 				}
-				if (member is IPropertySymbol p && !(p.IsStatic || p.IsReadOnly || p.IsImplicitlyDeclared) && p.Type.IsImmutable(treatArrayAsImmutable))
+				if (member is IPropertySymbol p && !(p.IsStatic || p.IsReadOnly || p.IsImplicitlyDeclared) && p.Type.IsImmutable(treatArrayAsImmutable, knownAsImmutable))
 				{
 					return false; // there's a non-readonly non-static property
 				}
@@ -183,7 +188,7 @@ namespace Uno.Helpers
 			return type.BaseType == null
 				|| type.BaseType.SpecialType == SpecialType.System_Object
 				|| type.BaseType.SpecialType == SpecialType.System_ValueType
-				|| type.BaseType.IsImmutable(treatArrayAsImmutable);
+				|| type.BaseType.IsImmutable(treatArrayAsImmutable, knownAsImmutable);
 		}
 
 		public static ITypeSymbol GetDefinitionType(this ITypeSymbol type)
