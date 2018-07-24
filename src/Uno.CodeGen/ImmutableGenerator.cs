@@ -17,6 +17,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -46,12 +47,15 @@ namespace Uno
 		private INamedTypeSymbol _immutableBuilderAttributeSymbol;
 		private INamedTypeSymbol _immutableAttributeCopyIgnoreAttributeSymbol;
 		private INamedTypeSymbol _immutableGenerationOptionsAttributeSymbol;
+		private INamedTypeSymbol _immutableKnownAsImmutableAttributeSymbol;
 
 		private (bool generateOptionCode, bool treatArrayAsImmutable, bool generateEqualityByDefault, bool generateJsonNet) _generationOptions;
 		private bool _generateOptionCode = true;
 		private bool _generateJsonNet = true;
 
 		private Regex[] _copyIgnoreAttributeRegexes;
+
+		private IReadOnlyList<ITypeSymbol> _knownAsImmutableTypes;
 
 		/// <inheritdoc />
 		public override void Execute(SourceGeneratorContext context)
@@ -63,12 +67,20 @@ namespace Uno
 			_immutableBuilderAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableBuilderAttribute");
 			_immutableAttributeCopyIgnoreAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableAttributeCopyIgnoreAttribute");
 			_immutableGenerationOptionsAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableGenerationOptionsAttribute");
+			_immutableKnownAsImmutableAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.KnownAsImmutableAttribute");
 
 			var generationData = EnumerateImmutableGeneratedEntities()
 				.OrderBy(x => x.symbol.Name)
 				.ToArray();
 
 			var immutableEntitiesToGenerate = generationData.Select(x => x.Item1).ToArray();
+
+			if (immutableEntitiesToGenerate.Length == 0)
+			{
+				return; // nothing to do
+			}
+
+			_knownAsImmutableTypes = EnumerateKnownAsImmutables();
 
 			_copyIgnoreAttributeRegexes =
 				ExtractCopyIgnoreAttributes(context.Compilation.Assembly)
@@ -849,7 +861,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 					builder.AppendLineInvariant(
 						$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} IS A BUILDER! It cannot be used in an immutable entity.");
 				}
-				else if (!type.IsImmutable(_generationOptions.treatArrayAsImmutable))
+				else if (!type.IsImmutable(_generationOptions.treatArrayAsImmutable, _knownAsImmutableTypes))
 				{
 					if (type is IArrayTypeSymbol)
 					{
@@ -950,5 +962,22 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 				where moduleAttribute != null
 				//where (bool) moduleAttribute.ConstructorArguments[0].Value
 				select (type, moduleAttribute);
+
+		private IReadOnlyList<ITypeSymbol> EnumerateKnownAsImmutables()
+		{
+			var currentModuleAttributes = _context.Compilation.Assembly.GetAttributes();
+			var referencedAssembliesAttributes =
+				_context.Compilation.SourceModule.ReferencedAssemblySymbols.SelectMany(a => a.GetAttributes());
+
+			var knownTypeAttributes = currentModuleAttributes
+				.Concat(referencedAssembliesAttributes)
+				.Where(a => a.AttributeClass.Equals(_immutableKnownAsImmutableAttributeSymbol))
+				.Select(a => a.ConstructorArguments[0].Value)
+				.Cast<ITypeSymbol>()
+				.Distinct()
+				.ToImmutableArray();
+
+			return knownTypeAttributes;
+		}
 	}
 }
