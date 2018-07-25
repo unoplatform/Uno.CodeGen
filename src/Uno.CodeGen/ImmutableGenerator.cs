@@ -861,7 +861,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 				if (type.FindAttribute(_immutableBuilderAttributeSymbol) != null)
 				{
 					builder.AppendLineInvariant(
-						$"#error {nameof(ImmutableGenerator)}: {typeSource} ({typeName}) IS A BUILDER! It cannot be used in an immutable entity.");
+						$"#error {nameof(ImmutableGenerator)}: {typeSource} ({typeName}) is a builder. It cannot be used in an immutable entity.");
 				}
 				else if (!type.IsImmutable(_generationOptions.treatArrayAsImmutable, _knownAsImmutableTypes))
 				{
