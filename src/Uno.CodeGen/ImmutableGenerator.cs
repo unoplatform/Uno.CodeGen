@@ -47,7 +47,7 @@ namespace Uno
 		private INamedTypeSymbol _immutableBuilderAttributeSymbol;
 		private INamedTypeSymbol _immutableAttributeCopyIgnoreAttributeSymbol;
 		private INamedTypeSymbol _immutableGenerationOptionsAttributeSymbol;
-		private INamedTypeSymbol _immutableKnownAsImmutableAttributeSymbol;
+		private INamedTypeSymbol _immutableTreatAsImmutableAttributeSymbol;
 
 		private (bool generateOptionCode, bool treatArrayAsImmutable, bool generateEqualityByDefault, bool generateJsonNet) _generationOptions;
 		private bool _generateOptionCode = true;
@@ -67,7 +67,7 @@ namespace Uno
 			_immutableBuilderAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableBuilderAttribute");
 			_immutableAttributeCopyIgnoreAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableAttributeCopyIgnoreAttribute");
 			_immutableGenerationOptionsAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableGenerationOptionsAttribute");
-			_immutableKnownAsImmutableAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.KnownAsImmutableAttribute");
+			_immutableTreatAsImmutableAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.TreatAsImmutableAttribute");
 
 			var generationData = EnumerateImmutableGeneratedEntities()
 				.OrderBy(x => x.symbol.Name)
@@ -80,7 +80,7 @@ namespace Uno
 				return; // nothing to do
 			}
 
-			_knownAsImmutableTypes = EnumerateKnownAsImmutables();
+			_knownAsImmutableTypes = EnumerateTreatAsImmutables();
 
 			_copyIgnoreAttributeRegexes =
 				ExtractCopyIgnoreAttributes(context.Compilation.Assembly)
@@ -835,6 +835,8 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 
 			void CheckTypeImmutable(ITypeSymbol type, string typeSource, bool constraintsChecked = false)
 			{
+				var typeName = (type as INamedTypeSymbol)?.GetSymbolNames().SymbolNameWithGenerics ?? type.ToString();
+
 				if (type is ITypeParameterSymbol typeParameter)
 				{
 					if (typeParameter.ConstraintTypes.Any())
@@ -850,7 +852,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 					else
 					{
 						builder.AppendLineInvariant(
-							$"#error {nameof(ImmutableGenerator)}: {typeSource} is of generic type {type} which isn't restricted to immutable. You can also make your class abstract.");
+							$"#error {nameof(ImmutableGenerator)}: {typeSource} is of generic type {typeName} which isn't restricted to immutable. You can also make your class abstract.");
 					}
 
 					return; // ok
@@ -859,22 +861,24 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 				if (type.FindAttribute(_immutableBuilderAttributeSymbol) != null)
 				{
 					builder.AppendLineInvariant(
-						$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} IS A BUILDER! It cannot be used in an immutable entity.");
+						$"#error {nameof(ImmutableGenerator)}: {typeSource} ({typeName}) is a builder. It cannot be used in an immutable entity.");
 				}
 				else if (!type.IsImmutable(_generationOptions.treatArrayAsImmutable, _knownAsImmutableTypes))
 				{
 					if (type is IArrayTypeSymbol)
 					{
 						builder.AppendLineInvariant(
-							$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} is an array, which is not immutable. "
-							+ "You can treat arrays as immutable by setting a global attribute " 
+							$"#error {nameof(ImmutableGenerator)}: {typeSource} ({typeName}) is an array, which is not immutable. "
+							+ "You can treat arrays as immutable by setting a global attribute: " 
 							+ "[assembly: Uno.ImmutableGenerationOptions(TreatArrayAsImmutable = true)].");
 
 					}
 					else
 					{
 						builder.AppendLineInvariant(
-							$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} is not immutable. It cannot be used in an immutable entity.");
+							$"#error {nameof(ImmutableGenerator)}: {typeSource} ({typeName}) not immutable. It cannot be used in an immutable entity. "
+							+ "If you know the type can safely be used as immutable, add a global attribyte: "
+							+ $"[assembly: Uno.TreatAsImmutable(typeof({typeName}))]");
 					}
 				}
 
@@ -963,21 +967,21 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 				//where (bool) moduleAttribute.ConstructorArguments[0].Value
 				select (type, moduleAttribute);
 
-		private IReadOnlyList<ITypeSymbol> EnumerateKnownAsImmutables()
+		private IReadOnlyList<ITypeSymbol> EnumerateTreatAsImmutables()
 		{
 			var currentModuleAttributes = _context.Compilation.Assembly.GetAttributes();
 			var referencedAssembliesAttributes =
 				_context.Compilation.SourceModule.ReferencedAssemblySymbols.SelectMany(a => a.GetAttributes());
 
-			var knownTypeAttributes = currentModuleAttributes
+			var knownToBeImmutableTypes = currentModuleAttributes
 				.Concat(referencedAssembliesAttributes)
-				.Where(a => a.AttributeClass.Equals(_immutableKnownAsImmutableAttributeSymbol))
+				.Where(a => a.AttributeClass.Equals(_immutableTreatAsImmutableAttributeSymbol))
 				.Select(a => a.ConstructorArguments[0].Value)
 				.Cast<ITypeSymbol>()
 				.Distinct()
 				.ToImmutableArray();
 
-			return knownTypeAttributes;
+			return knownToBeImmutableTypes;
 		}
 	}
 }

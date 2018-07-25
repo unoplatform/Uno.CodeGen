@@ -367,11 +367,11 @@ public class MyImmutable
 I'm getting this error:
 
 ``` csharp
-#error: 'ImmutableGenerator: Property MyClass.SomeField type ExternalClass.SuperClass is not immutable. It cannot be used in an immutable entity.'
+#error: 'ImmutableGenerator: Property MyClass.SomeField (BaseClass) is not immutable. It cannot be used in an immutable entity.'
 ```
 
 To fix this, put this attribute on your assembly:
 
 ``` csharp
-[assembly: Uno.KnownAsImmutable(typeof(ExternalClass.SuperClass))]
+[assembly: Uno.TreatAsImmutable(typeof(BaseClass))]
 ```

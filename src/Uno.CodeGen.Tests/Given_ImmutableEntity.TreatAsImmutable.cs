@@ -15,27 +15,22 @@
 //
 // ******************************************************************
 using System;
+using System.Net.Mail;
+using Uno;
 
-namespace Uno
+[assembly: TreatAsImmutable(typeof(DivideByZeroException))]
+
+namespace Uno.CodeGen.Tests
 {
-	/// <summary>
-	/// Define a type (usually external) as immutable
-	/// </summary>
-	[System.AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-	public sealed class KnownAsImmutableAttribute : Attribute
+	partial class Given_ImmutableEntity
 	{
-		/// <summary>
-		/// The type known to be immutable
-		/// </summary>
-		public Type Type { get; }
+		internal static readonly MyImmutableWithExternalTreatAsImmutable TreatAsImmutable =
+			MyImmutableWithExternalTreatAsImmutable.Default;
+	}
 
-		/// <summary>
-		/// .ctor
-		/// </summary>
-		/// <param name="type"></param>
-		public KnownAsImmutableAttribute(Type type)
-		{
-			Type = type;
-		}
+	[GeneratedImmutable]
+	internal partial class MyImmutableWithExternalTreatAsImmutable
+	{
+		private DivideByZeroException Exception { get; }
 	}
 }

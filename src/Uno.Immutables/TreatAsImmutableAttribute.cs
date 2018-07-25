@@ -14,22 +14,28 @@
 // limitations under the License.
 //
 // ******************************************************************
-using System.Net.Mail;
-using Uno;
+using System;
 
-[assembly: KnownAsImmutable(typeof(SmtpException))]
-
-namespace Uno.CodeGen.Tests
+namespace Uno
 {
-	partial class Given_ImmutableEntity
+	/// <summary>
+	/// Define a type (usually external) as immutable
+	/// </summary>
+	[System.AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
+	public sealed class TreatAsImmutableAttribute : Attribute
 	{
-		internal static readonly MyImmutableWithExternalKnownAsImmutable KnownAsImmutable =
-			MyImmutableWithExternalKnownAsImmutable.Default;
-	}
+		/// <summary>
+		/// The type known to be immutable
+		/// </summary>
+		public Type Type { get; }
 
-	[GeneratedImmutable]
-	internal partial class MyImmutableWithExternalKnownAsImmutable
-	{
-		private SmtpException Exception { get; }
+		/// <summary>
+		/// .ctor
+		/// </summary>
+		/// <param name="type"></param>
+		public TreatAsImmutableAttribute(Type type)
+		{
+			Type = type;
+		}
 	}
 }
