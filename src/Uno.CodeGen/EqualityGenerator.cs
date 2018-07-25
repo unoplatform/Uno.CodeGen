@@ -52,11 +52,8 @@ namespace Uno
 		private INamedTypeSymbol _valueTypeSymbol;
 		private INamedTypeSymbol _boolSymbol;
 		private INamedTypeSymbol _intSymbol;
-		private INamedTypeSymbol _stringSymbol;
 		private INamedTypeSymbol _arraySymbol;
 		private INamedTypeSymbol _collectionSymbol;
-		private INamedTypeSymbol _readonlyCollectionGenericSymbol;
-		private INamedTypeSymbol _collectionGenericSymbol;
 		private INamedTypeSymbol _iEquatableSymbol;
 		private INamedTypeSymbol _iKeyEquatableSymbol;
 		private INamedTypeSymbol _iKeyEquatableGenericSymbol;
@@ -105,11 +102,8 @@ namespace Uno
 			_valueTypeSymbol = context.Compilation.GetTypeByMetadataName("System.ValueType");
 			_boolSymbol = context.Compilation.GetTypeByMetadataName("System.Bool");
 			_intSymbol = context.Compilation.GetTypeByMetadataName("System.Int32");
-			_stringSymbol = context.Compilation.GetTypeByMetadataName("System.String");
 			_arraySymbol = context.Compilation.GetTypeByMetadataName("System.Array");
 			_collectionSymbol = context.Compilation.GetTypeByMetadataName("System.Collections.ICollection");
-			_readonlyCollectionGenericSymbol = context.Compilation.GetTypeByMetadataName("System.Collections.Generic.IReadOnlyCollection`1");
-			_collectionGenericSymbol = context.Compilation.GetTypeByMetadataName("System.Collections.Generic.ICollection`1");
 			_iEquatableSymbol = context.Compilation.GetTypeByMetadataName("System.IEquatable`1");
 			_iKeyEquatableSymbol = context.Compilation.GetTypeByMetadataName("Uno.Equality.IKeyEquatable");
 			_iKeyEquatableGenericSymbol = context.Compilation.GetTypeByMetadataName("Uno.Equality.IKeyEquatable`1");
@@ -496,7 +490,7 @@ namespace Uno
 						builder.AppendLineInvariant($"// **{member.Name}** You can define a custom comparer for {member.Name} and it will be used.");
 						builder.AppendLineInvariant($"// CUSTOM COMPARER>> private static IEqualityComparer<{type}> {GetCustomComparerPropertyName(member)} => <custom comparer>;");
 
-						if (type.Equals(_stringSymbol))
+						if (type.SpecialType == SpecialType.System_String)
 						{
 							// Extract mode from attribute, or default following the type of the collection (if ordered)
 							var mode = GetStringMode(member);
@@ -680,7 +674,7 @@ namespace Uno
 						{
 							getHashCode = $"((global::Uno.Equality.IKeyEquatable){member.Name}).GetKeyHashCode()";
 						}
-						else if (type.IsReferenceType)
+						else if (type.SpecialType == SpecialType.System_String)
 						{
 							var mode = GetStringMode(member);
 
@@ -719,7 +713,7 @@ namespace Uno
 						{
 							var emptyEqualsNull = false;
 
-							if (type.Equals(_stringSymbol))
+							if (type.SpecialType == SpecialType.System_String)
 							{
 								var mode = GetStringMode(member);
 								emptyEqualsNull = (mode & StringModeEmptyEqualsNull) == StringModeEmptyEqualsNull;
