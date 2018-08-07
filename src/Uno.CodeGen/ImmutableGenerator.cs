@@ -553,7 +553,7 @@ return ({symbolNameWithGenerics})(_cachedResult = _original);");
 							builder.AppendLine(
 								$@"private bool _isNone;
 
-public static Builder FromOption(Uno.Option<{symbolNameWithGenerics}> original)
+public static Builder FromOption(global::Uno.Option<{symbolNameWithGenerics}> original)
 {{
 	if(original.MatchSome(out var o))
 	{{
