@@ -497,6 +497,7 @@ namespace Uno
 					{
 						builder.AppendLineInvariant($"// **{member.Name}** You can define a custom comparer for {member.Name} and it will be used.");
 						builder.AppendLineInvariant($"// CUSTOM COMPARER>> private static IEqualityComparer<{type}> {GetCustomComparerPropertyName(member)} => <custom comparer>;");
+						builder.AppendLineInvariant($"// If you don't want {member.Name} to be used for equality check, add the [Uno.EqualityIgnore] attribute on it.");
 
 						if (type.SpecialType == SpecialType.System_String)
 						{
@@ -512,6 +513,10 @@ namespace Uno
 								? $"(string.IsNullOrWhiteSpace({member.Name}) != string.IsNullOrWhiteSpace(other.{member.Name})) || !string.IsNullOrWhiteSpace({member.Name}) && "
 								: "";
 							var nullCoalescing = emptyEqualsNull ? " ?? \"\" " : "";
+
+							builder.AppendLineInvariant("// STRING>> You can fine-tune the string equality by adding the following attribute on your member:");
+							builder.AppendLineInvariant("//   [EqualityComparerOptions(StringMode=<flags>)]");
+							builder.AppendLineInvariant($"//   Available flags: {nameof(StringComparerMode)}.IgnoreCase and {nameof(StringComparerMode)}.EmptyEqualsNull");
 
 							using (builder.BlockInvariant($"if({emptyCheck}!{comparer}.Equals({member.Name}{nullCoalescing}, other.{member.Name}{nullCoalescing}))"))
 							{
@@ -538,7 +543,7 @@ namespace Uno
 							{
 								if(type.IsReferenceType)
 								{ 
-									using (builder.BlockInvariant($"if(!((global::Uno.Equality.IKeyEquatable){member.Name})?.KeyEquals(other.{member.Name}) ?? false)"))
+									using (builder.BlockInvariant($"if(!((global::Uno.Equality.IKeyEquatable){member.Name})?.KeyEquals(other.{member.Name}) ?? other.{member.Name} != null)"))
 									{
 										builder.AppendLineInvariant($"return false; // {member.Name} not equal");
 									}
@@ -612,6 +617,7 @@ namespace Uno
 					{
 						var (member, equalityMode) = hashMembers[i];
 						var primeNumber = PrimeNumbers[i % PrimeNumbers.Length];
+						var primeNumberRank = 19900 + i;
 
 						var type = (member as IFieldSymbol)?.Type ?? (member as IPropertySymbol)?.Type;
 						if (type == null)
@@ -736,12 +742,12 @@ namespace Uno
 
 							using (builder.BlockInvariant($"if ({nullCheckCode})"))
 							{
-								builder.AppendLineInvariant($"hash = ({getHashCode} * {primeNumber}) ^ hash;");
+								builder.AppendLineInvariant($"hash = ({getHashCode} * {primeNumber}) ^ hash; // {primeNumber} is the {primeNumberRank}th prime number");
 							}
 						}
 						else
 						{
-							builder.AppendLineInvariant($"hash = ({getHashCode} * {primeNumber}) ^ hash;");
+							builder.AppendLineInvariant($"hash = ({getHashCode} * {primeNumber}) ^ hash; // {primeNumber} is the {primeNumberRank}th prime number");
 						}
 					}
 				}
