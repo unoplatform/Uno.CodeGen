@@ -21,7 +21,7 @@
 		<PackageReference Include="StyleCop.Analyzers" Version="1.0.2" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
 		<PackageReference Include="Uno.Core" Version="1.22.0" />
-	  <PackageReference Include="Uno.SourceGenerationTasks" Version="1.22.0">
+	  <PackageReference Include="Uno.SourceGenerationTasks" Version="1.23.0-dev.66">
 		  <NoWarn>NU1701</NoWarn>
 
 	  </PackageReference>
