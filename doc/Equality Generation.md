@@ -1,5 +1,7 @@
 ﻿# Equality Members Generation
 
+![Equality Members generation snippet](assets/equality-snippet.png)
+
 ## Quick Start
 
 1. Add a reference to the `Uno.CodeGen` _Nuget_ package in your project.
@@ -19,7 +21,7 @@
        public string B { get; }
 
        [EqualityIgnore]
-       public string C { get; } 
+       public string C { get; }
    }
    ```
 
@@ -31,31 +33,31 @@
        // Global static helper for equality
        public static bool Equals(MyEntity a, MyEntity b)
        { ... }
-       
+
        // IEquatable.Equals() implementation
        public bool Equals(MyEntity other)
        { ... }
 
-       // override for object.Equals()       
+       // override for object.Equals()
        public override bool Equals(MyEntity other)
            => Equals(other as MyEntity);
 
        // override for object.GetHashCode()
        public override int GetHashCode()
        { ... }
-       
+
        // IKeyEquatable.KeyEquals() implementation
        public bool KeyEquals(MyEntity other)
        { ... }
-       
+
        // IKeyEquatable.GetKeyHashCode() implementation
        public int GetKeyHashCode()
        { ... }
-       
+
        // `==` Operator overload
        public static bool operator ==(MyEntity a, MyEntity b)
        { ... }
-       
+
        // `!=` Operator overload
        public static bool operator !=(MyEntity a, MyEntity b)
        { ... }
@@ -68,7 +70,7 @@
    var e1_3 = new MyEntity {Id ="1", A="a", B="b2", C="c2"};
    var e1_4 = new MyEntity {Id ="1", A="a2", B="b2", C="c2"};
    var e2 = new MyEntity {Id ="2", A="a2", B="b2", C="c2"};
-   
+
    // All following asserts will pass:
 
    Assert.IsTrue(e1_1.Equals(e1_2));
@@ -251,14 +253,14 @@ The generation logic for fields/properties in the class, using a first-match rul
   can mute this warning in your project.
 
   You can also consider replacing the `struct` by a `class`.
-  
+
   ## Are equality generation automatic for generated immutables?
   Yes they are by default. If you want to chagne this behavior, use the global
   `[ImmutableGenerationOptions]` attribute. Example:
   ``` csharp
   [assembly: Uno.ImmutableGenerationOptions(GenerateEqualityByDefault = true)]
   ```
-  
+
   You can also override this default by specifying per-type:
   ```csharp
   [GeneratedImmutable(GenerateEquality = false)]
