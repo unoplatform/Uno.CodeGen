@@ -58,6 +58,9 @@ Features:
 | `stable` | [stable](https://github.com/nventive/Uno.CodeGen/tree/stable) | [![Build status](https://ci.appveyor.com/api/projects/status/bh83u4i2lp0hrg8r/branch/stable?svg=true)](https://ci.appveyor.com/project/nventivedevops/uno-codegen/branch/stable) | ![Build Stats](https://buildstats.info/appveyor/chart/nventivedevops/uno-codegen?branch=stable&includeBuildsFromPullRequest=false) | [![NuGet](https://buildstats.info/nuget/Uno.CodeGen?includePreReleases=false)](https://www.nuget.org/packages/Uno.CodeGen/) |
 
 
+## FAQ
+[Read our FAQ here](doc/faq.md)
+
 ## Release Notes
 
 ### 1.22.0 (May 17th 2018)
