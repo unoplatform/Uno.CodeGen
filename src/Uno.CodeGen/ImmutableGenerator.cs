@@ -17,6 +17,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -40,35 +41,52 @@ namespace Uno
 	public class ImmutableGenerator : SourceGenerator
 	{
 		private SourceGeneratorContext _context;
+		private ISourceGeneratorLogger _logger;
+
 		private INamedTypeSymbol _systemObject;
 		private INamedTypeSymbol _immutableAttributeSymbol;
 		private INamedTypeSymbol _generatedImmutableAttributeSymbol;
 		private INamedTypeSymbol _immutableBuilderAttributeSymbol;
 		private INamedTypeSymbol _immutableAttributeCopyIgnoreAttributeSymbol;
 		private INamedTypeSymbol _immutableGenerationOptionsAttributeSymbol;
+		private INamedTypeSymbol _immutableTreatAsImmutableAttributeSymbol;
 
 		private (bool generateOptionCode, bool treatArrayAsImmutable, bool generateEqualityByDefault, bool generateJsonNet) _generationOptions;
 		private bool _generateOptionCode = true;
 		private bool _generateJsonNet = true;
 
+		private string _currentType;
+
 		private Regex[] _copyIgnoreAttributeRegexes;
+
+		private IReadOnlyList<ITypeSymbol> _knownAsImmutableTypes;
 
 		/// <inheritdoc />
 		public override void Execute(SourceGeneratorContext context)
 		{
 			_context = context;
+			_logger = context.GetLogger();
+
 			_systemObject = context.Compilation.GetTypeByMetadataName("System.Object");
 			_immutableAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableAttribute");
 			_generatedImmutableAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.GeneratedImmutableAttribute");
 			_immutableBuilderAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableBuilderAttribute");
 			_immutableAttributeCopyIgnoreAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableAttributeCopyIgnoreAttribute");
 			_immutableGenerationOptionsAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableGenerationOptionsAttribute");
+			_immutableTreatAsImmutableAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.TreatAsImmutableAttribute");
 
 			var generationData = EnumerateImmutableGeneratedEntities()
 				.OrderBy(x => x.symbol.Name)
 				.ToArray();
 
 			var immutableEntitiesToGenerate = generationData.Select(x => x.Item1).ToArray();
+
+			if (immutableEntitiesToGenerate.Length == 0)
+			{
+				return; // nothing to do
+			}
+
+			_knownAsImmutableTypes = EnumerateTreatAsImmutables();
 
 			_copyIgnoreAttributeRegexes =
 				ExtractCopyIgnoreAttributes(context.Compilation.Assembly)
@@ -81,9 +99,9 @@ namespace Uno
 
 			_generateJsonNet = _generationOptions.generateOptionCode && context.Compilation.GetTypeByMetadataName("Newtonsoft.Json.JsonConvert") != null;
 
-			foreach ((var type, var moduleAttribute) in generationData)
+			foreach (var (type, moduleAttribute) in generationData)
 			{
-				var baseTypeInfo = GetTypeInfo(context, type, immutableEntitiesToGenerate);
+				var baseTypeInfo = GetTypeInfo(type, immutableEntitiesToGenerate);
 
 				var generateEquality = GetShouldGenerateEquality(moduleAttribute);
 
@@ -145,8 +163,8 @@ namespace Uno
 		}
 
 		private (bool isBaseTypePresent, string baseType, string builderBaseType, bool isImmutablePresent, INamedTypeSymbol baseBuilderType) GetTypeInfo(
-			SourceGeneratorContext context,
-			INamedTypeSymbol type, INamedTypeSymbol[] immutableEntitiesToGenerate)
+			INamedTypeSymbol type,
+			INamedTypeSymbol[] immutableEntitiesToGenerate)
 		{
 			// Check if [Immutable] is present on the non-generated partial
 			var isImmutablePresent = type.FindAttributeFlattened(_immutableAttributeSymbol) != null;
@@ -226,6 +244,7 @@ namespace Uno
 
 			var symbolNames = typeSymbol.GetSymbolNames();
 			var (symbolName, genericArguments, symbolNameWithGenerics, symbolNameForXml, symbolNameDefinition, resultFileName, genericConstraints) = symbolNames;
+			_currentType = symbolNameWithGenerics;
 
 			ValidateType(builder, typeSymbol, baseTypeInfo, symbolNames, typeProperties);
 
@@ -541,7 +560,7 @@ return ({symbolNameWithGenerics})(_cachedResult = _original);");
 							builder.AppendLine(
 								$@"private bool _isNone;
 
-public static Builder FromOption(Uno.Option<{symbolNameWithGenerics}> original)
+public static Builder FromOption(global::Uno.Option<{symbolNameWithGenerics}> original)
 {{
 	if(original.MatchSome(out var o))
 	{{
@@ -805,24 +824,23 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 		{
 			if (!typeSymbol.IsFromPartialDeclaration())
 			{
-				builder.AppendLineInvariant(
-					$"#warning {nameof(ImmutableGenerator)}: you should add the partial modifier to the class {symbolNames.SymbolNameWithGenerics}.");
+				Error(builder, $"You must add the partial modifier to the class {symbolNames.SymbolNameWithGenerics}.");
 			}
 
 			if (typeSymbol.IsValueType)
 			{
-				builder.AppendLineInvariant(
-					$"#error {nameof(ImmutableGenerator)}: Type {symbolNames.SymbolNameWithGenerics} **MUST** be a class, not a struct.");
+				Error(builder, $"To generate code for type {symbolNames.SymbolNameWithGenerics}, it **MUST** be a class, not a struct.");
 			}
 
 			if (baseTypeInfo.isBaseType && baseTypeInfo.baseType == null)
 			{
-				builder.AppendLineInvariant(
-					$"#error {nameof(ImmutableGenerator)}: Type {symbolNames.SymbolNameWithGenerics} **MUST** derive from an immutable class.");
+				Error(builder, $"To generate code for type {symbolNames.SymbolNameWithGenerics}, it **MUST** derive from an immutable class.");
 			}
 
 			void CheckTypeImmutable(ITypeSymbol type, string typeSource, bool constraintsChecked = false)
 			{
+				var typeName = (type as INamedTypeSymbol)?.GetSymbolNames().SymbolNameWithGenerics ?? type.ToString();
+
 				if (type is ITypeParameterSymbol typeParameter)
 				{
 					if (typeParameter.ConstraintTypes.Any())
@@ -837,8 +855,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 					}
 					else
 					{
-						builder.AppendLineInvariant(
-							$"#error {nameof(ImmutableGenerator)}: {typeSource} is of generic type {type} which isn't restricted to immutable. You can also make your class abstract.");
+						Error(builder, $"{typeSource} is of generic type {typeName} which isn't restricted to immutable (with a \"where\" clause). You can also make your class abstract.");
 					}
 
 					return; // ok
@@ -846,23 +863,26 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 
 				if (type.FindAttribute(_immutableBuilderAttributeSymbol) != null)
 				{
-					builder.AppendLineInvariant(
-						$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} IS A BUILDER! It cannot be used in an immutable entity.");
+					Error(builder, $"{typeSource} ({typeName}) is a builder. It cannot be used in an immutable entity.");
 				}
-				else if (!type.IsImmutable(_generationOptions.treatArrayAsImmutable))
+				else if (!type.IsImmutable(_generationOptions.treatArrayAsImmutable, _knownAsImmutableTypes))
 				{
 					if (type is IArrayTypeSymbol)
 					{
-						builder.AppendLineInvariant(
-							$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} is an array, which is not immutable. "
-							+ "You can treat arrays as immutable by setting a global attribute " 
-							+ "[assembly: Uno.ImmutableGenerationOptions(TreatArrayAsImmutable = true)].");
+						Error(
+							builder,
+							$"{typeSource} ({typeName}) is an array, which is not immutable. "
+							+ "You can treat arrays as immutable by setting a global attribute: " 
+							+ "[assembly: global::Uno.ImmutableGenerationOptions(TreatArrayAsImmutable = true)].");
 
 					}
 					else
 					{
-						builder.AppendLineInvariant(
-							$"#error {nameof(ImmutableGenerator)}: {typeSource} type {type} is not immutable. It cannot be used in an immutable entity.");
+						Error(
+							builder,
+							$"{typeSource} ({typeName}) not immutable. It cannot be used in an immutable entity. "
+							+ "If you know the type can safely be used as immutable, add a global attribyte: "
+							+ $"[assembly: global::Uno.TreatAsImmutable(typeof({typeName}))]");
 					}
 				}
 
@@ -883,8 +903,9 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 				}
 				if (!prop.IsReadOnly)
 				{
-					builder.AppendLineInvariant(
-						$"#error {nameof(ImmutableGenerator)}: Non-static property {symbolNames.SymbolNameWithGenerics}.{prop.Name} "
+					Error(
+						builder,
+						$"Non-static property {symbolNames.SymbolNameWithGenerics}.{prop.Name} "
 						+ "cannot have a setter, even a private one. You must remove it for immutable generation.");
 				}
 
@@ -912,9 +933,10 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 
 				if (!field.IsStatic)
 				{
-					builder.AppendLineInvariant(
-						$"#error {nameof(ImmutableGenerator)}: Immutable type {symbolNames.SymbolNameWithGenerics} cannot "
-						+ "have a non-static field {field.Name}. You must remove it for immutable generation.");
+					Error(
+						builder,
+						$"Immutable type {symbolNames.SymbolNameWithGenerics} cannot "
+						+ "have the non-static field {field.Name}. You must remove it for immutable generation or make it static.");
 				}
 			}
 		}
@@ -950,5 +972,36 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 				where moduleAttribute != null
 				//where (bool) moduleAttribute.ConstructorArguments[0].Value
 				select (type, moduleAttribute);
+
+		private IReadOnlyList<ITypeSymbol> EnumerateTreatAsImmutables()
+		{
+			var currentModuleAttributes = _context.Compilation.Assembly.GetAttributes();
+			var referencedAssembliesAttributes =
+				_context.Compilation.SourceModule.ReferencedAssemblySymbols.SelectMany(a => a.GetAttributes());
+
+			var knownToBeImmutableTypes = currentModuleAttributes
+				.Concat(referencedAssembliesAttributes)
+				.Where(a => a.AttributeClass.Equals(_immutableTreatAsImmutableAttributeSymbol))
+				.Select(a => a.ConstructorArguments[0].Value)
+				.Cast<ITypeSymbol>()
+				.Distinct()
+				.ToImmutableArray();
+
+			return knownToBeImmutableTypes;
+		}
+
+		private void Warning(IIndentedStringBuilder builder, string warningMsg)
+		{
+			var msg = $"{nameof(ImmutableGenerator)}/{_currentType}: {warningMsg}";
+			builder.AppendLineInvariant("#warning " + msg.Replace('\n', ' ').Replace('\r', ' '));
+			_logger.Warn(msg);
+		}
+
+		private void Error(IIndentedStringBuilder builder, string warningMsg)
+		{
+			var msg = $"{nameof(ImmutableGenerator)}/{_currentType}: {warningMsg}";
+			builder.AppendLineInvariant("#warning " + msg.Replace('\n', ' ').Replace('\r', ' '));
+			_logger.Error(msg);
+		}
 	}
 }

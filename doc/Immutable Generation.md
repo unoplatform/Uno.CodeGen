@@ -1,5 +1,7 @@
 ﻿# Immutable Generation
 
+![Equality Members generation snippet](assets/immutability-snippet.png)
+
 ## Quick Start
 
 1. Add a reference to the `Uno.CodeGen` _Nuget_ package in your project.
@@ -236,11 +238,11 @@ The generated code will produce the following effect:
   Option<MyEntity> modified = new MyEntity.Builder(original.SomeOrDefault()
       .WithA("new-a")
       .ToImmutable();
-  
+
   // With generated code:
   Option<MyEntity> original = Option.Some(MyEntity.Default);
   Option<MyEntity> modified = original.WithA("new-a");
-  
+
   // You can also do that:
   Option<MyEntity> x = MyEntity.None.WithA("new-a");
   // **************************************************************
@@ -249,7 +251,7 @@ The generated code will produce the following effect:
   // same result as MyEntity.Default.WithA().
   // **************************************************************
   ```
-  
+
 > For more information on the `Uno.Core` package:
 > * On Github: <https://github.com/nventive/Uno.Core>
 > * On Nuget: <https://www.nuget.org/packages/Uno.Core/>
@@ -345,7 +347,7 @@ Yes they are by default. If you want to chagne this behavior, use the global
 ``` csharp
 [assembly: Uno.ImmutableGenerationOptions(GenerateEqualityByDefault = true)]
 ```
-  
+
 You can also override this default by specifying per-type:
 ```csharp
 [GeneratedImmutable(GenerateEquality = false)]
@@ -361,3 +363,17 @@ public class MyImmutable
 > (`[GeneratedImmutable(GenerateEquality = false)]`)
 > won't have any effect in inherited class if the generation is active on the
 > base class.
+
+## I want to reference external classes from my entities.
+
+I'm getting this error:
+
+``` csharp
+#error: 'ImmutableGenerator: Property MyClass.SomeField (BaseClass) is not immutable. It cannot be used in an immutable entity.'
+```
+
+To fix this, put this attribute on your assembly:
+
+``` csharp
+[assembly: Uno.TreatAsImmutable(typeof(BaseClass))]
+```
