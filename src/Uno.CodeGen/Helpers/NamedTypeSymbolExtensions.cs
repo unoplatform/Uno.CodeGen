@@ -31,9 +31,13 @@ namespace Uno.Helpers
 			var substitutions = typeToUseForSubstitutions.GetSubstitutionTypes();
 
 			var symbolName = typeSymbol.Name;
+
+			// Generate a filename suffix from the namespace to prevent filename clashing when processing classes with the same name.
+			var filenameSuffix = $"{typeSymbol.GetNamespaceHash():X}";
+
 			if (typeSymbol.TypeArguments.Length == 0) // not a generic type
 			{
-				return new SymbolNames(typeSymbol, symbolName, "", symbolName, symbolName, symbolName, symbolName, "");
+				return new SymbolNames(typeSymbol, symbolName, "", symbolName, symbolName, symbolName, $"{symbolName}_{filenameSuffix}", "");
 			}
 
 			var argumentNames = typeSymbol.GetTypeArgumentNames(substitutions);
@@ -49,7 +53,7 @@ namespace Uno.Helpers
 			var symbolNameDefinition = $"{symbolName}<{string.Join(",", typeSymbol.TypeArguments.Select(ta => ""))}>";
 
 			// symbolNameWithGenerics: MyType_T1_T2
-			var symbolFilename = $"{symbolName}_{string.Join("_", argumentNames)}";
+			var symbolFilename = $"{symbolName}_{string.Join("_", argumentNames)}_{filenameSuffix}";
 
 			var genericConstraints = " " + string.Join(" ", typeSymbol
 				.TypeArguments
@@ -97,6 +101,19 @@ namespace Uno.Helpers
 			}
 
 			return result;
+		}
+
+		public static int GetNamespaceHash(this INamedTypeSymbol typeSymbol)
+		{
+			var hashCode = 0;
+			INamespaceSymbol namespaceSymbol = typeSymbol.ContainingNamespace;
+			while (!namespaceSymbol?.IsGlobalNamespace ?? false)
+			{
+				hashCode ^= namespaceSymbol.Name.GetStableHashCode();
+				namespaceSymbol = namespaceSymbol.ContainingNamespace;
+			}
+
+			return hashCode;
 		}
 	}
 
