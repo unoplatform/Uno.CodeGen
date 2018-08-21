@@ -47,6 +47,7 @@ namespace Uno
 		private INamedTypeSymbol _immutableAttributeSymbol;
 		private INamedTypeSymbol _generatedImmutableAttributeSymbol;
 		private INamedTypeSymbol _immutableBuilderAttributeSymbol;
+		private INamedTypeSymbol _immutableBuilderInterfaceSymbol;
 		private INamedTypeSymbol _immutableAttributeCopyIgnoreAttributeSymbol;
 		private INamedTypeSymbol _immutableGenerationOptionsAttributeSymbol;
 		private INamedTypeSymbol _immutableTreatAsImmutableAttributeSymbol;
@@ -71,6 +72,7 @@ namespace Uno
 			_immutableAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableAttribute");
 			_generatedImmutableAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.GeneratedImmutableAttribute");
 			_immutableBuilderAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableBuilderAttribute");
+			_immutableBuilderInterfaceSymbol = context.Compilation.GetTypeByMetadataName("Uno.IImmutableBuilder`1");
 			_immutableAttributeCopyIgnoreAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableAttributeCopyIgnoreAttribute");
 			_immutableGenerationOptionsAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.ImmutableGenerationOptionsAttribute");
 			_immutableTreatAsImmutableAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.TreatAsImmutableAttribute");
@@ -861,7 +863,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 					return; // ok
 				}
 
-				if (type.FindAttribute(_immutableBuilderAttributeSymbol) != null)
+				if (type.DerivesFromType(_immutableBuilderInterfaceSymbol))
 				{
 					Error(builder, $"{typeSource} ({typeName}) is a builder. It cannot be used in an immutable entity.");
 				}
@@ -959,7 +961,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 						continue; // should be ignored
 					}
 
-					yield return $"[{attrResult}]{Environment.NewLine}";
+					yield return $"[global::{attrResult}]{Environment.NewLine}";
 				}
 			}
 
@@ -1000,7 +1002,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 		private void Error(IIndentedStringBuilder builder, string warningMsg)
 		{
 			var msg = $"{nameof(ImmutableGenerator)}/{_currentType}: {warningMsg}";
-			builder.AppendLineInvariant("#warning " + msg.Replace('\n', ' ').Replace('\r', ' '));
+			builder.AppendLineInvariant("#error " + msg.Replace('\n', ' ').Replace('\r', ' '));
 			_logger.Error(msg);
 		}
 	}

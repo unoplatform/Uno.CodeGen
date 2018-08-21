@@ -103,7 +103,7 @@ namespace Uno.Equality
 				}
 			}
 
-			return true; // no difference found
+			return true; // no differences found
 		}
 
 		/// <inheritdoc/>
