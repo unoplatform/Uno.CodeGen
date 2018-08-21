@@ -961,7 +961,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 						continue; // should be ignored
 					}
 
-					yield return $"[{attrResult}]{Environment.NewLine}";
+					yield return $"[global::{attrResult}]{Environment.NewLine}";
 				}
 			}
 
