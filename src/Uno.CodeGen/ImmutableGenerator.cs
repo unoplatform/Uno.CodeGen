@@ -1000,7 +1000,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 		private void Error(IIndentedStringBuilder builder, string warningMsg)
 		{
 			var msg = $"{nameof(ImmutableGenerator)}/{_currentType}: {warningMsg}";
-			builder.AppendLineInvariant("#warning " + msg.Replace('\n', ' ').Replace('\r', ' '));
+			builder.AppendLineInvariant("#error " + msg.Replace('\n', ' ').Replace('\r', ' '));
 			_logger.Error(msg);
 		}
 	}
