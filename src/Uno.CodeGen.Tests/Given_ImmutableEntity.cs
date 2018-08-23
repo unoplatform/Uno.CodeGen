@@ -237,4 +237,17 @@ namespace Uno.CodeGen.Tests
 		[EqualityComparerOptions(CollectionMode = CollectionComparerMode.Unsorted)]
 		public byte[] UnsortedBytes { get; }
 	}
+
+	[GeneratedImmutable]
+	public partial class ImmutableWithStaticProperties
+	{
+		public static ImmutableWithStaticProperties Version1 { get; } = Default;
+
+		public static ImmutableWithStaticProperties Version2 { get; } = Default.WithVersion(2);
+
+		public static ImmutableWithStaticProperties Version3 { get; } = Default.WithVersion(3);
+
+		[EqualityKey]
+		public int Version { get; } = 1;
+	}
 }

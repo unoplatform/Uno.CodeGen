@@ -220,7 +220,10 @@ namespace Uno
 
 			(IPropertySymbol property, bool isNew)[] properties;
 
-			var typeProperties = typeSymbol.GetProperties().ToArray();
+			var typeProperties = typeSymbol
+				.GetProperties()
+				.Where(p => !p.IsStatic)
+				.ToArray();
 
 			if (baseTypeInfo.isBaseTypePresent)
 			{
