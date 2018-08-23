@@ -452,6 +452,8 @@ namespace Uno
 				}
 				var (_, customComparerProperty) = GetCustomsForMembers(typeSymbol, member, type);
 
+				var typeFullName = type.GetSymbolNames()?.GetSymbolFullNameWithGenerics() ?? type.ToString();
+
 				builder.AppendLine();
 
 				if (customComparerProperty == null)
@@ -462,13 +464,18 @@ namespace Uno
 							? "ReadonlyDictionaryEqualityComparer"
 							: "DictionaryEqualityComparer";
 
-						using (builder.BlockInvariant($"if(!global::Uno.Equality.{comparer}<{type}, {keyType}, {valueType}>.Default.Equals({member.Name}, other.{member.Name}))"))
+						var keyTypeFullName = keyType.GetSymbolNames()?.GetSymbolFullNameWithGenerics() ?? keyType.ToString();
+						var valueTypeFullName = valueType.GetSymbolNames()?.GetSymbolFullNameWithGenerics() ?? valueType.ToString();
+
+						using (builder.BlockInvariant($"if(!global::Uno.Equality.{comparer}<{typeFullName}, {keyTypeFullName}, {valueTypeFullName}>.Default.Equals({member.Name}, other.{member.Name}))"))
 						{
 							builder.AppendLineInvariant($"return false; // {member.Name} not equal");
 						}
 					}
 					else if (type.IsCollection(out var elementType, out var isReadonlyCollection, out var isOrdered))
 					{
+						var elementTypeFullName = elementType.GetSymbolNames()?.GetSymbolFullNameWithGenerics() ?? elementType.ToString();
+
 						// Extract mode from attribute, or default following the type of the collection (if ordered)
 						var optionsAttribute = member.FindAttribute(_equalityComparerOptionsAttributeSymbol);
 						var mode = (int)(optionsAttribute
@@ -489,7 +496,7 @@ namespace Uno
 							builder.AppendLineInvariant($"// [{nameof(EqualityComparerOptionsAttribute)}({nameof(CollectionComparerMode)}.{nameof(CollectionComparerMode.Unsorted)})]");
 						}
 
-						using (builder.BlockInvariant($"if(!global::Uno.Equality.{comparer}<{type}, {elementType}>.Default.Equals({member.Name}, other.{member.Name}))"))
+						using (builder.BlockInvariant($"if(!global::Uno.Equality.{comparer}<{typeFullName}, {elementTypeFullName}>.Default.Equals({member.Name}, other.{member.Name}))"))
 						{
 							builder.AppendLineInvariant($"return false; // {member.Name} not equal");
 						}
@@ -535,7 +542,7 @@ namespace Uno
 						{
 							if (equalityMode == KeyEqualityUseEquality)
 							{
-								using (builder.BlockInvariant($"if(!global::System.Collections.Generic.EqualityComparer<{type}>.Default.Equals({member.Name}, other.{member.Name}))"))
+								using (builder.BlockInvariant($"if(!global::System.Collections.Generic.EqualityComparer<{typeFullName}>.Default.Equals({member.Name}, other.{member.Name}))"))
 								{
 									builder.AppendLineInvariant($"return false; // {member.Name} not equal");
 								}
