@@ -415,9 +415,11 @@ namespace Uno
 
 							var attributes = GetAttributes(classCopyIgnoreRegexes, prop);
 
+							var propType = GetPropType(prop);
+
 							builder.AppendLine($@"
 // Backing field for property {prop.Name}.
-private {prop.Type} _{prop.Name};
+private {propType} _{prop.Name};
 
 // If the property {prop.Name} has been set in the builder.
 // `false` means the property hasn't been set or has been reverted to original value `{typeSymbol.Name}.Default.{
@@ -429,20 +431,20 @@ private bool _is{prop.Name}Set = false;
 /// Get/Set the current builder value for {prop.Name}.
 /// </summary>
 /// <remarks>
-/// When nothing is set in the builder, the value is `default({prop.Type})`.
+/// When nothing is set in the builder, the value is `default({propType})`.
 /// </remarks>
-{attributes}public {newPropertyModifier}{prop.Type} {prop.Name}
+{attributes}public {newPropertyModifier}{propType} {prop.Name}
 {{
 	get => _is{prop.Name}Set ? _{prop.Name} : (_original as {symbolNameWithGenerics}).{prop.Name};
 	set
 	{{
 		var originalValue = (({symbolNameWithGenerics})_original).{prop.Name};
-		var isSameAsOriginal = global::System.Collections.Generic.EqualityComparer<{prop.Type}>.Default.Equals(originalValue, value);
+		var isSameAsOriginal = global::System.Collections.Generic.EqualityComparer<{propType}>.Default.Equals(originalValue, value);
 		if(isSameAsOriginal)
 		{{
 			// Property {prop.Name} has been set back to original value
 			_is{prop.Name}Set = false;
-			_{prop.Name} = default({prop.Type}); // dereference to prevent any leak (when it's a reference type)
+			_{prop.Name} = default({propType}); // dereference to prevent any leak (when it's a reference type)
 		}}
 		else
 		{{
@@ -504,6 +506,8 @@ return ({symbolNameWithGenerics})(_cachedResult = _original);");
 							builder.AppendLineInvariant("{0}", $"#region .WithXXX() methods on {symbolNameWithGenerics}.Builder");
 							foreach (var (prop, isNew) in properties)
 							{
+								var propType = GetPropType(prop);
+
 								var newPropertyModifier = isNew ? "new " : "";
 
 								builder.AppendLineInvariant($"/// <summary>");
@@ -514,10 +518,10 @@ return ({symbolNameWithGenerics})(_cachedResult = _original);");
 								builder.AppendLineInvariant($"/// </remarks>");
 								builder.AppendLineInvariant("/// <example>");
 								builder.AppendLineInvariant("{0}", $"/// var builder = new {symbolNameForXml}.Builder {{ {prop1Name} = xxx, ... }}; // create a builder instance");
-								builder.AppendLineInvariant($"/// {prop.Type} new{prop.Name}Value = [...];");
+								builder.AppendLineInvariant($"/// {propType} new{prop.Name}Value = [...];");
 								builder.AppendLineInvariant($"/// {symbolNameForXml} instance = builder.With{prop.Name}(new{prop.Name}Value); // create an immutable instance");
 								builder.AppendLineInvariant("/// </example>");
-								using (builder.BlockInvariant($"public {newPropertyModifier}Builder With{prop.Name}({prop.Type} value)"))
+								using (builder.BlockInvariant($"public {newPropertyModifier}Builder With{prop.Name}({propType} value)"))
 								{
 									builder.AppendLineInvariant($"{prop.Name} = value;");
 									builder.AppendLineInvariant("return this;");
@@ -534,9 +538,9 @@ return ({symbolNameWithGenerics})(_cachedResult = _original);");
 								builder.AppendLineInvariant($"/// </remarks>");
 								builder.AppendLineInvariant("/// <example>");
 								builder.AppendLineInvariant("{0}", $"/// var builder = new {symbolNameForXml}.Builder {{ {prop1Name} = xxx, ... }}; // create a builder instance");
-								builder.AppendLineInvariant($"/// {symbolNameForXml} instance = builder.With{prop.Name}(previous{prop.Name}Value => new {prop.Type}(...)); // create an immutable instance");
+								builder.AppendLineInvariant($"/// {symbolNameForXml} instance = builder.With{prop.Name}(previous{prop.Name}Value => new {propType}(...)); // create an immutable instance");
 								builder.AppendLineInvariant("/// </example>");
-								using (builder.BlockInvariant($"public {newPropertyModifier}Builder With{prop.Name}(Func<{prop.Type}, {prop.Type}> valueSelector)"))
+								using (builder.BlockInvariant($"public {newPropertyModifier}Builder With{prop.Name}(Func<{propType}, {propType}> valueSelector)"))
 								{
 									builder.AppendLineInvariant($"{prop.Name} = valueSelector({prop.Name});");
 									builder.AppendLineInvariant("return this;");
@@ -677,6 +681,8 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 						builder.AppendLineInvariant($"#region .WithXXX() methods on {symbolNameWithGenerics}");
 						foreach (var prop in propertiesForWithExtensions)
 						{
+							var propType = GetPropType(prop);
+
 							builder.AppendLine();
 
 							builder.AppendLineInvariant("/// <summary>");
@@ -688,11 +694,11 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 							builder.AppendLineInvariant("/// </remarks>");
 							builder.AppendLineInvariant("/// <example>");
 							builder.AppendLineInvariant($"/// {symbolNameForXml} original = {symbolNameForXml}.{defaultMemberName}; // first immutable instance");
-							builder.AppendLineInvariant($"/// {prop.Type} new{prop.Name}Value = [...];");
+							builder.AppendLineInvariant($"/// {propType} new{prop.Name}Value = [...];");
 							builder.AppendLineInvariant($"/// {symbolNameForXml} modified = original.With{prop.Name}(new{prop.Name}Value); // create a new modified immutable instance");
 							builder.AppendLineInvariant("/// </example>");
 							builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
-							using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this {symbolNameWithGenerics} entity, {prop.Type} value){genericConstraints}"))
+							using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this {symbolNameWithGenerics} entity, {propType} value){genericConstraints}"))
 							{
 								builder.AppendLineInvariant($"return ({builderName})(new {builderName}(entity).With{prop.Name}(value));");
 							}
@@ -709,10 +715,10 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 							builder.AppendLineInvariant("/// </remarks>");
 							builder.AppendLineInvariant("/// <example>");
 							builder.AppendLineInvariant($"/// {symbolNameForXml} original = {symbolNameForXml}.{defaultMemberName}; // first immutable instance");
-							builder.AppendLineInvariant($"/// {symbolNameForXml} modified = original.With{prop.Name}(previous{prop.Name}Value => new {prop.Type}(...)); // create a new modified immutable instance");
+							builder.AppendLineInvariant($"/// {symbolNameForXml} modified = original.With{prop.Name}(previous{prop.Name}Value => new {propType}(...)); // create a new modified immutable instance");
 							builder.AppendLineInvariant("/// </example>");
 							builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
-							using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this {symbolNameWithGenerics} entity, Func<{prop.Type}, {prop.Type}> valueSelector){genericConstraints}"))
+							using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this {symbolNameWithGenerics} entity, Func<{propType}, {propType}> valueSelector){genericConstraints}"))
 							{
 								builder.AppendLineInvariant($"return ({builderName})(new {builderName}(entity).With{prop.Name}(valueSelector));");
 							}
@@ -731,11 +737,11 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 								builder.AppendLineInvariant("/// </remarks>");
 								builder.AppendLineInvariant("/// <example>");
 								builder.AppendLineInvariant($"/// Option&lt;{symbolNameForXml}&gt; original = Option.Some({symbolNameForXml}.{defaultMemberName});");
-								builder.AppendLineInvariant($"/// {prop.Type} new{prop.Name}Value = [...];");
+								builder.AppendLineInvariant($"/// {propType} new{prop.Name}Value = [...];");
 								builder.AppendLineInvariant($"/// Option&lt;{symbolNameForXml}&gt; modified = original.With{prop.Name}(new{prop.Name}Value); // result type is Option.Some");
 								builder.AppendLineInvariant("/// </example>");
 								builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
-								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this global::Uno.Option<{symbolNameWithGenerics}> optionEntity, {prop.Type} value){genericConstraints}"))
+								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this global::Uno.Option<{symbolNameWithGenerics}> optionEntity, {propType} value){genericConstraints}"))
 								{
 									builder.AppendLineInvariant($"return ({builderName})({builderName}.FromOption(optionEntity).With{prop.Name}(value));");
 								}
@@ -753,10 +759,10 @@ public static implicit operator {symbolNameWithGenerics}(Builder builder)
 								builder.AppendLineInvariant("/// </remarks>");
 								builder.AppendLineInvariant("/// <example>");
 								builder.AppendLineInvariant($"/// {symbolNameForXml} original = {symbolNameForXml}.{defaultMemberName}; // first immutable instance");
-								builder.AppendLineInvariant($"/// {symbolNameForXml} modified = original.With{prop.Name}(previous{prop.Name}Value => new {prop.Type}(...)); // create a new modified immutable instance");
+								builder.AppendLineInvariant($"/// {symbolNameForXml} modified = original.With{prop.Name}(previous{prop.Name}Value => new {propType}(...)); // create a new modified immutable instance");
 								builder.AppendLineInvariant("/// </example>");
 								builder.AppendLineInvariant("[global::System.Diagnostics.Contracts.Pure]");
-								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this global::Uno.Option<{symbolNameWithGenerics}> optionEntity, Func<{prop.Type}, {prop.Type}> valueSelector){genericConstraints}"))
+								using (builder.BlockInvariant($"public static {builderName} With{prop.Name}{genericArguments}(this global::Uno.Option<{symbolNameWithGenerics}> optionEntity, Func<{propType}, {propType}> valueSelector){genericConstraints}"))
 								{
 									builder.AppendLineInvariant($"return ({builderName})({builderName}.FromOption(optionEntity).With{prop.Name}(valueSelector));");
 								}
@@ -799,6 +805,13 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 			}
 
 			_context.AddCompilationUnit(resultFileName, builder.ToString());
+		}
+
+		private static string GetPropType(IPropertySymbol prop)
+		{
+			var propTypeNames = prop.Type.GetSymbolNames();
+			var propType = propTypeNames?.GetSymbolFullNameWithGenerics() ?? prop.Type.ToString();
+			return propType;
 		}
 
 		private IPropertySymbol[] GetPropertiesForWithExtensions(INamedTypeSymbol baseBuilderSymbol, (IPropertySymbol property, bool isNew)[] currentTypeProperties)
