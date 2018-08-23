@@ -67,7 +67,7 @@ namespace Uno.CodeGen.Tests
 		public Uri Uri { get; }
 		public int Int { get; }
 
-		public (string, int, Uri, AbstractExternalClass) SuperTuple { get; }
+		public (string a, int b, Uri c, AbstractExternalClass d, DateTime e, DateTimeOffset f, DateTimeKind g) SuperTuple { get; }
 	}
 
 	public partial class InheritanceDerivedClassFromExternalGeneric : ExternalClasses.AbstractExternalGenericClass<string>

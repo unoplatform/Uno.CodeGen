@@ -196,11 +196,49 @@ namespace Uno.Helpers
 			return "global::" + Symbol.ContainingNamespace;
 		}
 
+		private static readonly IReadOnlyList<SpecialType> LanguageSupportedSpecialTypes = new[]
+		{
+			SpecialType.System_Boolean,
+			SpecialType.System_Byte,
+			SpecialType.System_Char,
+			SpecialType.System_Decimal,
+			SpecialType.System_Double,
+			SpecialType.System_Int16,
+			SpecialType.System_Int32,
+			SpecialType.System_Int64,
+			SpecialType.System_Object,
+			SpecialType.System_SByte,
+			SpecialType.System_String,
+			SpecialType.System_UInt16,
+			SpecialType.System_UInt32,
+			SpecialType.System_UInt64,
+		};
+
 		public string GetSymbolFullNameWithGenerics(INamedTypeSymbol typeForSubstitutions = null)
 		{
-			if ((!Symbol.IsGenericType || typeForSubstitutions == null) && Symbol.SpecialType != SpecialType.None)
+			if ((!Symbol.IsGenericType || typeForSubstitutions == null)
+				&& LanguageSupportedSpecialTypes.Contains(Symbol.SpecialType))
 			{
 				return Symbol.ToString();
+			}
+
+			if (Symbol.IsTupleType)
+			{
+				var tupleElements = Symbol.TupleElements
+					.Select(t =>
+					{
+						var type = t.Type.GetSymbolNames(typeForSubstitutions)?.GetSymbolFullNameWithGenerics(typeForSubstitutions) ?? t.Type.ToString();
+						var name = t.Name;
+
+						if (string.IsNullOrEmpty(name))
+						{
+							return type;
+						}
+
+						return type + " " + name;
+					});
+
+				return "(" + string.Join(", ", tupleElements) + ")";
 			}
 
 			if (string.IsNullOrEmpty(SymbolNameWithGenerics))
