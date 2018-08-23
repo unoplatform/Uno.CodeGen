@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Microsoft.CodeAnalysis;
 
 namespace Uno.Helpers
@@ -140,15 +141,49 @@ namespace Uno.Helpers
 		}
 
 		public INamedTypeSymbol Symbol { get; }
+
+		/// <summary>
+		/// The name of the symbol, without any namespace, container type or generic decorations.
+		/// </summary>
 		public string SymbolName { get; }
+
+		/// <summary>
+		/// Generic arguments, if any.  Ex: `&lt;T1, T2&gt;`
+		/// </summary>
+		/// <remarks>
+		/// Empty if no generics
+		/// </remarks>
 		public string GenericArguments { get; }
+
+		/// <summary>
+		/// SymbolName + GenericArguments, Ex: `MyType&lt;T1, T2&gt;`
+		/// </summary>
 		public string SymbolNameWithGenerics { get; }
+
+		/// <summary>
+		/// Same as SymbolNameWithGenerics but escaped for XML
+		/// </summary>
 		public string SymbolFoxXml { get; }
+
+		/// <summary>
+		/// Definition for symbol name, ex: `MyType&lt;,&gt;`
+		/// </summary>
 		public string SymbolNameDefinition { get; }
+
+		/// <summary>
+		/// Appropriate result filename for the type
+		/// </summary>
 		public string SymbolFilename { get; }
+
+		/// <summary>
+		/// Generic constraints on the type, Ex: `where T1 : string`
+		/// </summary>
+		/// <remarks>
+		/// Empty if no generics or no constraints
+		/// </remarks>
 		public string GenericConstraints { get; }
 
-		public string GetContainingTypeFullName(INamedTypeSymbol typeForSubstitutions = null)
+		private string GetContainingTypeFullName(INamedTypeSymbol typeForSubstitutions = null)
 		{
 			if (Symbol.ContainingType != null)
 			{
@@ -158,12 +193,60 @@ namespace Uno.Helpers
 					.GetSymbolFullNameWithGenerics();
 			}
 
-			return Symbol.ContainingNamespace.ToString();
+			return "global::" + Symbol.ContainingNamespace;
 		}
+
+		private static readonly IReadOnlyList<SpecialType> LanguageSupportedSpecialTypes = new[]
+		{
+			SpecialType.System_Boolean,
+			SpecialType.System_Byte,
+			SpecialType.System_Char,
+			SpecialType.System_Decimal,
+			SpecialType.System_Double,
+			SpecialType.System_Int16,
+			SpecialType.System_Int32,
+			SpecialType.System_Int64,
+			SpecialType.System_Object,
+			SpecialType.System_SByte,
+			SpecialType.System_String,
+			SpecialType.System_UInt16,
+			SpecialType.System_UInt32,
+			SpecialType.System_UInt64,
+		};
 
 		public string GetSymbolFullNameWithGenerics(INamedTypeSymbol typeForSubstitutions = null)
 		{
-			return $"{GetContainingTypeFullName(typeForSubstitutions)}.{SymbolNameWithGenerics}";
+			if ((!Symbol.IsGenericType || typeForSubstitutions == null)
+				&& LanguageSupportedSpecialTypes.Contains(Symbol.SpecialType))
+			{
+				return Symbol.ToString();
+			}
+
+			if (Symbol.IsTupleType)
+			{
+				var tupleElements = Symbol.TupleElements
+					.Select(t =>
+					{
+						var type = t.Type.GetSymbolNames(typeForSubstitutions)?.GetSymbolFullNameWithGenerics(typeForSubstitutions) ?? t.Type.ToString();
+						var name = t.Name;
+
+						if (string.IsNullOrEmpty(name))
+						{
+							return type;
+						}
+
+						return type + " " + name;
+					});
+
+				return "(" + string.Join(", ", tupleElements) + ")";
+			}
+
+			if (string.IsNullOrEmpty(SymbolNameWithGenerics))
+			{
+				return Symbol.ToString();
+			}
+
+			return GetContainingTypeFullName(typeForSubstitutions) + "." + SymbolNameWithGenerics;
 		}
 
 		public void Deconstruct(
