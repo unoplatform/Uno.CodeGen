@@ -24,12 +24,12 @@ This package is part of the Uno.CodeGen to generate classes lifecycle methods in
 
 	<ItemGroup Condition="'$(TargetFramework)'=='net46'">
 		<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />
-		<PackageReference Include="Uno.RoslynHelpers" Version="1.1.1" PrivateAssets="all" />
-		<PackageReference Include="Uno.SourceGeneration" Version="1.25.0" PrivateAssets="all" />
+		<PackageReference Include="Uno.RoslynHelpers" Version="1.2.0-dev.10" PrivateAssets="all" />
+		<PackageReference Include="Uno.SourceGeneration" Version="1.26.0-dev.83" PrivateAssets="all" />
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.25.0" PrivateAssets="none">
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.26.0-dev.83" PrivateAssets="none">
 		  <NoWarn>NU1701</NoWarn>
 		</PackageReference>
 	</ItemGroup>

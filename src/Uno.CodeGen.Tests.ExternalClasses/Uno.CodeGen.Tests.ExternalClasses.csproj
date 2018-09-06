@@ -13,7 +13,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.25.0" />
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.26.0-dev.83" />
 	</ItemGroup>
 
 	<ItemGroup>
