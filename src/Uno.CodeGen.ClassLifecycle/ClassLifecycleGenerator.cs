@@ -34,7 +34,7 @@ using StatementSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.StatementSyntax;
 
 namespace Uno.CodeGen.ClassLifecycle
 {
-    public class ClassLifecycleGenerator : SourceGenerator
+	public class ClassLifecycleGenerator : SourceGenerator
 	{
 		private INamedTypeSymbol _constructorAttribute;
 		private INamedTypeSymbol _disposeAttribute;
@@ -102,7 +102,6 @@ namespace Uno.CodeGen.ClassLifecycle
 
 			return allTypes.Values;
 		}
-			
 
 		private void Generate(LifecycleMethods methods)
 		{

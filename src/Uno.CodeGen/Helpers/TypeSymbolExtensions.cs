@@ -60,6 +60,13 @@ namespace Uno.Helpers
 		private static ImmutableDictionary<(ITypeSymbol, bool), bool> _isImmutable =
 			ImmutableDictionary<(ITypeSymbol, bool), bool>.Empty;
 
+		public static SymbolNames GetSymbolNames(this ITypeSymbol symbol, INamedTypeSymbol typeToUseForSubstitutions = null)
+		{
+			return symbol is INamedTypeSymbol namedSymbol
+				? namedSymbol.GetSymbolNames(typeToUseForSubstitutions)
+				: null;
+		}
+
 		public static bool IsImmutable(this ITypeSymbol type, bool treatArrayAsImmutable, IReadOnlyList<ITypeSymbol> knownAsImmutable)
 		{
 			bool GetIsImmutable((ITypeSymbol type, bool treatArrayAsImmutable) x)
