@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // ******************************************************************
+using System;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Uno.Equality;
@@ -61,6 +62,12 @@ namespace Uno.CodeGen.Tests
 
 	public partial class InheritanceDerivedClassFromExternal : AbstractExternalClass
 	{
+		public string Str { get; }
+		public AbstractExternalClass Class1 { get; }
+		public Uri Uri { get; }
+		public int Int { get; }
+
+		public (string a, int b, Uri c, AbstractExternalClass d, DateTime e, DateTimeOffset f, DateTimeKind g) SuperTuple { get; }
 	}
 
 	public partial class InheritanceDerivedClassFromExternalGeneric : ExternalClasses.AbstractExternalGenericClass<string>
