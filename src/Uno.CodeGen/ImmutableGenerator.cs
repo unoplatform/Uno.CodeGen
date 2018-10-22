@@ -487,10 +487,7 @@ if(!ReferenceEquals(cachedResult, null))
 if (_isDirty)
 {{
 	var new{symbolName} = new {symbolNameWithGenerics}(this);
-	if (!Equals(new{symbolName}, _original))
-	{{
-		return ({symbolNameWithGenerics})(_cachedResult = new{symbolName});
-	}}
+	return ({symbolNameWithGenerics})(_cachedResult = new{symbolName});
 }}
 return ({symbolNameWithGenerics})(_cachedResult = _original);");
 								builder.AppendLine();
