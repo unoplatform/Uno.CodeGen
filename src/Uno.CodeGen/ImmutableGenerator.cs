@@ -18,6 +18,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -306,10 +307,11 @@ namespace Uno
 				{
 					if(!typeSymbol.IsAbstract)
 					{
+						builder.AppendLineInvariant($"private static readonly {symbolNameWithGenerics} _{defaultMemberName} = new {symbolNameWithGenerics}();");
 						builder.AppendLineInvariant($"/// <summary>");
 						builder.AppendLineInvariant($"/// {defaultMemberName} instance with only property initializer set.");
 						builder.AppendLineInvariant($"/// </summary>");
-						builder.AppendLineInvariant($"public static readonly {newModifier}{symbolNameWithGenerics} {defaultMemberName} = new {symbolNameWithGenerics}();");
+						builder.AppendLineInvariant($"public static {newModifier}{symbolNameWithGenerics} {defaultMemberName} => _{defaultMemberName};");
 						builder.AppendLine();
 					}
 
