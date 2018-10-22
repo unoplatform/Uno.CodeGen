@@ -953,8 +953,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 				{
 					Error(
 						builder,
-						$"Immutable type {symbolNames.SymbolNameWithGenerics} cannot "
-						+ "have the non-static field {field.Name}. You must remove it for immutable generation or make it static.");
+						$"Immutable type {symbolNames.SymbolNameWithGenerics} cannot have the non-static field {field.Name}. You must remove it for immutable generation or make it static.");
 				}
 			}
 		}
