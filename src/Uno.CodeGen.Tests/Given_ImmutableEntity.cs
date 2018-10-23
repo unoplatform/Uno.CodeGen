@@ -126,8 +126,8 @@ namespace Uno.CodeGen.Tests
 		{
 			ImmutableForTypeEquality original = ImmutableForTypeEquality.Default
 				.WithString("str")
-				.WithSortedBytes(new byte[] {1, 2, 3})
-				.WithUnsortedBytes(new byte[] {1, 2, 3});
+				.WithSortedBytes(new byte[] { 1, 2, 3 })
+				.WithUnsortedBytes(new byte[] { 1, 2, 3 });
 
 			ImmutableForTypeEquality modified = original
 				.WithString("str")
@@ -136,6 +136,22 @@ namespace Uno.CodeGen.Tests
 
 			original.Should().BeEquivalentTo(modified);
 			original.Should().BeSameAs(modified);
+		}
+
+		[TestMethod]
+		public void Immutable_When_AssigningEqualityIgnoreProperty()
+		{
+			Console.WriteLine(ImmutableWithEqualityIgnoreProperty.X1);
+
+			ImmutableWithEqualityIgnoreProperty original = new ImmutableWithEqualityIgnoreProperty("key1", "value1");
+			ImmutableWithEqualityIgnoreProperty modified1 = original.WithIgnoredValue("ignored1");
+			ImmutableWithEqualityIgnoreProperty modified2 = modified1.WithIgnoredValue("ignored2");
+			ImmutableWithEqualityIgnoreProperty modified3 = modified1.WithIgnoredValue("ignored1");
+
+			modified1.IgnoredValue.Should().Be("ignored1");
+			modified2.IgnoredValue.Should().Be("ignored2");
+			modified3.IgnoredValue.Should().Be("ignored1");
+			modified3.Should().BeSameAs(modified1);
 		}
 	}
 
@@ -249,5 +265,29 @@ namespace Uno.CodeGen.Tests
 
 		[EqualityKey]
 		public int Version { get; } = 1;
+	}
+
+	[GeneratedImmutable]
+	public partial class ImmutableWithEqualityIgnoreProperty
+	{
+		[EqualityKey]
+		public string Key { get; }
+
+		public string Value { get; }
+
+		[EqualityIgnore]
+		public string IgnoredValue { get; }
+
+		public ImmutableWithEqualityIgnoreProperty(string key, string value)
+		{
+			Key = key;
+			Value = value;
+		}
+
+		public static string X1 { get; } = X2;
+
+		public static string X2 => X;
+
+		public static string X = "123";
 	}
 }

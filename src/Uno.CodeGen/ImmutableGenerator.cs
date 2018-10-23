@@ -18,6 +18,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -306,10 +307,11 @@ namespace Uno
 				{
 					if(!typeSymbol.IsAbstract)
 					{
+						builder.AppendLineInvariant($"private static readonly {symbolNameWithGenerics} _{defaultMemberName} = new {symbolNameWithGenerics}();");
 						builder.AppendLineInvariant($"/// <summary>");
 						builder.AppendLineInvariant($"/// {defaultMemberName} instance with only property initializer set.");
 						builder.AppendLineInvariant($"/// </summary>");
-						builder.AppendLineInvariant($"public static readonly {newModifier}{symbolNameWithGenerics} {defaultMemberName} = new {symbolNameWithGenerics}();");
+						builder.AppendLineInvariant($"public static {newModifier}{symbolNameWithGenerics} {defaultMemberName} => _{defaultMemberName};");
 						builder.AppendLine();
 					}
 
@@ -485,10 +487,7 @@ if(!ReferenceEquals(cachedResult, null))
 if (_isDirty)
 {{
 	var new{symbolName} = new {symbolNameWithGenerics}(this);
-	if (!Equals(new{symbolName}, _original))
-	{{
-		return ({symbolNameWithGenerics})(_cachedResult = new{symbolName});
-	}}
+	return ({symbolNameWithGenerics})(_cachedResult = new{symbolName});
 }}
 return ({symbolNameWithGenerics})(_cachedResult = _original);");
 								builder.AppendLine();
@@ -953,8 +952,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 				{
 					Error(
 						builder,
-						$"Immutable type {symbolNames.SymbolNameWithGenerics} cannot "
-						+ "have the non-static field {field.Name}. You must remove it for immutable generation or make it static.");
+						$"Immutable type {symbolNames.SymbolNameWithGenerics} cannot have the non-static field {field.Name}. You must remove it for immutable generation or make it static.");
 				}
 			}
 		}
