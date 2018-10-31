@@ -26,11 +26,11 @@ What kind of change does this PR introduce?
 
 Please check if your PR fulfills the following requirements:
 
-- [ ] Tested code with current [supported SDKs](../README.md#supported)
-- [ ] Docs have been added/updated which fit [documentation template](https://github.com/nventive/Uno/blob/master/doc/.feature-template.md). (for bug fixes / features)
+- [ ] Tested code with current [supported SDKs](../README.md)
+- [ ] Docs have been added/updated which fit [documentation template](https://github.com/nventive/Uno.CodeGen/tree/master/doc/.feature-template.md). (for bug fixes / features)
 - [ ] Tests for the changes have been added (for bug fixes / features) (if applicable)
 - [ ] Contains **NO** breaking changes
-- [ ] Updated the [Release Notes](https://github.com/nventive/Uno/tree/master/doc/ReleaseNotes)
+- [ ] Updated the [Release Notes](https://github.com/nventive/Uno.CodeGen/tree/master/doc/ReleaseNotes)
 - [ ] Associated with an issue (GitHub or internal)
 
 <!-- If this PR contains a breaking change, please describe the impact and migration path for existing applications below. 
