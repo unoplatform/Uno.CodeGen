@@ -66,3 +66,11 @@ Features:
 ### 1.22.0 (May 17th 2018)
 
 - Added support for System.Guid as a supported immutable type.
+
+# Have questions? Feature requests? Issues?
+
+Make sure to visit our [FAQ](doc/faq.md), [StackOverflow](https://stackoverflow.com/questions/tagged/uno-platform), [create an issue](https://github.com/nventive/Uno.CodeGen/issues) or [visit our gitter](https://gitter.im/uno-platform/Lobby).
+
+# Contributing
+
+Read our [contributing guide](CONTRIBUTING.md) to learn about our development process and how to propose bug fixes and improvements.
