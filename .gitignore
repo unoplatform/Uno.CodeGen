@@ -3,6 +3,7 @@
 
 # Remove everything beginning with a dot
 .*/
+!.github/
 
 # User-specific files
 *.suo
