@@ -288,7 +288,9 @@ namespace Uno
 					}
 					using (builder.BlockInvariant("public override int GetHashCode()"))
 					{
+						builder.AppendLineInvariant("#pragma warning disable CS0171");
 						builder.AppendLineInvariant("return _computedHashCode ?? (int)(_computedHashCode = ComputeHashCode());");
+						builder.AppendLineInvariant("#pragma warning restore CS0171");
 					}
 
 					builder.AppendLine();
