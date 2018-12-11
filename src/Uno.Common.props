@@ -9,7 +9,7 @@
 
 		<PropertyGroup>
 			<_OverrideTargetFramework>$(TargetFramework)</_OverrideTargetFramework>
-			<_TargetNugetFolder Condition="'$(IsTool)'=='true' AND '$(TargetFramework)' == 'net46'">$(USERPROFILE)\.nuget\packages\$(AssemblyName)\$(NugetOverrideVersion)\tools</_TargetNugetFolder>
+			<_TargetNugetFolder Condition="'$(IsTool)'=='true' AND '$(TargetFramework)' == 'net461'">$(USERPROFILE)\.nuget\packages\$(AssemblyName)\$(NugetOverrideVersion)\tools</_TargetNugetFolder>
 			<_TargetNugetFolder Condition="'$(IsTool)'!='true'">$(USERPROFILE)\.nuget\packages\$(AssemblyName)\$(NugetOverrideVersion)\lib\$(_OverrideTargetFramework)</_TargetNugetFolder>
 		</PropertyGroup>
 		<ItemGroup>

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net46</TargetFramework>
+		<TargetFramework>net461</TargetFramework>
 		<IsPackable>false</IsPackable>
 		<NoWarn>1701;1702;1705;NU1701</NoWarn>
 		<CodeAnalysisRuleSet>Uno.CodeGen.Tests.ruleset</CodeAnalysisRuleSet>
@@ -9,7 +9,7 @@
 
 	<ItemGroup>
 		<Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
-		<SourceGenerator Include="..\Uno.CodeGen\bin\$(Configuration)\net46\Uno.CodeGen.dll" />
+		<SourceGenerator Include="..\Uno.CodeGen\bin\$(Configuration)\net461\Uno.CodeGen.dll" />
 	</ItemGroup>
 
 	<ItemGroup>

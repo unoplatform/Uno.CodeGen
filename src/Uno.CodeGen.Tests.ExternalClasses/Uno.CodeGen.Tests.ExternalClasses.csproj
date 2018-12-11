@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net46;netstandard2.0;netstandard1.3</TargetFrameworks>
+		<TargetFrameworks>net461;netstandard2.0;netstandard1.3</TargetFrameworks>
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<SourceGenerator Include="..\Uno.CodeGen\bin\$(Configuration)\net46\Uno.CodeGen.dll" />
+		<SourceGenerator Include="..\Uno.CodeGen\bin\$(Configuration)\net461\Uno.CodeGen.dll" />
 	</ItemGroup>
 
 	<Import Project="..\Uno.CodeGen\build\Uno.CodeGen.props" />
