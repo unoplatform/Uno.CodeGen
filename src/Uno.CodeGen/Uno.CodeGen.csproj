@@ -21,12 +21,12 @@
   <ItemGroup Condition="'$(TargetFramework)'=='net46'">
 	<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />
 	<PackageReference Include="Uno.RoslynHelpers" Version="1.2.0-dev.10" PrivateAssets="all" />
-	<PackageReference Include="Uno.SourceGeneration" Version="1.29.0-dev.157" PrivateAssets="all" />
+	<PackageReference Include="Uno.SourceGeneration" Version="1.29.0-beta.202" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
 	<PackageReference Include="Microsoft.CodeAnalysis" Version="2.3.0" PrivateAssets="all" />
-	<PackageReference Include="Uno.SourceGenerationTasks" Version="1.29.0-dev.157" PrivateAssets="none">
+	<PackageReference Include="Uno.SourceGenerationTasks" Version="1.29.0-beta.202" PrivateAssets="none">
 		<NoWarn>NU1701</NoWarn>
 	</PackageReference>
   </ItemGroup>
