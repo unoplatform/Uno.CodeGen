@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>net46;netstandard1.3;netstandard2.0</TargetFrameworks>
+	<TargetFrameworks>net461;netstandard1.3;netstandard2.0</TargetFrameworks>
 	<IsTool>true</IsTool>
 	<NoWarn>1701;1702;1705;NU1701</NoWarn>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -18,7 +18,7 @@
 
   <Import Project="..\Uno.Common.props" />
 
-  <ItemGroup Condition="'$(TargetFramework)'=='net46'">
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
 	<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />
 	<PackageReference Include="Uno.RoslynHelpers" Version="1.2.0-dev.10" PrivateAssets="all" />
 	<PackageReference Include="Uno.SourceGeneration" Version="1.29.0-beta.202" PrivateAssets="all" />
@@ -31,7 +31,7 @@
 	</PackageReference>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)'!='net46'">
+  <ItemGroup Condition="'$(TargetFramework)'!='net461'">
 	<Compile Remove="**\*.cs" />
 	<None Include="**\*.cs" Exclude="bin\**\*.cs;obj\**\*.cs" />
   </ItemGroup>
