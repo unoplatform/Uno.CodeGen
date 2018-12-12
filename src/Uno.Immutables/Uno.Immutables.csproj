@@ -21,6 +21,10 @@ This package is part of the Uno.CodeGen to generate immutable entities in your p
 	</PropertyGroup>
 	
 	<Import Project="..\Uno.Common.props" />
+	
+	<ItemGroup>
+	  <PackageReference Include="System.Diagnostics.Contracts" Version="4.3.0" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
