@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net46;netstandard1.3;netstandard2.0</TargetFrameworks>
+		<TargetFrameworks>net461;netstandard1.3;netstandard2.0</TargetFrameworks>
 		<Product>Injectable Declarations</Product>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
