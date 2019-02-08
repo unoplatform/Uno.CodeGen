@@ -55,6 +55,7 @@ namespace Uno
 		private INamedTypeSymbol _valueTypeSymbol;
 		private INamedTypeSymbol _boolSymbol;
 		private INamedTypeSymbol _intSymbol;
+		private INamedTypeSymbol _enumSymbol;
 		private INamedTypeSymbol _arraySymbol;
 		private INamedTypeSymbol _collectionSymbol;
 		private INamedTypeSymbol _iEquatableSymbol;
@@ -108,6 +109,7 @@ namespace Uno
 			_valueTypeSymbol = context.Compilation.GetTypeByMetadataName("System.ValueType");
 			_boolSymbol = context.Compilation.GetTypeByMetadataName("System.Bool");
 			_intSymbol = context.Compilation.GetTypeByMetadataName("System.Int32");
+			_enumSymbol = context.Compilation.GetTypeByMetadataName("System.Enum");
 			_arraySymbol = context.Compilation.GetTypeByMetadataName("System.Array");
 			_collectionSymbol = context.Compilation.GetTypeByMetadataName("System.Collections.ICollection");
 			_iEquatableSymbol = context.Compilation.GetTypeByMetadataName("System.IEquatable`1");
@@ -699,6 +701,10 @@ namespace Uno
 						else if (equalityMode == KeyEqualityUseKeyEquality)
 						{
 							getHashCode = $"((global::Uno.Equality.IKeyEquatable){member.Name}).GetKeyHashCode()";
+						}
+						else if (type.BaseType == _enumSymbol)
+						{
+							getHashCode = $"{member.Name}.GetHashCode()";
 						}
 						else if (type.SpecialType == SpecialType.System_String)
 						{
