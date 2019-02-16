@@ -954,7 +954,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 					Error(
 						builder,
 						$"Immutable type {symbolNames.SymbolNameWithGenerics} cannot "
-						+ "have the non-static field {field.Name}. You must remove it for immutable generation or make it static.");
+						+ $"have the non-static field {field.Name}. You must remove it for immutable generation or make it static.");
 				}
 			}
 		}
@@ -1011,15 +1011,15 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 		private void Warning(IIndentedStringBuilder builder, string warningMsg)
 		{
 			var msg = $"{nameof(ImmutableGenerator)}/{_currentType}: {warningMsg}";
-			builder.AppendLineInvariant("#warning " + msg.Replace('\n', ' ').Replace('\r', ' '));
 			_logger.Warn(msg);
+			builder.AppendLineInvariant("#warning " + msg.Replace('\n', ' ').Replace('\r', ' '));
 		}
 
 		private void Error(IIndentedStringBuilder builder, string warningMsg)
 		{
 			var msg = $"{nameof(ImmutableGenerator)}/{_currentType}: {warningMsg}";
-			builder.AppendLineInvariant("#error " + msg.Replace('\n', ' ').Replace('\r', ' '));
 			_logger.Error(msg);
+			builder.AppendLineInvariant("#error " + msg.Replace('\n', ' ').Replace('\r', ' '));
 		}
 	}
 }
