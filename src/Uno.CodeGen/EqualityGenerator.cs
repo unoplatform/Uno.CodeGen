@@ -813,6 +813,7 @@ namespace Uno
 				where !property.IsStatic
 				where !property.IsImplicitlyDeclared
 				where property.GetMethod.DeclaredAccessibility > Accessibility.Private
+				where !property.IsIndexer
 				select (symbol: (ISymbol)property, type: property.Type);
 
 			var fields =
