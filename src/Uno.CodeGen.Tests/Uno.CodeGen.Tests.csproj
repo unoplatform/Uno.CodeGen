@@ -20,8 +20,8 @@
 		<PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.0.2" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
-		<PackageReference Include="Uno.Core" Version="1.26.0-beta.69" />
-	  <PackageReference Include="Uno.SourceGenerationTasks" Version="1.29.0-beta.277">
+		<PackageReference Include="Uno.Core" Version="1.26.0" />
+	  <PackageReference Include="Uno.SourceGenerationTasks" Version="1.29.0">
 		  <NoWarn>NU1701</NoWarn>
 
 	  </PackageReference>
