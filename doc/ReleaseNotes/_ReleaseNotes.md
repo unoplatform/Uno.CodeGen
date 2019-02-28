@@ -11,3 +11,8 @@
 
 ### Bug fixes
 * Equality: Using an indexer won't break the code generation anymore.
+
+
+## Release 1.30.0
+
+ * No major changes.
