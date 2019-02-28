@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
    <PropertyGroup>
-		<TargetFrameworks>net46;netstandard1.3;netstandard2.0</TargetFrameworks>
+		<TargetFrameworks>net461;netstandard1.3;netstandard2.0</TargetFrameworks>
 		<IsTool>true</IsTool>
 		<Product>Generator of class lifecycle</Product>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -22,19 +22,19 @@ This package is part of the Uno.CodeGen to generate classes lifecycle methods in
 	
 	<Import Project="..\Uno.Common.props" />
 
-	<ItemGroup Condition="'$(TargetFramework)'=='net46'">
+	<ItemGroup Condition="'$(TargetFramework)'=='net461'">
 		<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />
 		<PackageReference Include="Uno.RoslynHelpers" Version="1.1.1" PrivateAssets="all" />
-		<PackageReference Include="Uno.SourceGeneration" Version="1.28.0" PrivateAssets="all" />
+		<PackageReference Include="Uno.SourceGeneration" Version="1.29.0" PrivateAssets="all" />
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.28.0" PrivateAssets="none">
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.29.0" PrivateAssets="none">
 		  <NoWarn>NU1701</NoWarn>
 		</PackageReference>
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)'!='net46'">
+	<ItemGroup Condition="'$(TargetFramework)'!='net461'">
 		<Compile Remove="**\*.cs" />
 		<None Include="**\*.cs" Exclude="obj\**\*.cs;bin\**\.cs" />
 	</ItemGroup>
