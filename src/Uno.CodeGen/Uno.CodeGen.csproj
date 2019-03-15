@@ -26,6 +26,10 @@
 
   <ItemGroup>
 	<PackageReference Include="Microsoft.CodeAnalysis" Version="2.3.0" PrivateAssets="all" />
+	<PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0-dev.4">
+	  <PrivateAssets>all</PrivateAssets>
+	  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+	</PackageReference>
 	<PackageReference Include="Uno.SourceGenerationTasks" Version="1.30.0-dev.245" PrivateAssets="none">
 		<NoWarn>NU1701</NoWarn>
 	</PackageReference>
