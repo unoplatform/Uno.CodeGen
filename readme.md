@@ -50,22 +50,12 @@ Features:
 | `ImmutableGenerator` | `[GenerateImmutable]` | Generate code to build truly immutable entities. | [Documentation](doc/Immutable%20Generation.md) |
 | `InjectableGenerator` | `[Inject]` | Generate code to resolve and inject dependencies. | [Documentation](doc/Injectable%20Generation.md) |
 
-## Continuous Integration Build status
+## Nuget
 
-| Target | Branch | Status | Recent builds | Recommended Nuget packages version |
-| ------ | ------ | ------ | ------ | ------ |
-| `development` | [master](https://github.com/nventive/Uno.CodeGen/tree/master) | [![Build status](https://ci.appveyor.com/api/projects/status/bh83u4i2lp0hrg8r/branch/master?svg=true)](https://ci.appveyor.com/project/nventivedevops/uno-codegen/branch/master) | ![Build Stats](https://buildstats.info/appveyor/chart/nventivedevops/uno-codegen?branch=master&includeBuildsFromPullRequest=false) | [![NuGet](https://buildstats.info/nuget/Uno.CodeGen?includePreReleases=true)](https://www.nuget.org/packages/Uno.CodeGen/) |
-| `stable` | [stable](https://github.com/nventive/Uno.CodeGen/tree/stable) | [![Build status](https://ci.appveyor.com/api/projects/status/bh83u4i2lp0hrg8r/branch/stable?svg=true)](https://ci.appveyor.com/project/nventivedevops/uno-codegen/branch/stable) | ![Build Stats](https://buildstats.info/appveyor/chart/nventivedevops/uno-codegen?branch=stable&includeBuildsFromPullRequest=false) | [![NuGet](https://buildstats.info/nuget/Uno.CodeGen?includePreReleases=false)](https://www.nuget.org/packages/Uno.CodeGen/) |
-
+[![NuGet](https://buildstats.info/nuget/Uno.CodeGen?includePreReleases=true)](https://www.nuget.org/packages/Uno.CodeGen/)
 
 ## FAQ
 [Read our FAQ here](doc/faq.md)
-
-## Release Notes
-
-### 1.22.0 (May 17th 2018)
-
-- Added support for System.Guid as a supported immutable type.
 
 # Have questions? Feature requests? Issues?
 
