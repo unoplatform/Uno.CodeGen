@@ -18,7 +18,10 @@
 ### Bug fixes
 * Equality: Using an indexer won't break the code generation anymore.
 
-
 ## Release 1.30.0
 
  * No major changes.
+
+## 1.22.0 (May 17th 2018)	
+
+ * Added support for System.Guid as a supported immutable type.
