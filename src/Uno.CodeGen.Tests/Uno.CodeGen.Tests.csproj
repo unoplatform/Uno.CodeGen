@@ -20,12 +20,12 @@
 		<PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.0.2" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
-		<PackageReference Include="Uno.Core" Version="1.27.0-dev.65" />
+		<PackageReference Include="Uno.Core" Version="1.27.0-beta.83" />
 		<PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0-dev.4">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
-	  <PackageReference Include="Uno.SourceGenerationTasks" Version="1.30.0-dev.245">
+	  <PackageReference Include="Uno.SourceGenerationTasks" Version="1.30.0-beta.321">
 		  <NoWarn>NU1701</NoWarn>
 
 	  </PackageReference>
