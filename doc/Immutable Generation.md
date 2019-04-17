@@ -41,7 +41,8 @@
      `[assembly: ImmutableGenerationOptions(GenerateNewtownsoftJsonNetConverters=false)]`)
    * **No property setters allowed** (even `private` ones):
      properties should be _read only_, even for the class itself.
-   * **No fields allowed** (except static fields, but that would be weird).
+   * **No fields allowed** (except static fields, or `readonly` fields of a recognized immutable type).
+   * **No _write_ indexers** read-only indexers are ok and sometime useful for complex types.
    * **Static members are ok**, as they can only manipulate immutable stuff.
      Same apply for extensions.
    * **Nested classes not supported**, the class must be directly in its

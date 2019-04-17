@@ -951,10 +951,17 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 
 				if (!field.IsStatic)
 				{
-					Error(
-						builder,
-						$"Immutable type {symbolNames.SymbolNameWithGenerics} cannot "
-						+ "have the non-static field {field.Name}. You must remove it for immutable generation or make it static.");
+					if (field.IsReadOnly)
+					{
+						CheckTypeImmutable(field.Type, $"Field {field.Name}");
+					}
+					else
+					{
+						Error(
+							builder,
+							$"Immutable type {symbolNames.SymbolNameWithGenerics} cannot "
+							+ $"have the non-static field {field.Name}. You must either remove it, make it readonly or static to allow for immutable generation.");
+					}
 				}
 			}
 		}
@@ -1011,15 +1018,15 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 		private void Warning(IIndentedStringBuilder builder, string warningMsg)
 		{
 			var msg = $"{nameof(ImmutableGenerator)}/{_currentType}: {warningMsg}";
-			builder.AppendLineInvariant("#warning " + msg.Replace('\n', ' ').Replace('\r', ' '));
 			_logger.Warn(msg);
+			builder.AppendLineInvariant("#warning " + msg.Replace('\n', ' ').Replace('\r', ' '));
 		}
 
 		private void Error(IIndentedStringBuilder builder, string warningMsg)
 		{
 			var msg = $"{nameof(ImmutableGenerator)}/{_currentType}: {warningMsg}";
-			builder.AppendLineInvariant("#error " + msg.Replace('\n', ' ').Replace('\r', ' '));
 			_logger.Error(msg);
+			builder.AppendLineInvariant("#error " + msg.Replace('\n', ' ').Replace('\r', ' '));
 		}
 	}
 }

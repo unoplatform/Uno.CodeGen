@@ -22,4 +22,11 @@ This package is part of the Uno.CodeGen to generate equality members in your pro
 	
 	<Import Project="..\Uno.Common.props" />
 	
+	<ItemGroup>
+	  <PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+	  </PackageReference>
+	</ItemGroup>
+	
 </Project>
