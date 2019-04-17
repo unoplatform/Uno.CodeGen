@@ -21,7 +21,7 @@
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
 	<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />
 	<PackageReference Include="Uno.RoslynHelpers" Version="1.2.0-dev.10" PrivateAssets="all" />
-	<PackageReference Include="Uno.SourceGeneration" Version="1.30.0-dev.245" PrivateAssets="all" />
+	<PackageReference Include="Uno.SourceGeneration" Version="1.31.0-dev.285" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,7 +30,7 @@
 	  <PrivateAssets>all</PrivateAssets>
 	  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 	</PackageReference>
-	<PackageReference Include="Uno.SourceGenerationTasks" Version="1.30.0-dev.245" PrivateAssets="none">
+	<PackageReference Include="Uno.SourceGenerationTasks" Version="1.31.0-dev.285" PrivateAssets="none">
 		<NoWarn>NU1701</NoWarn>
 	</PackageReference>
   </ItemGroup>

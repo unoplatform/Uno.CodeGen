@@ -17,7 +17,7 @@
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.30.0-dev.245" />
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.31.0-dev.285" />
 	</ItemGroup>
 
 	<ItemGroup>
