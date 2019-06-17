@@ -24,7 +24,7 @@ This package is part of the Uno.CodeGen to generate immutable entities in your p
 	
 	<ItemGroup>
 	  <PackageReference Include="System.Diagnostics.Contracts" Version="4.3.0" />
-	  <PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0-dev.4">
+	  <PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 	  </PackageReference>
