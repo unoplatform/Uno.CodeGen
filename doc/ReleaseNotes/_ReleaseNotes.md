@@ -8,6 +8,10 @@
 
 ### Bug fixes
 
+## Release 1.32.0
+
+* No major changes.
+
 ## Release 1.31.0
 
 ### Features
