@@ -794,7 +794,7 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 	public override object ReadJson(global::Newtonsoft.Json.JsonReader reader, Type objectType, object existingValue, global::Newtonsoft.Json.JsonSerializer serializer)
 	{{
 		var o = serializer.Deserialize<{symbolNameWithGenerics}.Builder>(reader);
-		return ({symbolNameWithGenerics})o;
+		return o?.ToImmutable();
 	}}
 
 	public override bool CanConvert(Type objectType)
