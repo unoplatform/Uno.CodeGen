@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Project ToolsVersion="15.0">
 	<ItemGroup>
-		<SourceGenerator Include="$(MSBuildThisFileDirectory)..\bin\$(Configuration)\net46\Uno.CodeGen.dll" 
+		<SourceGenerator Include="$(MSBuildThisFileDirectory)..\bin\$(Configuration)\netstandard2.0\Uno.CodeGen.dll" 
 		                 Condition="Exists('$(MSBuildThisFileDirectory)..\bin')" />
 		<SourceGenerator Include="$(MSBuildThisFileDirectory)..\tools\Uno.CodeGen.dll" 
 		                 Condition="Exists('$(MSBuildThisFileDirectory)..\tools')" />

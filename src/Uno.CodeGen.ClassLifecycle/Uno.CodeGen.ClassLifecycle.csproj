@@ -1,11 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
    <PropertyGroup>
-		<TargetFrameworks>net46;netstandard1.3;netstandard2.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<IsTool>true</IsTool>
 		<Product>Generator of class lifecycle</Product>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 		<TreatSpecificWarningsAsErrors />
 		<DebugType>full</DebugType>
 		<DebugSymbols>True</DebugSymbols>
@@ -22,21 +23,16 @@ This package is part of the Uno.CodeGen to generate classes lifecycle methods in
 	
 	<Import Project="..\Uno.Common.props" />
 
-	<ItemGroup Condition="'$(TargetFramework)'=='net46'">
+	<ItemGroup>
 		<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />
 		<PackageReference Include="Uno.RoslynHelpers" Version="1.1.1" PrivateAssets="all" />
-		<PackageReference Include="Uno.SourceGeneration" Version="1.20.1" PrivateAssets="all" />
+		<PackageReference Include="Uno.SourceGeneration" Version="1.32.0-PullRequest0113.302" PrivateAssets="all" />
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.20.1" PrivateAssets="none">
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.32.0-PullRequest0113.302" PrivateAssets="none">
 		  <NoWarn>NU1701</NoWarn>
 		</PackageReference>
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)'!='net46'">
-		<Compile Remove="**\*.cs" />
-		<None Include="**\*.cs" Exclude="obj\**\*.cs;bin\**\.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -1,6 +1,6 @@
 ﻿<Project>
 	<ItemGroup>
-		<SourceGenerator Include="$(MSBuildThisFileDirectory)..\bin\$(Configuration)\net46\Uno.CodeGen.ClassLifecycle.dll" 
+		<SourceGenerator Include="$(MSBuildThisFileDirectory)..\bin\$(Configuration)\netstandard2.0\Uno.CodeGen.ClassLifecycle.dll" 
 				 Condition="Exists('$(MSBuildThisFileDirectory)..\bin')" />
 		<SourceGenerator Include="$(MSBuildThisFileDirectory)..\tools\Uno.CodeGen.ClassLifecycle.dll" 
 				 Condition="Exists('$(MSBuildThisFileDirectory)..\tools')" />
