@@ -1,4 +1,4 @@
-image: nventive/wasm-build:1.5
+image: mcr.microsoft.com/dotnet/core/sdk:3.0
 
 tasks:
   # This task is run as part of the pre-build, but also during workspace init.
