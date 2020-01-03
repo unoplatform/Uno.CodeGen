@@ -255,7 +255,7 @@ The generation logic for fields/properties in the class, using a first-match rul
   You can also consider replacing the `struct` by a `class`.
 
   ## Are equality generation automatic for generated immutables?
-  Yes they are by default. If you want to chagne this behavior, use the global
+  Yes they are by default. If you want to change this behavior, use the global
   `[ImmutableGenerationOptions]` attribute. Example:
   ``` csharp
   [assembly: Uno.ImmutableGenerationOptions(GenerateEqualityByDefault = true)]
