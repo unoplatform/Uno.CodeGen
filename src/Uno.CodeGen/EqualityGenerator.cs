@@ -254,6 +254,7 @@ namespace Uno
 					builder.AppendLineInvariant("// private method doing the real .Equals() job");
 					using (builder.BlockInvariant($"private bool InnerEquals({symbolNameWithGenerics} other)"))
 					{
+						builder.AppendLineInvariant("if (other.GetType() != GetType()) return false;");
 						builder.AppendLineInvariant("if (other.GetHashCode() != GetHashCode()) return false;");
 
 						var baseCall = baseTypeInfo.baseOverridesEquals
