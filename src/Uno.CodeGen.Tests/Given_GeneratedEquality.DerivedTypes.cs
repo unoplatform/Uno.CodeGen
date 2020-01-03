@@ -29,12 +29,18 @@ namespace Uno.CodeGen.Tests
 			var d2 = new MyDerived2.Builder { a = 10, c = 25, }.ToImmutable();
 			var d3 = new MyDerived3.Builder { a = 10, b = 15, c=25 }.ToImmutable();
 
-			(d1 == d2).Should().BeFalse();
-			d1.Equals(d2).Should().BeFalse();
-			d2.Equals(d1).Should().BeFalse();
-			(d1==d3).Should().BeFalse();
-			d1.Equals(d3).Should().BeFalse();
-			d3.Equals(d1).Should().BeFalse();
+			(d1 == d2).Should().BeFalse("d1 == d2");
+			(d2 == d1).Should().BeFalse("d2 == d1");
+			(d1 != d2).Should().BeTrue("d1 != d2");
+			(d2 != d1).Should().BeTrue("d2 != d1");
+			d1.Should().NotBe(d2, "d1.Equals(d2)");
+			d2.Should().NotBe(d1, "d2.Equals(d1)");
+			(d1 == d3).Should().BeFalse("d1 == d3");
+			(d3 == d1).Should().BeFalse("d3 == d1");
+			(d1 != d3).Should().BeTrue("d1 == d3");
+			(d3 != d1).Should().BeTrue("d3 == d1");
+			d1.Should().NotBe(d3, "d1.Equals(d3)");
+			d3.Should().NotBe(d1, "d3.Equals(d1)");
 		}
 
 	}
