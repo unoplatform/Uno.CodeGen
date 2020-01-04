@@ -43,6 +43,19 @@ namespace Uno.CodeGen.Tests
 			d3.Should().NotBe(d1, "d3.Equals(d1)");
 		}
 
+		[TestMethod]
+		public void Equality_WhenUsingDerivedFromExternal()
+		{
+			var d1 = new MyADerived.Builder { Id = "d1", a = 15, }.ToImmutable();
+			var d2 = new MyADerived.Builder { Id = "d2", a = 15, }.ToImmutable();
+
+			(d1 == d2).Should().BeFalse("d1 == d2");
+			(d2 == d1).Should().BeFalse("d2 == d1");
+			(d1 != d2).Should().BeTrue("d1 != d2");
+			(d2 != d1).Should().BeTrue("d2 != d1");
+			d1.Should().NotBe(d2, "d1.Equals(d2)");
+			d2.Should().NotBe(d1, "d2.Equals(d1)");
+		}
 	}
 
 	[GeneratedImmutable]
@@ -61,5 +74,10 @@ namespace Uno.CodeGen.Tests
 	internal partial class MyDerived3 : MyDerived1
 	{
 		public int c { get; }
+	}
+
+	internal partial class MyADerived : Uno.CodeGen.Tests.ExternalClasses.ConcreteExternalClassNoHash
+	{
+		public int a { get; }
 	}
 }
