@@ -7,6 +7,8 @@ phases:
 
   - powershell: './build/build.ps1 -script build/build.cake'
 
+  - task: VSTest@2
+
   - task: CopyFiles@2
     inputs:
       SourceFolder: $(Build.SourcesDirectory)/build
