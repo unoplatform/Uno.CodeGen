@@ -22,4 +22,10 @@ namespace Uno.CodeGen.Tests.ExternalClasses
 		[EqualityHash]
 		public string Id { get; }
 	}
+
+	[GeneratedImmutable]
+	public partial class ConcreteExternalClassNoHash
+	{
+		public string Id { get; }
+	}
 }
