@@ -63,5 +63,27 @@ namespace Uno.CodeGen.Tests
 			a.Entity­.MyField1.Should().Be(1);
 			a.Entity­.MyField2.Should().Be(2);
 		}
+
+		[TestMethod]
+		public void Immutable_When_Deserializing_ABuilder_WithNull_Using_JsonNet()
+		{
+			const string json = "{IsSomething:false, T:null, Entity:null}";
+			var a = JsonConvert.DeserializeObject<A.Builder>(json).ToImmutable();
+			a.Should().NotBeNull();
+			a.IsSomething.Should().BeFalse();
+			a.T.Should().BeNull();
+			a.Entity.Should().BeNull();
+		}
+
+		[TestMethod]
+		public void Immutable_When_Deserializing_A_WithNull_Using_JsonNet()
+		{
+			const string json = "{IsSomething:false, T:null, Entity:null}";
+			var a = JsonConvert.DeserializeObject<A>(json);
+			a.Should().NotBeNull();
+			a.IsSomething.Should().BeFalse();
+			a.T.Should().BeNull();
+			a.Entity.Should().BeNull();
+		}
 	}
 }
