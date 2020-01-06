@@ -99,28 +99,36 @@ namespace Uno
 
 		private string _currentType = "unknown";
 
+		private INamedTypeSymbol GetMandatoryTypeSymbol(string name)
+		{
+			var s = _context.Compilation.GetTypeByMetadataName(name);
+			if (s == null)
+				throw new InvalidOperationException($"Invalid type symbol '{name}'");
+			return s;
+		}
+
 		/// <inheritdoc />
 		public override void Execute(SourceGeneratorContext context)
 		{
 			_context = context;
 			_logger = context.GetLogger();
 
-			_objectSymbol = context.Compilation.GetTypeByMetadataName("System.Object");
-			_valueTypeSymbol = context.Compilation.GetTypeByMetadataName("System.ValueType");
-			_boolSymbol = context.Compilation.GetTypeByMetadataName("System.Bool");
-			_intSymbol = context.Compilation.GetTypeByMetadataName("System.Int32");
-			_enumSymbol = context.Compilation.GetTypeByMetadataName("System.Enum");
-			_arraySymbol = context.Compilation.GetTypeByMetadataName("System.Array");
-			_collectionSymbol = context.Compilation.GetTypeByMetadataName("System.Collections.ICollection");
-			_iEquatableSymbol = context.Compilation.GetTypeByMetadataName("System.IEquatable`1");
-			_iKeyEquatableSymbol = context.Compilation.GetTypeByMetadataName("Uno.Equality.IKeyEquatable");
-			_iKeyEquatableGenericSymbol = context.Compilation.GetTypeByMetadataName("Uno.Equality.IKeyEquatable`1");
-			_generatedEqualityAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.GeneratedEqualityAttribute");
-			_ignoreForEqualityAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityIgnoreAttribute");
-			_equalityHashAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityHashAttribute");
-			_equalityKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.EqualityKeyAttribute");
-			_equalityComparerOptionsAttributeSymbol = context.Compilation.GetTypeByMetadataName("Uno.Equality.EqualityComparerOptionsAttribute");
-			_dataAnnonationsKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("System.ComponentModel.DataAnnotations.KeyAttribute");
+			_objectSymbol = GetMandatoryTypeSymbol("System.Object");
+			_valueTypeSymbol = GetMandatoryTypeSymbol("System.ValueType");
+			_boolSymbol = GetMandatoryTypeSymbol("System.Boolean");
+			_intSymbol = GetMandatoryTypeSymbol("System.Int32");
+			_enumSymbol = GetMandatoryTypeSymbol("System.Enum");
+			_arraySymbol = GetMandatoryTypeSymbol("System.Array");
+			_collectionSymbol = GetMandatoryTypeSymbol("System.Collections.ICollection");
+			_iEquatableSymbol = GetMandatoryTypeSymbol("System.IEquatable`1");
+			_iKeyEquatableSymbol = _context.Compilation.GetTypeByMetadataName("Uno.Equality.IKeyEquatable");
+			_iKeyEquatableGenericSymbol = _context.Compilation.GetTypeByMetadataName("Uno.Equality.IKeyEquatable`1");
+			_generatedEqualityAttributeSymbol = GetMandatoryTypeSymbol("Uno.GeneratedEqualityAttribute");
+			_ignoreForEqualityAttributeSymbol = GetMandatoryTypeSymbol("Uno.EqualityIgnoreAttribute");
+			_equalityHashAttributeSymbol = GetMandatoryTypeSymbol("Uno.EqualityHashAttribute");
+			_equalityKeyAttributeSymbol = GetMandatoryTypeSymbol("Uno.EqualityKeyAttribute");
+			_equalityComparerOptionsAttributeSymbol = GetMandatoryTypeSymbol("Uno.Equality.EqualityComparerOptionsAttribute");
+			_dataAnnonationsKeyAttributeSymbol = GetMandatoryTypeSymbol("System.ComponentModel.DataAnnotations.KeyAttribute");
 			_isPureAttributePresent = context.Compilation.GetTypeByMetadataName("System.Diagnostics.Contracts.Pure") != null;
 
 			_generateKeyEqualityCode = _iKeyEquatableSymbol != null;
@@ -254,6 +262,7 @@ namespace Uno
 					builder.AppendLineInvariant("// private method doing the real .Equals() job");
 					using (builder.BlockInvariant($"private bool InnerEquals({symbolNameWithGenerics} other)"))
 					{
+						builder.AppendLineInvariant("if (other.GetType() != GetType()) return false;");
 						builder.AppendLineInvariant("if (other.GetHashCode() != GetHashCode()) return false;");
 
 						var baseCall = baseTypeInfo.baseOverridesEquals
