@@ -121,14 +121,14 @@ namespace Uno
 			_arraySymbol = GetMandatoryTypeSymbol("System.Array");
 			_collectionSymbol = GetMandatoryTypeSymbol("System.Collections.ICollection");
 			_iEquatableSymbol = GetMandatoryTypeSymbol("System.IEquatable`1");
-			_iKeyEquatableSymbol = _context.Compilation.GetTypeByMetadataName("Uno.Equality.IKeyEquatable");
-			_iKeyEquatableGenericSymbol = _context.Compilation.GetTypeByMetadataName("Uno.Equality.IKeyEquatable`1");
+			_iKeyEquatableSymbol = context.Compilation.GetTypeByMetadataName("Uno.Equality.IKeyEquatable");
+			_iKeyEquatableGenericSymbol = context.Compilation.GetTypeByMetadataName("Uno.Equality.IKeyEquatable`1");
 			_generatedEqualityAttributeSymbol = GetMandatoryTypeSymbol("Uno.GeneratedEqualityAttribute");
 			_ignoreForEqualityAttributeSymbol = GetMandatoryTypeSymbol("Uno.EqualityIgnoreAttribute");
 			_equalityHashAttributeSymbol = GetMandatoryTypeSymbol("Uno.EqualityHashAttribute");
 			_equalityKeyAttributeSymbol = GetMandatoryTypeSymbol("Uno.EqualityKeyAttribute");
 			_equalityComparerOptionsAttributeSymbol = GetMandatoryTypeSymbol("Uno.Equality.EqualityComparerOptionsAttribute");
-			_dataAnnonationsKeyAttributeSymbol = GetMandatoryTypeSymbol("System.ComponentModel.DataAnnotations.KeyAttribute");
+			_dataAnnonationsKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("System.ComponentModel.DataAnnotations.KeyAttribute");
 			_isPureAttributePresent = context.Compilation.GetTypeByMetadataName("System.Diagnostics.Contracts.Pure") != null;
 
 			_generateKeyEqualityCode = _iKeyEquatableSymbol != null;
