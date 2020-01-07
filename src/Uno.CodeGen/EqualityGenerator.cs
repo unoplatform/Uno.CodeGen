@@ -128,7 +128,7 @@ namespace Uno
 			_equalityHashAttributeSymbol = GetMandatoryTypeSymbol("Uno.EqualityHashAttribute");
 			_equalityKeyAttributeSymbol = GetMandatoryTypeSymbol("Uno.EqualityKeyAttribute");
 			_equalityComparerOptionsAttributeSymbol = GetMandatoryTypeSymbol("Uno.Equality.EqualityComparerOptionsAttribute");
-			_dataAnnonationsKeyAttributeSymbol = GetMandatoryTypeSymbol("System.ComponentModel.DataAnnotations.KeyAttribute");
+			_dataAnnonationsKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("System.ComponentModel.DataAnnotations.KeyAttribute");
 			_isPureAttributePresent = context.Compilation.GetTypeByMetadataName("System.Diagnostics.Contracts.Pure") != null;
 
 			_generateKeyEqualityCode = _iKeyEquatableSymbol != null;
