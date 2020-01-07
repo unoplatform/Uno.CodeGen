@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net461;netstandard2.0;netstandard1.3</TargetFrameworks>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<SourceGenerator Include="..\Uno.CodeGen\bin\$(Configuration)\net461\Uno.CodeGen.dll" />
+	</ItemGroup>
+
+	<Import Project="..\Uno.CodeGen\build\Uno.CodeGen.props" />
+
+	<!--
+    *******************************************************************
+    * This project is meant only to check if the compilation succeeds *
+    * with minimal set of dependencies.                               *
+    * Please do not add any other dependency to this project!         *
+    *******************************************************************
+    -->
+  
+	<ItemGroup>
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.30.0-dev.245" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Uno.Injectable\Uno.Injectable.csproj" />
+		<ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
+		<ProjectReference Include="..\Uno.Immutables\Uno.Immutables.csproj" />
+	</ItemGroup>
+
+</Project>
