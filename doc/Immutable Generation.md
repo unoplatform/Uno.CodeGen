@@ -36,9 +36,10 @@
 1. Restrictions:
    * **No default constructor allowed**
      (will with [Newtownsoft's JSON.NET](https://www.newtonsoft.com/json),
+     or with [new .NET Core 3.0 API](https://devblogs.microsoft.com/dotnet/try-the-new-system-text-json-apis/) [System.Text.Json](https://docs.microsoft.com/en-us/dotnet/api/system.text.json?view=netcore-3.1)
      when detected, it will generate custom JSON Converter. You can disable
      this globally by setting this attribute:
-     `[assembly: ImmutableGenerationOptions(GenerateNewtownsoftJsonNetConverters=false)]`)
+     `[assembly: ImmutableGenerationOptions(GenerateNewtownsoftJsonNetConverters=false, GenerateSystemTextJsonConverters=false)]`
    * **No property setters allowed** (even `private` ones):
      properties should be _read only_, even for the class itself.
    * **No fields allowed** (except static fields, or `readonly` fields of a recognized immutable type).
@@ -259,13 +260,14 @@ The generated code will produce the following effect:
 
 # FAQ
 
-## What if I need to use it with [Newtownsoft's JSON.NET](https://www.newtonsoft.com/json)?
+## What if I need to use it with [Newtownsoft's JSON.NET](https://www.newtonsoft.com/json) or with [System.Text.Json](https://docs.microsoft.com/en-us/dotnet/api/system.text.json?view=netcore-3.1)?
 You simply need to deserialize the builder instead of the class itself.
 The implicit casting will automatically convert it to the right type.
 
 Example:
 ``` csharp
-  MyEntity e = JsonConvert.DeserializeObject<MyEntity.Builder>(json);
+  MyEntity e1 = Newtonsoft.Json.JsonConvert.DeserializeObject<MyEntity.Builder>(json);
+  MyEntity e2 = System.Text.Json.JsonSerializer.Deserialize<MyEntity.Builder>(json);
 ```
 
 ## It's generating a lot of unused method. It's a waste.

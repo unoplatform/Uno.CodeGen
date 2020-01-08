@@ -52,9 +52,10 @@ namespace Uno
 		private INamedTypeSymbol _immutableGenerationOptionsAttributeSymbol;
 		private INamedTypeSymbol _immutableTreatAsImmutableAttributeSymbol;
 
-		private (bool generateOptionCode, bool treatArrayAsImmutable, bool generateEqualityByDefault, bool generateJsonNet) _generationOptions;
+		private (bool generateOptionCode, bool treatArrayAsImmutable, bool generateEqualityByDefault, bool generateJsonNet, bool generateSystemTextJson) _generationOptions;
 		private bool _generateOptionCode = true;
 		private bool _generateJsonNet = true;
+		private bool _generateSystemTextJson = true;
 
 		private string _currentType;
 
@@ -98,8 +99,8 @@ namespace Uno
 			_generationOptions = ExtractGenerationOptions(context.Compilation.Assembly);
 
 			_generateOptionCode = _generationOptions.generateOptionCode && context.Compilation.GetTypeByMetadataName("Uno.Option") != null;
-
-			_generateJsonNet = _generationOptions.generateOptionCode && context.Compilation.GetTypeByMetadataName("Newtonsoft.Json.JsonConvert") != null;
+			_generateJsonNet = _generationOptions.generateJsonNet && context.Compilation.GetTypeByMetadataName("Newtonsoft.Json.JsonConvert") != null;
+			_generateSystemTextJson = _generationOptions.generateSystemTextJson && context.Compilation.GetTypeByMetadataName("System.Text.Json.Serialization.JsonConverter") != null;
 
 			foreach (var (type, moduleAttribute) in generationData)
 			{
@@ -118,12 +119,13 @@ namespace Uno
 				.Select(a => new Regex(a.ConstructorArguments[0].Value.ToString()));
 		}
 
-		private (bool generateOptionCode, bool treatArrayAsImmutable, bool generateEqualityByDefault, bool generateJsonNet) ExtractGenerationOptions(IAssemblySymbol assembly)
+		private (bool generateOptionCode, bool treatArrayAsImmutable, bool generateEqualityByDefault, bool generateJsonNet, bool generateSystemTextJson) ExtractGenerationOptions(IAssemblySymbol assembly)
 		{
 			var generateOptionCode = true;
 			var treatArrayAsImmutable = false;
 			var generateEqualityByDefault = true;
 			var generateJsonNet = true;
+			var generateSystemTextJson = true;
 
 			var attribute = assembly
 				.GetAttributes()
@@ -147,11 +149,14 @@ namespace Uno
 						case nameof(ImmutableGenerationOptionsAttribute.GenerateNewtownsoftJsonNetConverters):
 							generateJsonNet = (bool)argument.Value.Value;
 							break;
+						case nameof(ImmutableGenerationOptionsAttribute.GenerateSystemTextJsonConverters):
+							generateSystemTextJson = (bool)argument.Value.Value;
+							break;
 					}
 				}
 			}
 
-			return (generateOptionCode, treatArrayAsImmutable, generateEqualityByDefault, generateJsonNet);
+			return (generateOptionCode, treatArrayAsImmutable, generateEqualityByDefault, generateJsonNet, generateSystemTextJson);
 		}
 
 		private bool GetShouldGenerateEquality(AttributeData attribute)
@@ -215,6 +220,7 @@ namespace Uno
 
 			var generateOption = _generateOptionCode && !typeSymbol.IsAbstract;
 			var generateJsonNet = _generateJsonNet && !typeSymbol.IsAbstract;
+			var generateSystemTextJson = _generateSystemTextJson && !typeSymbol.IsAbstract;
 
 			var classCopyIgnoreRegexes = ExtractCopyIgnoreAttributes(typeSymbol).ToArray();
 
@@ -296,6 +302,11 @@ namespace Uno
 				if (generateJsonNet)
 				{
 					builder.AppendLineInvariant($"[global::Newtonsoft.Json.JsonConverter(typeof({symbolName}BuilderJsonConverterTo{symbolNameDefinition}))]");
+				}
+
+				if (generateSystemTextJson)
+				{
+					builder.AppendLineInvariant($"[global::System.Text.Json.Serialization.JsonConverter(typeof({symbolName}BuilderSystemTextJsonConverterTo{symbolNameDefinition}))]");
 				}
 
 				builder.AppendLineInvariant($"[global::Uno.ImmutableBuilder(typeof({symbolNameDefinition}.Builder))] // Other generators can use this to find the builder.");
@@ -800,6 +811,26 @@ $@"public sealed class {symbolName}BuilderJsonConverterTo{symbolName}{genericArg
 	public override bool CanConvert(Type objectType)
 	{{
 		return objectType == typeof({symbolNameWithGenerics}) || objectType == typeof({symbolNameWithGenerics}.Builder);
+	}}
+}}");
+
+					builder.AppendLine();
+				}
+
+				if (generateSystemTextJson)
+				{
+					builder.AppendLine(
+$@"{typeSymbol.GetAccessibilityAsCSharpCodeString()} sealed class {symbolName}BuilderSystemTextJsonConverterTo{symbolName}{genericArguments} : global::System.Text.Json.Serialization.JsonConverter<{symbolNameWithGenerics}>{genericConstraints}
+{{
+	public override void Write(global::System.Text.Json.Utf8JsonWriter writer, {symbolName}{genericArguments} value, global::System.Text.Json.JsonSerializerOptions options)
+	{{
+		global::System.Text.Json.JsonSerializer.Serialize<{symbolNameWithGenerics}.Builder>(writer, value, options);
+	}}
+
+	public override {symbolName}{genericArguments} Read(ref global::System.Text.Json.Utf8JsonReader reader, Type typeToConvert, global::System.Text.Json.JsonSerializerOptions options)
+	{{
+		var v = global::System.Text.Json.JsonSerializer.Deserialize<{symbolNameWithGenerics}.Builder>(ref reader, options);
+		return v?.ToImmutable();
 	}}
 }}");
 

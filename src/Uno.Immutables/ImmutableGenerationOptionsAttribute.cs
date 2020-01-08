@@ -57,5 +57,13 @@ namespace Uno
 		/// Default is true. No effect if package `Newtownsoft.Json` is not referenced.
 		/// </remarks>
 		public bool GenerateNewtownsoftJsonNetConverters { get; set; } = true;
+
+		/// <summary>
+		/// If you want to generate System.Text.Json converters by default.
+		/// </summary>
+		/// <remarks>
+		/// Default is true. No effect if package `System.Text.Json` is not referenced.
+		/// </remarks>
+		public bool GenerateSystemTextJsonConverters { get; set; } = true;
 	}
 }
