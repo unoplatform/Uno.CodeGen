@@ -35,6 +35,7 @@ Features:
 * Works with generics & derived classes (even if they are from external assembly)
 * Optional support (_on_ by default) for `[GeneratedEquality]`
 * Transparent support for _Newtonsoft's JSON.NET_ (activated when detected, can be turned off)
+* Transparent support for _System.Text.Json_ (activated when detected, can be turned off)
 * Debuggable: You can put a breakpoint directly in the generated code
 * Validation to avoid mutable code in your class
 * Highly configureable: Generated code provides a lot of useful tips (stripped in previous snippet)
