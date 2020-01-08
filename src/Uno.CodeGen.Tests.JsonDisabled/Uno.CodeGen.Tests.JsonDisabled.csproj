@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net461</TargetFrameworks>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<SourceGenerator Include="..\Uno.CodeGen\bin\$(Configuration)\net461\Uno.CodeGen.dll" />
+	</ItemGroup>
+
+	<Import Project="..\Uno.CodeGen\build\Uno.CodeGen.props" />
+  
+	<ItemGroup>
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.30.0-dev.245" />
+        <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+	    <PackageReference Include="System.Text.Json" Version="4.7.0" />
+    </ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Uno.Injectable\Uno.Injectable.csproj" />
+		<ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
+		<ProjectReference Include="..\Uno.Immutables\Uno.Immutables.csproj" />
+	</ItemGroup>
+
+</Project>

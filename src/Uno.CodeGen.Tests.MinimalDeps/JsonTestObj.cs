@@ -14,12 +14,27 @@
 // limitations under the License.
 //
 // ******************************************************************
+using System;
+
 namespace Uno.CodeGen.Tests.MinimalDeps
 {
 	[GeneratedImmutable]
-	public partial class Class1
+	public partial class JsonTestObj
 	{
-		[EqualityHash]
-		public string Id { get; }
+		public Type T { get; }
+
+		public JsonTestObjChild Entity { get; } = JsonTestObjChild.Default;
+
+		public bool IsSomething { get; } = true;
+
 	}
+
+	[GeneratedImmutable]
+	public partial class JsonTestObjChild
+	{
+		public int MyField1 { get; } = 4;
+
+		public int MyField2 { get; } = 75;
+	}
+
 }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net461</TargetFramework>
@@ -38,6 +38,8 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Uno.ClassLifecycle\Uno.ClassLifecycle.csproj" />
 		<ProjectReference Include="..\Uno.CodeGen.Tests.ExternalClasses\Uno.CodeGen.Tests.ExternalClasses.csproj" />
+		<ProjectReference Include="..\Uno.CodeGen.Tests.MinimalDeps\Uno.CodeGen.Tests.MinimalDeps.csproj" />
+		<ProjectReference Include="..\Uno.CodeGen.Tests.JsonDisabled\Uno.CodeGen.Tests.JsonDisabled.csproj" />
 		<ProjectReference Include="..\Uno.Injectable\Uno.Injectable.csproj" />
 		<ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
 		<ProjectReference Include="..\Uno.Immutables\Uno.Immutables.csproj" />

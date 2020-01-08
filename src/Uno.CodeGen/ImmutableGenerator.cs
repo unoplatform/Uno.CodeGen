@@ -99,9 +99,8 @@ namespace Uno
 			_generationOptions = ExtractGenerationOptions(context.Compilation.Assembly);
 
 			_generateOptionCode = _generationOptions.generateOptionCode && context.Compilation.GetTypeByMetadataName("Uno.Option") != null;
-
-			_generateJsonNet = _generationOptions.generateOptionCode && context.Compilation.GetTypeByMetadataName("Newtonsoft.Json.JsonConvert") != null;
-			_generateSystemTextJson = _generationOptions.generateOptionCode && context.Compilation.GetTypeByMetadataName("System.Text.Json.Serialization.JsonConverter") != null;
+			_generateJsonNet = _generationOptions.generateJsonNet && context.Compilation.GetTypeByMetadataName("Newtonsoft.Json.JsonConvert") != null;
+			_generateSystemTextJson = _generationOptions.generateSystemTextJson && context.Compilation.GetTypeByMetadataName("System.Text.Json.Serialization.JsonConverter") != null;
 
 			foreach (var (type, moduleAttribute) in generationData)
 			{
