@@ -152,10 +152,9 @@ namespace Uno.Helpers
 					return true;
 				}
 
-				switch (definitionType.GetType().Name)
+				if (definitionType.IsTupleType)
 				{
-					case "TupleTypeSymbol":
-						return true; // tuples are immutables
+					return true; // tuples are immutables
 				}
 
 				switch (definitionType.BaseType?.ToString())
@@ -356,28 +355,36 @@ namespace Uno.Helpers
 				symbol = symbol.OriginalDefinition;
 			}
 
-			var type = symbol.GetType();
-			switch (type.FullName)
+			if (symbol.Locations.FirstOrDefault() is Location location)
 			{
-				case "Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE.PEPropertySymbol":
-					return symbol.IsReadOnly; // It's from compiled code. We assume it's an auto-property when "read only"
-				case "Microsoft.CodeAnalysis.CSharp.Symbols.SourcePropertySymbol":
-					break; // ok
-				default:
-					throw new InvalidOperationException(
-						"Unable to find the internal property `IsAutoProperty` on implementation of `IPropertySymbol`. " +
-						"Should be on internal class `PropertySymbol`. Maybe you are using an incompatible version of Roslyn.");
+				var node = location.SourceTree?.GetRoot()?.FindNode(location.SourceSpan);
+
+				if (node != null)
+				{
+					// Compute if a property with accessible is having a Body or an ExpressionBody.
+					// Reference https://github.com/dotnet/roslyn/blob/ba014d9d7728de0d4b5df3859507f9701e7032c0/src/Compilers/CSharp/Portable/Symbols/Source/SourcePropertySymbol.cs#L205
+
+					var isExplicitProperty = node
+						.DescendantNodesAndSelf()
+						.OfType<PropertyDeclarationSyntax>()
+						.Any(prop =>
+						{
+							if(prop.AccessorList != null)
+							{
+								return prop.AccessorList.Accessors
+									.Any(a => a.Body != null || a.ExpressionBody != null);
+							}
+
+							// readonly arrow property declaration
+							return true;
+						});
+
+					return !isExplicitProperty;
+				}
 			}
 
-			if (_isAutoPropertyGetter == null)
-			{
-				_isAutoPropertyGetter = type
-					.GetProperty("IsAutoProperty", BindingFlags.Instance | BindingFlags.NonPublic)
-					.GetMethod;
-			}
-
-			var isAuto = _isAutoPropertyGetter.Invoke(symbol, new object[] { });
-			return (bool)isAuto;
+			// Source location in unknown, we assume it's an auto-property when "read only"
+			return true;
 		}
 
 		public static bool IsFromPartialDeclaration(this ISymbol symbol)
