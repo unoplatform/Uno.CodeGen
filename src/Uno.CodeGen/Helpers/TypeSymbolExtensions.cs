@@ -338,8 +338,6 @@ namespace Uno.Helpers
 			return keyType != null;
 		}
 
-		private static MethodInfo _isAutoPropertyGetter;
-
 		public static bool IsAutoProperty(this IPropertySymbol symbol)
 		{
 			if (symbol.IsWithEvents || symbol.IsIndexer || !symbol.IsReadOnly)
