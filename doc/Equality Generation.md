@@ -173,7 +173,7 @@ this order:
 1. If the type of the field/property is a collection (and not a `string`):
    1. A reference equality will be done. If `equals`, it will return `true`. If one
       of them is `null`, it will return `false`. If both are `null`, it will return `true` since
-      they are _reference equals_.
+      they are _reference equal_.
    1. The `.Count` will be compared (return `false` if `Count` is different)
    1. Each item of the collection will be compared by reapplying those rules.
 1. **Custom Equality Comparer**: If there's a **Private**, **Static** &
