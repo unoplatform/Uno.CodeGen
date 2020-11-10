@@ -160,7 +160,7 @@ of it).
    generator from generating this method. (actually, it will be generated,
    but the code will be commented-out, so you'll be able to sneak at it).
 1. The comparer for a field can be overriden by specifying a
-   `private static` property named &lt;Field/Property name&gt; + "`_Comparer`"
+   `private static` read-only property named &lt;Field/Property name&gt; + "`_Comparer`"
    and of type `IEqualityComparer`
 1. For `string`, a `StringComparer.Ordinal` will be used by default. If you
    need a different one you can specify a _custom equality comparer_.
