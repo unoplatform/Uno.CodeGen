@@ -160,7 +160,7 @@ of it).
    generator from generating this method. (actually, it will be generated,
    but the code will be commented-out, so you'll be able to sneak at it).
 1. The comparer for a field can be overriden by specifying a
-   `private static` read-only property named &lt;Field/Property name&gt; + "`_Comparer`"
+   `private static` read-only property named &lt;Field/Property name&gt; + "`_CustomComparer`"
    and of type `IEqualityComparer`
 1. For `string`, a `StringComparer.Ordinal` will be used by default. If you
    need a different one you can specify a _custom equality comparer_.
@@ -177,7 +177,7 @@ this order:
    1. The `.Count` will be compared (return `false` if `Count` is different)
    1. Each item of the collection will be compared by reapplying those rules.
 1. **Custom Equality Comparer**: If there's a **Private**, **Static** &
-   **Read-Only** field with the name &lt;Field/Propertyname&gt;`_Comparer`
+   **Read-only** property with the name &lt;Field/Propertyname&gt;`_CustomComparer`
    of type `IEqualityComparer`, it will be used to compare the value. Example:
    ``` csharp
    public partial class Person
@@ -186,7 +186,7 @@ this order:
 
        // Default comparer for `Name` property
        // Tip: You can create another .cs file to keep your entity "clean"
-       private static readonly IEqualityComparer Name_Comparer = StringComparer.Ordinal;
+       private static IEqualityComparer Name_CustomComparer { get; } = StringComparer.Ordinal;
    }
    ```
 1. If the type of the field/property is a string,
