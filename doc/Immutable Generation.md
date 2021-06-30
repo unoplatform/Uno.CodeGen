@@ -255,7 +255,7 @@ The generated code will produce the following effect:
   ```
 
 > For more information on the `Uno.Core` package:
-> * On Github: <https://github.com/nventive/Uno.Core>
+> * On Github: <https://github.com/unoplatform/Uno.Core>
 > * On Nuget: <https://www.nuget.org/packages/Uno.Core/>
 
 # FAQ

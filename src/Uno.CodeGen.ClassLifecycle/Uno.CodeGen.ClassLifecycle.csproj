@@ -15,9 +15,9 @@
 This package is part of the Uno.CodeGen to generate classes lifecycle methods in your project.</Description>
 		<RootNamespace>Uno</RootNamespace>
 		<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
-		<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
-		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
+	<PackageProjectUrl>https://github.com/unoplatform/Uno.CodeGen</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/unoplatform/Uno.CodeGen</RepositoryUrl>
+	<PackageIcon>uno.png</PackageIcon>
 	</PropertyGroup>
 	
 	<Import Project="..\Uno.Common.props" />
@@ -48,6 +48,8 @@ This package is part of the Uno.CodeGen to generate classes lifecycle methods in
 			<Pack>true</Pack>
 			<PackagePath>build</PackagePath>
 		</Content>
+
+	<None Include="..\uno.png" Pack="true" PackagePath="\" Visible="false" />
 	</ItemGroup>
 
 	<ItemGroup>

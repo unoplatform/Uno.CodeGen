@@ -28,7 +28,7 @@
    }
    ```
 
-1. Compile ([the generation process occurs at compile time](https://github.com/nventive/Uno.SourceGeneration/issues/9)).
+1. Compile ([the generation process occurs at compile time](https://github.com/unoplatform/Uno.SourceGeneration/issues/9)).
 1. It will generate the following public methods for you:
    ``` csharp
     partial class MyClass : IDisposable

@@ -9,11 +9,11 @@
 	<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 	<Authors>nventive</Authors>
 	<Company>nventive</Company>
-	<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
-	<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
-	<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
+	<PackageProjectUrl>https://github.com/unoplatform/Uno.CodeGen</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/unoplatform/Uno.CodeGen</RepositoryUrl>
 	<Description>This package provides tooling for code generation.</Description>
 	<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
+	<PackageIcon>uno.png</PackageIcon>
   </PropertyGroup>
 
   <Import Project="..\Uno.Common.props" />
@@ -45,6 +45,8 @@
 	  <Pack>true</Pack>
 	  <PackagePath>build</PackagePath>
 	</Content>
+
+	<None Include="..\uno.png" Pack="true" PackagePath="\" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
