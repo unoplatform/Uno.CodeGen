@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31320.298
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.CodeGen", "Uno.CodeGen\Uno.CodeGen.csproj", "{7A05DD54-F3F1-4A48-97A5-1A5F45D9F315}"
 EndProject
@@ -35,7 +35,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.CodeGen.Tests.MinimalDe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Uno.CodeGen.Tests.JsonDisabled", "Uno.CodeGen.Tests.JsonDisabled\Uno.CodeGen.Tests.JsonDisabled.csproj", "{8A1F7BE0-46F6-455B-8720-5B0698843733}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Uno.CodeGen.RoslynHelpers", "Uno.CodeGen.RoslynHelpers\Uno.CodeGen.RoslynHelpers.shproj", "{F099B362-19D8-450B-B9B2-DCA3CDFCAAB5}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Uno.CodeGen.RoslynHelpers\Uno.CodeGen.RoslynHelpers.projitems*{3f7d2a75-2fbe-4b2c-ab93-1fbf7effe3c9}*SharedItemsImports = 5
+		Uno.CodeGen.RoslynHelpers\Uno.CodeGen.RoslynHelpers.projitems*{f099b362-19d8-450b-b9b2-dca3cdfcaab5}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
