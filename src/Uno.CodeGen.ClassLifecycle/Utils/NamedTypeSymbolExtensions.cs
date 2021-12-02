@@ -88,7 +88,7 @@ namespace Uno.CodeGen.ClassLifecycle.Utils
 			=> type.FindAttribute(attribute) != null;
 
 		public static AttributeData FindAttribute(this INamedTypeSymbol type, INamedTypeSymbol attributeType)
-			=> type.GetAttributes().FirstOrDefault(attribute => attribute.AttributeClass.Equals(attributeType));
+			=> type.GetAttributes().FirstOrDefault(attribute => Equals(attribute.AttributeClass, attributeType));
 
 		public static SymbolNames GetSymbolNames(this INamedTypeSymbol typeSymbol)
 		{
@@ -163,7 +163,7 @@ namespace Uno.CodeGen.ClassLifecycle.Utils
 				if (disposePattern == null)
 				{
 				}
-				else if (type == sourceType)
+				else if (Equals(type, sourceType))
 				{
 					return (DisposePatternImplementationKind.DisposePattern, disposePattern);
 				}

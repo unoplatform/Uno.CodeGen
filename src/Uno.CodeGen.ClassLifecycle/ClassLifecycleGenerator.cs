@@ -24,7 +24,6 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 using Uno.CodeGen.ClassLifecycle.Utils;
 using Uno.SourceGeneration;
 using ExpressionStatementSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.ExpressionStatementSyntax;
@@ -163,7 +162,7 @@ namespace Uno.CodeGen.ClassLifecycle
 				.Select(parameter =>
 				{
 					var type = parameter.First().Type;
-					var isTypeMismatch = parameter.Any(p => p.Type != type);
+					var isTypeMismatch = parameter.Any(p => !Equals(p.Type, type));
 
 					var isOptional = parameter.All(p => p.IsOptional);
 					var defaultValue = default(object);
@@ -313,7 +312,7 @@ namespace Uno.CodeGen.ClassLifecycle
 							// It is invoking the parameter less contructor we are generating !
 							return declaredParameterlessConstructor == null && initializer.ArgumentList.Arguments.None();
 						}
-						else if (parentConstructor.ContainingSymbol != constructor.ContainingSymbol)
+						else if (!Equals(parentConstructor.ContainingSymbol, constructor.ContainingSymbol))
 						{
 							// Currently we don't support Intialize inheritance (the issue is that as each inheriance layer may add some parameters,
 							// the base class cannot invoke a single method that is overriden by children)

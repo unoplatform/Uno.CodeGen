@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>net461;netstandard1.3;netstandard2.0</TargetFrameworks>
+	<TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
 	<IsTool>true</IsTool>
 	<NoWarn>1701;1702;1705;NU1701</NoWarn>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -13,7 +13,7 @@
 	<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
 	<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
 	<Description>This package provides tooling for code generation.</Description>
-	<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
+	<Copyright>Copyright (C) 2015-$([System.DateTime]::Now.ToString(`yyyy`)) nventive inc. - all rights reserved</Copyright>
   </PropertyGroup>
 
   <Import Project="..\Uno.Common.props" />
@@ -21,16 +21,18 @@
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
 	<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />
 	<PackageReference Include="Uno.RoslynHelpers" Version="1.2.0-dev.10" PrivateAssets="all" />
-	<PackageReference Include="Uno.SourceGeneration" Version="1.30.0-dev.245" PrivateAssets="all" ExcludeAssets="runtime" />
+	<PackageReference Include="Uno.SourceGeneration" Version="4.0.0" PrivateAssets="all" ExcludeAssets="runtime">
+	  <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-	<PackageReference Include="Microsoft.CodeAnalysis" Version="2.3.0" PrivateAssets="all" ExcludeAssets="runtime" />
+	<PackageReference Include="Microsoft.CodeAnalysis" Version="4.0.1" PrivateAssets="all" ExcludeAssets="runtime" />
 	<PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0-dev.4">
 	  <PrivateAssets>all</PrivateAssets>
 	  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 	</PackageReference>
-	<PackageReference Include="Uno.SourceGenerationTasks" Version="1.30.0-dev.245" PrivateAssets="none">
+	<PackageReference Include="Uno.SourceGenerationTasks" Version="4.0.0" PrivateAssets="none">
 	  <NoWarn>NU1701</NoWarn>
 	</PackageReference>
   </ItemGroup>

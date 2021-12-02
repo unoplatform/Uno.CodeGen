@@ -1,19 +1,58 @@
-phases:
-- phase: VS_Latest
+pool:
+  vmImage: 'windows-2022'
 
-  steps:
+trigger:
+  branches:
+    include:
+      - master
+      - beta
+      - release/beta/*
+      - stable
+      - release/stable/*
+
+pr: 
+  branches:
+    include:
+      - master
+      - beta
+      - release/beta/*
+      - stable
+      - release/stable/*
+
+steps:
   - checkout: self
-    clean: true
+    clean: 'true'
 
-  - powershell: './build/build.ps1 -script build/build.cake'
+  - task: gitversion/setup@0
+    inputs:
+      versionSpec: '5.6.8'
+
+  - task: gitversion/execute@0
+    inputs:
+      useConfigFile: true
+      configFilePath: gitversion.yml
+    displayName: Use GitVersion
+
+  - task: MSBuild@1
+    inputs:
+      solution: src/Uno.CodeGen.sln
+      msbuildArchitecture: x86
+      msbuildArguments: /r /p:Configuration=Release "/p:PackageOutputPath=$(build.artifactstagingdirectory)\vslatest" "/p:PackageVersion=%GITVERSION_FullSemVer%" "/p:InformationalVersion=%GITVERSION_InformationalVersion%" /detailedsummary
+      clean: false
+      maximumCpuCount: true
+      restoreNugetPackages: false
+      logProjectEvents: false
+      createLogFile: false
+
+  - task: VisualStudioTestPlatformInstaller@1
 
   - task: VSTest@2
-
-  - task: CopyFiles@2
     inputs:
-      SourceFolder: $(Build.SourcesDirectory)/build
-      Contents: '*.nupkg'
-      TargetFolder: $(Build.ArtifactStagingDirectory)/vslatest
+      testAssemblyVer2: |
+        **\*test*.dll
+        !**\obj\**
+      vsTestVersion: toolsInstaller
+      testSelector: testAssemblies
 
   - task: PublishBuildArtifacts@1
     inputs:
