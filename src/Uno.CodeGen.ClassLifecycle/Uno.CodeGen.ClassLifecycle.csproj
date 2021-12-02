@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
    <PropertyGroup>
-		<TargetFrameworks>net461;netstandard1.3;netstandard2.0</TargetFrameworks>
+		<TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
 		<IsTool>true</IsTool>
 		<Product>Generator of class lifecycle</Product>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -18,14 +18,16 @@ This package is part of the Uno.CodeGen to generate classes lifecycle methods in
 		<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
 		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
+		<NoWarn>RS1024;NU5118;NU5128</NoWarn>
 	</PropertyGroup>
 	
 	<Import Project="..\Uno.Common.props" />
 
 	<ItemGroup Condition="'$(TargetFramework)'=='net461'">
 		<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />
-		<PackageReference Include="Uno.RoslynHelpers" Version="1.2.0-dev.10" PrivateAssets="all" />
-		<PackageReference Include="Uno.SourceGeneration" Version="1.30.0-dev.245" PrivateAssets="all" ExcludeAssets="runtime" />
+		<PackageReference Include="Uno.Roslyn" Version="1.3.0-dev.12" PrivateAssets="all" />
+		<PackageReference Include="Uno.SourceGeneration" Version="4.0.0" PrivateAssets="all" ExcludeAssets="runtime" />
+		<PackageReference Include="Microsoft.CodeAnalysis" Version="4.0.1" PrivateAssets="all" />
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -33,8 +35,8 @@ This package is part of the Uno.CodeGen to generate classes lifecycle methods in
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.30.0-dev.245" PrivateAssets="none">
-		  <NoWarn>NU1701</NoWarn>
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="4.0.0" PrivateAssets="none">
+		  <NoWarn>NU1701;RS1024</NoWarn>
 		</PackageReference>
 	</ItemGroup>
 
