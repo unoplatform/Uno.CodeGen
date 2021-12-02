@@ -9,28 +9,30 @@
 	<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 	<Authors>nventive</Authors>
 	<Company>nventive</Company>
-	<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
-	<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
-	<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
+	<PackageProjectUrl>https://github.com/unoplatform/Uno.CodeGen</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/unoplatform/Uno.CodeGen</RepositoryUrl>
 	<Description>This package provides tooling for code generation.</Description>
 	<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
+	<PackageIcon>uno.png</PackageIcon>
   </PropertyGroup>
 
   <Import Project="..\Uno.Common.props" />
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
-	<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />
+	<PackageReference Include="System.ValueTuple" Version="4.5.0" PrivateAssets="all" />
 	<PackageReference Include="Uno.RoslynHelpers" Version="1.2.0-dev.10" PrivateAssets="all" />
-	<PackageReference Include="Uno.SourceGeneration" Version="1.30.0-dev.245" PrivateAssets="all" ExcludeAssets="runtime" />
+	<PackageReference Include="Uno.SourceGeneration" Version="3.1.0" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <ItemGroup>
-	<PackageReference Include="Microsoft.CodeAnalysis" Version="2.3.0" PrivateAssets="all" ExcludeAssets="runtime" />
-	<PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0-dev.4">
+	<PackageReference Include="Microsoft.CodeAnalysis" Version="3.10.0" PrivateAssets="all" ExcludeAssets="runtime">
+	  <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
+	<PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0">
 	  <PrivateAssets>all</PrivateAssets>
 	  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 	</PackageReference>
-	<PackageReference Include="Uno.SourceGenerationTasks" Version="1.30.0-dev.245" PrivateAssets="none">
+	<PackageReference Include="Uno.SourceGenerationTasks" Version="3.1.0" PrivateAssets="none">
 	  <NoWarn>NU1701</NoWarn>
 	</PackageReference>
   </ItemGroup>
@@ -45,6 +47,8 @@
 	  <Pack>true</Pack>
 	  <PackagePath>build</PackagePath>
 	</Content>
+
+	<None Include="..\uno.png" Pack="true" PackagePath="\" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>

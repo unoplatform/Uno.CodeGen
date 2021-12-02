@@ -15,17 +15,19 @@ This package is part of the Uno.CodeGen to generate object life cycle methods in
 		<RootNamespace>Uno</RootNamespace>
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 		<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
-		<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
-		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
+		<PackageProjectUrl>https://github.com/unoplatform/Uno.CodeGen</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/unoplatform/Uno.CodeGen</RepositoryUrl>
+		<PackageIcon>uno.png</PackageIcon>
 	</PropertyGroup>
 
 	<Import Project="..\Uno.Common.props" />
 
 	<ItemGroup>
-	  <PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0-dev.4">
+	  <PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 	  </PackageReference>
+
+	  <None Include="..\uno.png" Pack="true" PackagePath="\" Visible="false" />
 	</ItemGroup>
 </Project>

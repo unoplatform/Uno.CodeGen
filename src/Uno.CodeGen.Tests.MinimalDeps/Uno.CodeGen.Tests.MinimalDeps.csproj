@@ -20,7 +20,7 @@
     -->
   
 	<ItemGroup>
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.30.0-dev.245" />
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="3.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>

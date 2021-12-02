@@ -1,32 +1,34 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>net461;netstandard1.3;netstandard2.0</TargetFrameworks>
-		<Product>Equality Declarations</Product>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-		<TreatSpecificWarningsAsErrors />
-		<DebugType>full</DebugType>
-		<DebugSymbols>True</DebugSymbols>
-		<Authors>nventive</Authors>
-		<Company>nventive</Company>
+  <PropertyGroup>
+	<TargetFrameworks>net461;netstandard1.3;netstandard2.0</TargetFrameworks>
+	<Product>Equality Declarations</Product>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+	<TreatSpecificWarningsAsErrors />
+	<DebugType>full</DebugType>
+	<DebugSymbols>True</DebugSymbols>
+	<Authors>nventive</Authors>
+	<Company>nventive</Company>
 		<Description>This package provides attributes for Equality source code generation.
 This package is part of the Uno.CodeGen to generate equality members in your project.</Description>
-		<RootNamespace>Uno.Equality</RootNamespace>
-		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-		<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
-		<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
-		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
-	</PropertyGroup>
-	
-	<Import Project="..\Uno.Common.props" />
-	
-	<ItemGroup>
-	  <PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0-dev.4">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-	  </PackageReference>
-	</ItemGroup>
-	
+	<RootNamespace>Uno.Equality</RootNamespace>
+	<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+	<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
+	<PackageProjectUrl>https://github.com/unoplatform/Uno.CodeGen</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/unoplatform/Uno.CodeGen</RepositoryUrl>
+	<PackageIcon>uno.png</PackageIcon>
+  </PropertyGroup>
+
+  <Import Project="..\Uno.Common.props" />
+
+  <ItemGroup>
+	<PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0">
+	  <PrivateAssets>all</PrivateAssets>
+	  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+	</PackageReference>
+
+	<None Include="..\uno.png" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+
 </Project>

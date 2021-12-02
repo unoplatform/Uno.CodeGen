@@ -1,57 +1,64 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-   <PropertyGroup>
+  <PropertyGroup>
 		<TargetFrameworks>net461;netstandard1.3;netstandard2.0</TargetFrameworks>
-		<IsTool>true</IsTool>
-		<Product>Generator of class lifecycle</Product>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-		<TreatSpecificWarningsAsErrors />
-		<DebugType>full</DebugType>
-		<DebugSymbols>True</DebugSymbols>
-		<Authors>nventive</Authors>
-		<Company>nventive</Company>
+	<IsTool>true</IsTool>
+	<Product>Generator of class lifecycle</Product>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+	<TreatSpecificWarningsAsErrors />
+	<DebugType>full</DebugType>
+	<DebugSymbols>True</DebugSymbols>
+	<Authors>nventive</Authors>
+	<Company>nventive</Company>
 		<Description>This package provides a generator which generates the class life cycle method using the attributes from Uno.ClassLifecycle.
 This package is part of the Uno.CodeGen to generate classes lifecycle methods in your project.</Description>
-		<RootNamespace>Uno</RootNamespace>
-		<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
-		<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
-		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
-	</PropertyGroup>
-	
-	<Import Project="..\Uno.Common.props" />
+	<RootNamespace>Uno</RootNamespace>
+	<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
+	<PackageProjectUrl>https://github.com/unoplatform/Uno.CodeGen</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/unoplatform/Uno.CodeGen</RepositoryUrl>
+	<PackageIcon>uno.png</PackageIcon>
+  </PropertyGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)'=='net461'">
-		<PackageReference Include="System.ValueTuple" Version="4.4.0" PrivateAssets="all" />
-		<PackageReference Include="Uno.RoslynHelpers" Version="1.2.0-dev.10" PrivateAssets="all" />
-		<PackageReference Include="Uno.SourceGeneration" Version="1.30.0-dev.245" PrivateAssets="all" ExcludeAssets="runtime" />
-	</ItemGroup>
-	
-	<ItemGroup>
-		<PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0-dev.4">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.30.0-dev.245" PrivateAssets="none">
-		  <NoWarn>NU1701</NoWarn>
-		</PackageReference>
-	</ItemGroup>
+  <Import Project="..\Uno.CodeGen.RoslynHelpers\Uno.CodeGen.RoslynHelpers.projitems" Label="Shared" />
 
-	<ItemGroup Condition="'$(TargetFramework)'!='net461'">
-		<Compile Remove="**\*.cs" />
-		<None Include="**\*.cs" Exclude="obj\**\*.cs;bin\**\.cs" />
-	</ItemGroup>
+  <Import Project="..\Uno.Common.props" />
 
-	<ItemGroup>
-		<Content Include="build/**/*.*">
-			<Pack>true</Pack>
-			<PackagePath>build</PackagePath>
-		</Content>
-	</ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
+	<PackageReference Include="System.ValueTuple" Version="4.5.0" PrivateAssets="all" />
+	<PackageReference Include="Uno.SourceGeneration" Version="3.1.0" PrivateAssets="all" ExcludeAssets="runtime" />
 
-	<ItemGroup>
-	  <ProjectReference Include="..\Uno.ClassLifecycle\Uno.ClassLifecycle.csproj" />
-	</ItemGroup>
-	
+	<PackageReference Include="Microsoft.CodeAnalysis" Version="1.3.2" PrivateAssets="all" />
+	<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="1.3.2" PrivateAssets="all" />
+	<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="1.3.2" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0">
+	  <PrivateAssets>all</PrivateAssets>
+	  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+	</PackageReference>
+	<PackageReference Include="Uno.SourceGenerationTasks" Version="3.1.0" PrivateAssets="none">
+	  <NoWarn>NU1701</NoWarn>
+	</PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'!='net461'">
+	<Compile Remove="**\*.cs" />
+	<None Include="**\*.cs" Exclude="obj\**\*.cs;bin\**\.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<Content Include="build/**/*.*">
+	  <Pack>true</Pack>
+	  <PackagePath>build</PackagePath>
+	</Content>
+
+	<None Include="..\uno.png" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<ProjectReference Include="..\Uno.ClassLifecycle\Uno.ClassLifecycle.csproj" />
+  </ItemGroup>
+
 </Project>

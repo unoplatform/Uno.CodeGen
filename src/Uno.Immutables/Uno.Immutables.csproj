@@ -1,37 +1,39 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>net461;netstandard1.3;netstandard2.0</TargetFrameworks>
-		<Product>Immutable Declarations</Product>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-		<TreatSpecificWarningsAsErrors />
-		<DebugType>full</DebugType>
-		<DebugSymbols>True</DebugSymbols>
-		<Authors>nventive</Authors>
-		<Company>nventive</Company>
+  <PropertyGroup>
+	<TargetFrameworks>net461;netstandard1.3;netstandard2.0</TargetFrameworks>
+	<Product>Immutable Declarations</Product>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+	<TreatSpecificWarningsAsErrors />
+	<DebugType>full</DebugType>
+	<DebugSymbols>True</DebugSymbols>
+	<Authors>nventive</Authors>
+	<Company>nventive</Company>
 		<Description>This package provides attributes for immutable entities source code generation.
 This package is part of the Uno.CodeGen to generate immutable entities in your project.</Description>
-		<RootNamespace>Uno</RootNamespace>
-		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-		<PackageProjectUrl>https://github.com/nventive/Uno.CodeGen</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/nventive/Uno.CodeGen</RepositoryUrl>
-		<PackageIconUrl>https://nv-assets.azurewebsites.net/logos/uno.png</PackageIconUrl>
-		<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
-	</PropertyGroup>
-	
-	<Import Project="..\Uno.Common.props" />
-	
-	<ItemGroup>
-	  <PackageReference Include="System.Diagnostics.Contracts" Version="4.3.0" />
-	  <PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0-dev.4">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-	  </PackageReference>
-	</ItemGroup>
+	<RootNamespace>Uno</RootNamespace>
+	<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+	<PackageProjectUrl>https://github.com/unoplatform/Uno.CodeGen</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/unoplatform/Uno.CodeGen</RepositoryUrl>
+	<Copyright>Copyright (C) 2015-2018 nventive inc. - all rights reserved</Copyright>
+	<PackageIcon>uno.png</PackageIcon>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
-	</ItemGroup>
+  <Import Project="..\Uno.Common.props" />
+
+  <ItemGroup>
+	<PackageReference Include="System.Diagnostics.Contracts" Version="4.3.0" />
+	<PackageReference Include="Uno.MonoAnalyzers" Version="1.0.0">
+	  <PrivateAssets>all</PrivateAssets>
+	  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+	</PackageReference>
+
+	<None Include="..\uno.png" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<ProjectReference Include="..\Uno.Equality\Uno.Equality.csproj" />
+  </ItemGroup>
 
 </Project>

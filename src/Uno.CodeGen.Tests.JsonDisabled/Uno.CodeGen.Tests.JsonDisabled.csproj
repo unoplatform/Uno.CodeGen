@@ -12,9 +12,9 @@
 	<Import Project="..\Uno.CodeGen\build\Uno.CodeGen.props" />
   
 	<ItemGroup>
-		<PackageReference Include="Uno.SourceGenerationTasks" Version="1.30.0-dev.245" />
+		<PackageReference Include="Uno.SourceGenerationTasks" Version="3.1.0" />
         <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-	    <PackageReference Include="System.Text.Json" Version="4.7.0" />
+	    <PackageReference Include="System.Text.Json" Version="5.0.2" />
     </ItemGroup>
 
 	<ItemGroup>

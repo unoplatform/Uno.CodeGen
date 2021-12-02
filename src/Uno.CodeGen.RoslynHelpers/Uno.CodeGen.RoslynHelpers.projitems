@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>f099b362-19d8-450b-b9b2-dca3cdfcaab5</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Uno.CodeGen.RoslynHelpers</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\DisposableAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\IIndentedStringBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\IndentedStringBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\IndentedStringBuilderExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\CyclomaticComplexityWalker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\ExtendedSyntaxType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\SyntaxSymbolPairing.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Microsoft\CodeAnalysis\MethodSymbolExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Microsoft\CodeAnalysis\SymbolExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Microsoft\CodeAnalysis\SyntaxNodeExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Microsoft\CodeAnalysis\TypeParameterSymbolExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Microsoft\CodeAnalysis\TypeSymbolExtensions.cs" />
+  </ItemGroup>
+</Project>
