@@ -131,11 +131,31 @@ namespace Uno
 			_dataAnnonationsKeyAttributeSymbol = context.Compilation.GetTypeByMetadataName("System.ComponentModel.DataAnnotations.KeyAttribute");
 			_isPureAttributePresent = context.Compilation.GetTypeByMetadataName("System.Diagnostics.Contracts.Pure") != null;
 
+			ApplyWorkaroundForUnoEqualityAssembly(context);
+
 			_generateKeyEqualityCode = _iKeyEquatableSymbol != null;
 
 			foreach (var type in EnumerateEqualityTypesToGenerate())
 			{
 				GenerateEquality(type);
+			}
+		}
+
+		private void ApplyWorkaroundForUnoEqualityAssembly(SourceGeneratorContext context)
+		{
+			if (_iKeyEquatableSymbol == null && _iKeyEquatableGenericSymbol == null)
+			{
+				// Workaround for internal types duplicated in Uno.Foundation and other Uno assemblies
+				// causing context.Compilation.GetTypeByMetadataName to return null because of the ambiguity.
+
+				if (context.Compilation.ExternalReferences.FirstOrDefault(r => r.Display.EndsWith("Uno.Core.Extensions.Equality.dll", StringComparison.OrdinalIgnoreCase)) is MetadataReference equalityRef)
+				{
+					if (context.Compilation.GetAssemblyOrModuleSymbol(equalityRef) is IAssemblySymbol assemblySymbol)
+					{
+						_iKeyEquatableSymbol = assemblySymbol.GetTypeByMetadataName("Uno.Equality.IKeyEquatable");
+						_iKeyEquatableGenericSymbol = assemblySymbol.GetTypeByMetadataName("Uno.Equality.IKeyEquatable`1");
+					}
+				}
 			}
 		}
 
