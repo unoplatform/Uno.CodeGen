@@ -128,16 +128,16 @@ of it).
      or property marked as _Equality Key_, or to derive from a type
 	 implementing it.
    * When activated, this feature will generate:
-     * The class will implements the `IKeyEquatable<T>` interface
+     * The class that implements the `IKeyEquatable<T>` interface
      * The `.GetKeyHashCode()` & `.KeyEquals()` methods
 
-     Those fields/properties WILL BE TREATED AS IF THEY WERE TAGGED EXPLICTELY.
+     Those fields/properties WILL BE TREATED AS IF THEY WERE TAGGED EXPLICITLY.
    * You can put the `[EqualityKey]` attribute on more than one
      field/property.
 1. **HashCodes**:
    _Hash Codes_ are used to quickly differentiate/categorize the object.
    * Computing _hash codes_ should be very quick.
-   * For equivalents instances, the computed _hash code_
+   * For equivalent instances, the computed _hash code_
      **MUST PRODUCE THE SAME RESULT**.
    * **Hash Codes can't change over time** for the same instance (object).
      For this reason the computed result will be cached.
@@ -154,13 +154,13 @@ of it).
    * Overloading of operations will be automatic, you have nothing to do
      to enable it.
    * There is no operator overloading (`==`/`!=`) for _Key Equality_.
-1. Can be used on eiter a _value type_ (`stuct`) or a _reference type_
+1. Can be used on either a _value type_ (`struct`) or a _reference type_
    (`class`). When used with a `class`, a reference equality will be done.
 1. If your code defines any of the generated methods, it will prevent the
-   generator from generating this method. (actually, it will be be generated,
+   generator from generating this method. (actually, it will be generated,
    but the code will be commented-out, so you'll be able to sneak at it).
 1. The comparer for a field can be overriden by specifying a
-   `private static readonly` named &lt;Field/Property name&gt; + "`_Comparer`"
+   `private static` read-only property named &lt;Field/Property name&gt; + "`_CustomComparer`"
    and of type `IEqualityComparer`
 1. For `string`, a `StringComparer.Ordinal` will be used by default. If you
    need a different one you can specify a _custom equality comparer_.
@@ -171,13 +171,13 @@ For processing equality, the generation will generate many comparisons, in
 this order:
 
 1. If the type of the field/property is a collection (and not a `string`):
-   1. A reference equality will be done. If `equals`, will return `true`, if one
-      of them is `null`, will return `false` (both `null` will return `true` since
-      they are _reference equals_).
-   1. The `.Count` will be compared (return `false if different`)
-   1. Each items of the collection will be compared by reapplying those rules.
+   1. A reference equality comparison will be done. If `equals`, it will return `true`. If one
+      of them is `null`, it will return `false`. If both are `null`, it will return `true` since
+      they are _reference equal_.
+   1. The `.Count` will be compared (return `false` if `Count` is different)
+   1. Each item of the collection will be compared by reapplying those rules.
 1. **Custom Equality Comparer**: If there's a **Private**, **Static** &
-   **Read-Only** field with the name &lt;Field/Propertyname&gt;`_Comparer`
+   **Read-only** property with the name &lt;Field/Propertyname&gt;`_CustomComparer`
    of type `IEqualityComparer`, it will be used to compare the value. Example:
    ``` csharp
    public partial class Person
@@ -186,7 +186,7 @@ this order:
 
        // Default comparer for `Name` property
        // Tip: You can create another .cs file to keep your entity "clean"
-       private static readonly IEqualityComparer Name_Comparer = StringComparer.Ordinal;
+       private static IEqualityComparer Name_CustomComparer { get; } = StringComparer.Ordinal;
    }
    ```
 1. If the type of the field/property is a string,
